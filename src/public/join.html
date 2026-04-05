@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Join Us — Yuvaverse</title>
+  <meta name="description" content="Join the Yuvaverse team! Apply for a role in event management, design, marketing, and more."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="stylesheet" href="/css/global.css"/>
+</head>
+<body>
+
+<nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container navbar__inner">
+    <a href="/" class="navbar__logo" aria-label="Yuvaverse Home">
+      <span class="logo-mark" aria-hidden="true">Y</span><span class="logo-text">UVAVERSE</span>
+    </a>
+    <ul class="navbar__links" id="navLinks" role="list">
+      <li><a href="/"             class="nav-link">Home</a></li>
+      <li><a href="/events.html"  class="nav-link">Events</a></li>
+      <li><a href="/about.html"   class="nav-link">About</a></li>
+      <li><a href="/join.html"    class="nav-link nav-link--active">Join Us</a></li>
+      <li><a href="/contact.html" class="nav-link">Contact</a></li>
+    </ul>
+    <div class="navbar__actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<section class="page-hero" aria-labelledby="pageTitle">
+  <div class="container">
+    <span class="section__eyebrow">We're Recruiting</span>
+    <h1 id="pageTitle">Join the Yuvaverse Team</h1>
+    <p>Help us craft extraordinary campus experiences. We're looking for passionate, driven individuals across all departments.</p>
+  </div>
+</section>
+
+<section class="section section--sm">
+  <div class="container" style="max-width:680px">
+
+    <!-- Roles grid -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:3rem">
+      <div class="form-card" style="padding:1.25rem;text-align:center">
+        <div style="font-size:1.75rem;margin-bottom:.5rem">🎨</div>
+        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Design</p>
+      </div>
+      <div class="form-card" style="padding:1.25rem;text-align:center">
+        <div style="font-size:1.75rem;margin-bottom:.5rem">📢</div>
+        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Marketing</p>
+      </div>
+      <div class="form-card" style="padding:1.25rem;text-align:center">
+        <div style="font-size:1.75rem;margin-bottom:.5rem">💻</div>
+        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Tech</p>
+      </div>
+      <div class="form-card" style="padding:1.25rem;text-align:center">
+        <div style="font-size:1.75rem;margin-bottom:.5rem">📋</div>
+        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Operations</p>
+      </div>
+      <div class="form-card" style="padding:1.25rem;text-align:center">
+        <div style="font-size:1.75rem;margin-bottom:.5rem">📸</div>
+        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Media</p>
+      </div>
+      <div class="form-card" style="padding:1.25rem;text-align:center">
+        <div style="font-size:1.75rem;margin-bottom:.5rem">🤝</div>
+        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Outreach</p>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card" id="formWrapper">
+      <h2 style="margin-bottom:.5rem;font-size:1.375rem">Apply Now</h2>
+      <p style="margin-bottom:2rem">Fill in the form below. We review all applications within 3-5 working days.</p>
+
+      <form id="joinForm" novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="name">Full Name <span>*</span></label>
+            <input class="form-input" id="name" type="text" placeholder="Your full name" autocomplete="name" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">Email <span>*</span></label>
+            <input class="form-input" id="email" type="email" placeholder="your@email.com" autocomplete="email" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="phone">Phone <span>*</span></label>
+            <input class="form-input" id="phone" type="tel" placeholder="10-digit mobile number" autocomplete="tel" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="roleAppliedFor">Role Applying For <span>*</span></label>
+            <select class="form-input form-select" id="roleAppliedFor" required>
+              <option value="">Select a role…</option>
+              <option>Event Management</option>
+              <option>UI/UX Design</option>
+              <option>Graphic Design</option>
+              <option>Marketing &amp; Promotions</option>
+              <option>Social Media</option>
+              <option>Tech &amp; Web Development</option>
+              <option>Photography &amp; Videography</option>
+              <option>Outreach &amp; Sponsorships</option>
+              <option>Operations &amp; Logistics</option>
+            </select>
+            <span class="form-error" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="resumeLink">Portfolio / Resume Link</label>
+          <input class="form-input" id="resumeLink" type="url" placeholder="https://drive.google.com/…"/>
+          <span class="form-error" role="alert"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="message">Why do you want to join? (Optional)</label>
+          <textarea class="form-textarea" id="message" placeholder="Tell us a bit about yourself and why you'd be a great fit…"></textarea>
+        </div>
+
+        <button class="btn btn--accent btn--full" id="submitBtn" type="submit">Submit Application →</button>
+      </form>
+    </div>
+
+    <!-- Success state -->
+    <div id="successState" style="display:none;text-align:center;padding:4rem 2rem" class="form-card">
+      <div style="font-size:4rem;margin-bottom:1.25rem">🎉</div>
+      <h2 style="margin-bottom:.75rem">Application Received!</h2>
+      <p>Thanks for applying! We'll review your application and reach out within 3-5 working days. Check your inbox for a confirmation email.</p>
+      <a href="/" class="btn btn--primary" style="margin-top:2rem">Back to Home</a>
+    </div>
+
+  </div>
+</section>
+
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer__bottom" style="border-top:none;padding-top:0">
+      <p>© <span id="footerYear"></span> Yuvaverse. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/join.js"></script>
+<script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
+</body>
+</html>

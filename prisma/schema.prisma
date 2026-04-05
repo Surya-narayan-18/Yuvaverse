@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum RegistrationStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Platform users — admins manage events; students register for them.
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+
+  @@map("users")
+}
+
+/// An event hosted by the club.
+model Event {
+  id          String         @id @default(cuid())
+  title       String
+  description String         @db.Text
+  date        DateTime
+  venue       String
+  price       Float          @default(0)
+  imageUrl    String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  registrations Registration[]
+
+  @@map("events")
+}
+
+/// A student's registration record for a specific event.
+model Registration {
+  id                String             @id @default(cuid())
+  studentName       String
+  studentEmail      String
+  razorpayOrderId   String?            @unique
+  razorpayPaymentId String?            @unique
+  status            RegistrationStatus @default(PENDING)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  // Foreign key
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([studentEmail])
+  @@map("registrations")
+}
+
+/// A recruitment application submitted via the "Join Us" page.
+model Application {
+  id            String   @id @default(cuid())
+  name          String
+  email         String
+  phone         String
+  roleAppliedFor String
+  message       String?  @db.Text
+  resumeLink    String?
+  createdAt     DateTime @default(now())
+
+  @@index([email])
+  @@map("applications")
+}
+
+/// A message submitted via the "Contact Us" page.
+model ContactMessage {
+  id          String   @id @default(cuid())
+  senderName  String
+  senderEmail String
+  message     String   @db.Text
+  createdAt   DateTime @default(now())
+
+  @@index([senderEmail])
+  @@map("contact_messages")
+}

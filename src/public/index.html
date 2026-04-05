@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yuvaverse — The Premier University Event Club</title>
+  <meta name="description" content="Yuvaverse organises unforgettable campus events. Discover, register, and experience the best events at your university."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="stylesheet" href="/css/global.css"/>
+  <style>
+    .pagination { display:flex; justify-content:center; gap:.5rem; margin-top:3rem; flex-wrap:wrap; }
+    .page-btn { padding:.45rem .875rem; border-radius:var(--r-sm); border:1.5px solid var(--clr-border-strong); background:var(--clr-card); color:var(--clr-text-muted); font-family:var(--ff-heading); font-size:.85rem; font-weight:600; cursor:pointer; transition:all var(--t-fast); }
+    .page-btn:hover:not(:disabled) { border-color:var(--clr-accent); color:var(--clr-accent); }
+    .page-btn--active { background:var(--clr-accent); border-color:var(--clr-accent); color:#fff; }
+    .page-btn:disabled { opacity:.4; cursor:default; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ──────────────────────────────────────────────────── -->
+<nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container navbar__inner">
+    <a href="/" class="navbar__logo" aria-label="Yuvaverse Home">
+      <span class="logo-mark" aria-hidden="true">Y</span>
+      <span class="logo-text">UVAVERSE</span>
+    </a>
+    <ul class="navbar__links" id="navLinks" role="list">
+      <li><a href="/"              class="nav-link" id="navHome">Home</a></li>
+      <li><a href="/events.html"   class="nav-link" id="navEvents">Events</a></li>
+      <li><a href="/about.html"    class="nav-link" id="navAbout">About</a></li>
+      <li><a href="/join.html"     class="nav-link" id="navJoin">Join Us</a></li>
+      <li><a href="/contact.html"  class="nav-link" id="navContact">Contact</a></li>
+    </ul>
+    <div class="navbar__actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <a href="/events.html" class="btn btn--accent btn--sm">Explore Events</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ── TOAST CONTAINER ─────────────────────────────────────────── -->
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<!-- ── HERO ────────────────────────────────────────────────────── -->
+<section class="hero" id="hero" aria-labelledby="heroTitle">
+  <div class="hero__bg" aria-hidden="true"></div>
+  <div class="hero__grid-lines" aria-hidden="true"></div>
+  <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
+  <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
+  <div class="container hero__content">
+    <span class="hero__eyebrow">✦ The Premier Event Organization Club</span>
+    <h1 class="hero__title" id="heroTitle">
+      Where Campus Events<br>Come <em class="hero__title-accent">Alive</em>
+    </h1>
+    <p class="hero__subtitle">
+      Yuvaverse crafts unforgettable experiences — from tech summits and cultural fests to workshops and networking nights. Your next favourite memory starts here.
+    </p>
+    <div class="hero__cta">
+      <a href="/events.html" class="btn btn--accent btn--lg" id="exploreBtn">Explore Events →</a>
+      <a href="/about.html"  class="btn btn--ghost btn--lg">Learn Our Story</a>
+    </div>
+    <div class="hero__stats" role="list" aria-label="Club statistics">
+      <div role="listitem"><span class="stat__number">50+</span><span class="stat__label">Events Hosted</span></div>
+      <div role="listitem"><span class="stat__number">2K+</span><span class="stat__label">Happy Attendees</span></div>
+      <div role="listitem"><span class="stat__number">10+</span><span class="stat__label">Campus Partners</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── UPCOMING EVENTS ─────────────────────────────────────────── -->
+<section class="section" id="upcoming" aria-labelledby="upcomingTitle">
+  <div class="container">
+    <div class="section__header">
+      <span class="section__eyebrow">Don't Miss Out</span>
+      <h2 id="upcomingTitle">Upcoming Events</h2>
+      <p>Handpicked experiences crafted to inspire, connect, and celebrate.</p>
+    </div>
+    <div class="events-grid" id="eventsGrid" role="list" aria-label="Upcoming events"></div>
+    <div class="section-cta">
+      <a href="/events.html" class="btn btn--outline btn--lg">View All Events →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT TEASER ────────────────────────────────────────────── -->
+<section class="section about-teaser" aria-labelledby="aboutTitle">
+  <div class="container">
+    <div class="about-teaser__inner">
+      <div class="about-teaser__visual" aria-hidden="true">
+        <span class="about-teaser__monogram">YV</span>
+      </div>
+      <div class="about-teaser__content">
+        <span class="section__eyebrow">Who We Are</span>
+        <h2 id="aboutTitle">Built by Students,<br>For Students</h2>
+        <p>Yuvaverse is a student-run event organization club with one mission — making campus life extraordinary. We plan, produce, and execute events that leave a lasting mark.</p>
+        <ul class="value-list" aria-label="Our values">
+          <li class="value-item">Innovation-first event design</li>
+          <li class="value-item">Inclusive and accessible experiences</li>
+          <li class="value-item">Strong industry and campus partnerships</li>
+          <li class="value-item">Student growth through real opportunities</li>
+        </ul>
+        <a href="/about.html" class="btn btn--primary">Meet the Team →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ───────────────────────────────────────────────────── -->
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <a href="/" class="navbar__logo" aria-label="Yuvaverse Home">
+          <span class="logo-mark">Y</span>
+          <span class="logo-text" style="color:#fff">UVAVERSE</span>
+        </a>
+        <p style="margin-top:1rem">Crafting unforgettable campus experiences. Join us and be part of something extraordinary.</p>
+      </div>
+      <div>
+        <p class="footer__heading">Quick Links</p>
+        <ul class="footer__links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/events.html">Events</a></li>
+          <li><a href="/about.html">About Us</a></li>
+          <li><a href="/join.html">Join Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer__heading">Contact</p>
+        <ul class="footer__links">
+          <li><a href="/contact.html">Get in Touch</a></li>
+          <li><a href="mailto:yuvaverse.org@gmail.com">yuvaverse.org@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>© <span id="footerYear"></span> Yuvaverse. All rights reserved.</p>
+      <p>Made with ❤️ by students, for students.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/home.js"></script>
+<script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
+</body>
+</html>

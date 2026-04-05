@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us — Yuvaverse</title>
+  <meta name="description" content="Get in touch with the Yuvaverse team. We'd love to hear from you."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="stylesheet" href="/css/global.css"/>
+</head>
+<body>
+
+<nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container navbar__inner">
+    <a href="/" class="navbar__logo" aria-label="Yuvaverse Home">
+      <span class="logo-mark" aria-hidden="true">Y</span><span class="logo-text">UVAVERSE</span>
+    </a>
+    <ul class="navbar__links" id="navLinks" role="list">
+      <li><a href="/"             class="nav-link">Home</a></li>
+      <li><a href="/events.html"  class="nav-link">Events</a></li>
+      <li><a href="/about.html"   class="nav-link">About</a></li>
+      <li><a href="/join.html"    class="nav-link">Join Us</a></li>
+      <li><a href="/contact.html" class="nav-link nav-link--active">Contact</a></li>
+    </ul>
+    <div class="navbar__actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<section class="page-hero" aria-labelledby="pageTitle">
+  <div class="container">
+    <span class="section__eyebrow">Say Hello</span>
+    <h1 id="pageTitle">Get in Touch</h1>
+    <p>Have a question, collaboration idea, or just want to say hi? We'd love to hear from you.</p>
+  </div>
+</section>
+
+<section class="section section--sm">
+  <div class="container" style="max-width:680px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:3rem;text-align:center">
+      <div class="form-card" style="padding:1.5rem">
+        <div style="font-size:1.75rem;margin-bottom:.75rem">📧</div>
+        <p style="font-size:.75rem;font-weight:600;color:var(--clr-text-subtle);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.25rem">Email</p>
+        <a href="mailto:yuvaverse.org@gmail.com" style="font-size:.85rem;color:var(--clr-accent);font-weight:500">yuvaverse.org@gmail.com</a>
+      </div>
+      <div class="form-card" style="padding:1.5rem">
+        <div style="font-size:1.75rem;margin-bottom:.75rem">📍</div>
+        <p style="font-size:.75rem;font-weight:600;color:var(--clr-text-subtle);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.25rem">Location</p>
+        <p style="font-size:.85rem;color:var(--clr-text-muted);margin:0">Your University Campus</p>
+      </div>
+      <div class="form-card" style="padding:1.5rem">
+        <div style="font-size:1.75rem;margin-bottom:.75rem">⏱</div>
+        <p style="font-size:.75rem;font-weight:600;color:var(--clr-text-subtle);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.25rem">Response</p>
+        <p style="font-size:.85rem;color:var(--clr-text-muted);margin:0">Within 1-2 business days</p>
+      </div>
+    </div>
+
+    <div class="form-card" id="formWrapper">
+      <h2 style="font-size:1.375rem;margin-bottom:.5rem">Send a Message</h2>
+      <p style="margin-bottom:2rem">Fill in the form and we'll get back to you as soon as possible.</p>
+
+      <form id="contactForm" novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="senderName">Your Name <span>*</span></label>
+            <input class="form-input" id="senderName" type="text" placeholder="Full name" autocomplete="name" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="senderEmail">Email Address <span>*</span></label>
+            <input class="form-input" id="senderEmail" type="email" placeholder="your@email.com" autocomplete="email" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="message">Message <span>*</span></label>
+          <textarea class="form-textarea" id="message" placeholder="Write your message here…" style="min-height:150px" required></textarea>
+          <span class="form-error" role="alert"></span>
+        </div>
+        <button class="btn btn--accent btn--full" id="submitBtn" type="submit">Send Message →</button>
+      </form>
+    </div>
+
+    <div id="successState" style="display:none;text-align:center;padding:4rem 2rem" class="form-card">
+      <div style="font-size:4rem;margin-bottom:1.25rem">💬</div>
+      <h2 style="margin-bottom:.75rem">Message Sent!</h2>
+      <p>Thanks for reaching out! We'll get back to you within 1-2 business days. Check your inbox for our acknowledgment.</p>
+      <a href="/" class="btn btn--primary" style="margin-top:2rem">Back to Home</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer__bottom" style="border-top:none;padding-top:0">
+      <p>© <span id="footerYear"></span> Yuvaverse. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/contact.js"></script>
+<script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
+</body>
+</html>

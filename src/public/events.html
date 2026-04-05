@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>All Events — Yuvaverse</title>
+  <meta name="description" content="Browse all upcoming Yuvaverse events. Search, discover, and register for campus events near you."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="stylesheet" href="/css/global.css"/>
+  <style>
+    .pagination{display:flex;justify-content:center;gap:.5rem;margin-top:3rem;flex-wrap:wrap}
+    .page-btn{padding:.45rem .875rem;border-radius:var(--r-sm);border:1.5px solid var(--clr-border-strong);background:var(--clr-card);color:var(--clr-text-muted);font-family:var(--ff-heading);font-size:.85rem;font-weight:600;cursor:pointer;transition:all var(--t-fast)}
+    .page-btn:hover:not(:disabled){border-color:var(--clr-accent);color:var(--clr-accent)}
+    .page-btn--active{background:var(--clr-accent);border-color:var(--clr-accent);color:#fff}
+    .page-btn--nav{font-size:1rem}
+    .page-btn:disabled{opacity:.4;cursor:default}
+  </style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container navbar__inner">
+    <a href="/" class="navbar__logo" aria-label="Yuvaverse Home">
+      <span class="logo-mark" aria-hidden="true">Y</span>
+      <span class="logo-text">UVAVERSE</span>
+    </a>
+    <ul class="navbar__links" id="navLinks" role="list">
+      <li><a href="/"             class="nav-link">Home</a></li>
+      <li><a href="/events.html"  class="nav-link nav-link--active">Events</a></li>
+      <li><a href="/about.html"   class="nav-link">About</a></li>
+      <li><a href="/join.html"    class="nav-link">Join Us</a></li>
+      <li><a href="/contact.html" class="nav-link">Contact</a></li>
+    </ul>
+    <div class="navbar__actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<section class="page-hero" aria-labelledby="pageTitle">
+  <div class="container">
+    <span class="section__eyebrow">Discover &amp; Register</span>
+    <h1 id="pageTitle">All Events</h1>
+    <p>Browse all upcoming Yuvaverse events. Find something that excites you.</p>
+  </div>
+</section>
+
+<section class="section section--sm" aria-label="Events listing">
+  <div class="container">
+    <div class="search-bar" role="search">
+      <svg class="search-bar__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="searchInput" class="form-input" placeholder="Search events by name, venue…" aria-label="Search events"/>
+    </div>
+    <div class="events-grid" id="eventsGrid" role="list" aria-label="Events"></div>
+    <div class="pagination" id="pagination" role="navigation" aria-label="Events pagination"></div>
+  </div>
+</section>
+
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer__bottom" style="border-top:none;padding-top:0">
+      <p>© <span id="footerYear"></span> Yuvaverse. All rights reserved.</p>
+      <a href="/" style="color:rgba(255,255,255,0.6);font-size:.85rem">← Back to Home</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/events.js"></script>
+<script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
+</body>
+</html>
