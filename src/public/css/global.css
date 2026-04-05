@@ -192,9 +192,9 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
   width: auto;
   display: block;
 }
-.logo-img-dark { display: none; }
-[data-theme="dark"] .logo-img-dark { display: block; }
-[data-theme="dark"] .logo-img-light { display: none; }
+.navbar__logo .logo-img-dark { display: none; }
+[data-theme="dark"] .navbar__logo .logo-img-dark { display: block; }
+[data-theme="dark"] .navbar__logo .logo-img-light { display: none; }
 
 .navbar__links {
   display: flex;
