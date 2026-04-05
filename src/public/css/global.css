@@ -187,21 +187,14 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
   letter-spacing: -0.03em;
   flex-shrink: 0;
 }
-.logo-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
+.navbar__logo img {
   height: 34px;
-  background: var(--clr-primary);
-  color: #fff;
-  border-radius: var(--r-sm);
-  font-size: 1.1rem;
-  font-weight: 800;
+  width: auto;
+  display: block;
 }
-[data-theme="dark"] .logo-mark { background: var(--clr-accent); }
-.logo-text { color: var(--clr-primary); }
-[data-theme="dark"] .logo-text { color: var(--clr-text); }
+.logo-img-dark { display: none; }
+[data-theme="dark"] .logo-img-dark { display: block; }
+[data-theme="dark"] .logo-img-light { display: none; }
 
 .navbar__links {
   display: flex;
