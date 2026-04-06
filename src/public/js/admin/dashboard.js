@@ -1,8 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 // Analytics Dashboard Logic
-const authGuard_js_1 = require("./authGuard.js");
-const token = (0, authGuard_js_1.checkAuth)();
+import { checkAuth } from './authGuard.js';
+const token = checkAuth();
 // --- Main initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
     try {

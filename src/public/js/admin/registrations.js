@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const authGuard_js_1 = require("./authGuard.js");
-const token = (0, authGuard_js_1.checkAuth)();
+import { checkAuth } from './authGuard.js';
+const token = checkAuth();
 let allRegistrations = [];
 document.addEventListener('DOMContentLoaded', () => {
     loadRegistrations();

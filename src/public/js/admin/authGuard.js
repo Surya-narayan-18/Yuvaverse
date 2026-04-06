@@ -1,9 +1,5 @@
-"use strict";
 // authGuard.ts ensures protected page cannot be loaded without valid state
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkAuth = checkAuth;
-exports.logout = logout;
-function checkAuth() {
+export function checkAuth() {
     const token = localStorage.getItem('adminToken');
     const role = localStorage.getItem('adminRole');
     if (!token || !role || role !== 'ADMIN') {
@@ -13,7 +9,7 @@ function checkAuth() {
     }
     return token;
 }
-function logout() {
+export function logout() {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminRole');
     window.location.href = '/admin-login.html';
