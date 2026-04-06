@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Events - Yuvaverse</title>
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/admin-dashboard.css">
+  <style>
+    /* Shared table styles can go here for now */
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--card-bg); }
+    th, td { text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-color); }
+    th { background: #f9fafb; font-weight: 600; color: var(--text-secondary); }
+    .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+    .btn-primary { background: #3b82f6; color: white; }
+    
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; padding: 2rem; border-radius: 8px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;}
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+    .form-group input, .form-group textarea { width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; }
+    
+    .custom-fields-container { background: #f9fafb; padding: 1rem; border: 1px dashed var(--border-color); margin-top: 1rem; }
+    .custom-field-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+    .custom-field-row input { flex: 1; }
+    .remove-field { background: #ef4444; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body class="admin-body">
+  <script type="module" src="/js/admin/authGuard.js"></script>
+
+  <div class="dashboard-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-brand">Yuvaverse</div>
+      <nav class="sidebar-nav">
+        <a href="/admin-dashboard.html">Overview</a>
+        <a href="/admin-events.html" class="active">Events</a>
+        <a href="/admin-registrations.html">Registrations</a>
+        <a href="/admin-applications.html">Applications</a>
+      </nav>
+      <button id="logout-btn" class="logout-btn">Logout</button>
+    </aside>
+
+    <main class="main-content">
+      <header class="dashboard-header" style="display:flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1>Events Management</h1>
+          <p>Create and manage club events.</p>
+        </div>
+        <button class="btn btn-primary" id="open-create-modal">Create Event</button>
+      </header>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Title</th>
+            <th>Venue</th>
+            <th>Price</th>
+            <th>Custom Fields</th>
+          </tr>
+        </thead>
+        <tbody id="events-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Create Modal -->
+  <div class="modal" id="create-modal">
+    <div class="modal-content">
+      <h2>Create New Event</h2>
+      <form id="create-event-form">
+        <div class="form-group">
+          <label>Title</label><input type="text" id="ev-title" required>
+        </div>
+        <div class="form-group">
+          <label>Description</label><textarea id="ev-desc" required></textarea>
+        </div>
+        <div class="form-group" style="display:flex; gap: 1rem;">
+          <div style="flex:1"><label>Date & Time</label><input type="datetime-local" id="ev-date" required></div>
+          <div style="flex:1"><label>Venue</label><input type="text" id="ev-venue" required></div>
+        </div>
+        <div class="form-group">
+          <label>Price (₹)</label><input type="number" id="ev-price" value="0" required>
+        </div>
+        
+        <div class="custom-fields-container">
+          <h4>Dynamic Form Fields</h4>
+          <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 1rem;">Ask extra questions during registration (e.g., T-Shirt Size, Dept).</p>
+          <div id="dynamic-fields-wrapper"></div>
+          <button type="button" class="btn" id="add-field-btn" style="background:#e5e7eb; margin-top:0.5rem; font-size:0.8rem;">+ Add Question</button>
+        </div>
+
+        <div style="display:flex; gap:1rem; margin-top: 2rem;">
+          <button type="submit" class="btn btn-primary" style="flex:1">Save Event</button>
+          <button type="button" class="btn" id="close-create-modal" style="flex:1; background:#ef4444; color:white;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/js/admin/events.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Yuvaverse</title>
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/admin-dashboard.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="admin-body">
+  <!-- Ensure authentication runs before anything else is visible -->
+  <script type="module" src="/js/admin/authGuard.js"></script>
+
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">Yuvaverse</div>
+      <nav class="sidebar-nav">
+        <a href="/admin-dashboard.html" class="active">Overview</a>
+        <a href="/admin-events.html">Events</a>
+        <a href="/admin-registrations.html">Registrations</a>
+        <a href="/admin-applications.html">Applications</a>
+      </nav>
+      <button id="logout-btn" class="logout-btn">Logout</button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="dashboard-header">
+        <div>
+          <h1>Analytics Overview</h1>
+          <p>Real-time platform insights.</p>
+        </div>
+      </header>
+
+      <!-- KPI Cards Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <h3>Total Revenue</h3>
+          <h2 id="kpi-revenue">₹0</h2>
+        </div>
+        <div class="kpi-card">
+          <h3>Total Registrations</h3>
+          <h2 id="kpi-registrations">0</h2>
+        </div>
+        <div class="kpi-card">
+          <h3>Active Events</h3>
+          <h2 id="kpi-active-events">0</h2>
+        </div>
+      </div>
+
+      <!-- Main Chart -->
+      <div class="analytics-layout">
+        <div class="chart-container">
+          <h3>Revenue Trends</h3>
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/js/admin/dashboard.js"></script>
+</body>
+</html>

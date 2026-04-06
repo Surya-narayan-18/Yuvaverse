@@ -25,6 +25,14 @@ enum RegistrationStatus {
   FAILED
 }
 
+enum ApplicationStatus {
+  NEW
+  SHORTLISTED
+  INTERVIEWED
+  RECRUITED
+  REJECTED
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MODELS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -50,6 +58,7 @@ model Event {
   venue       String
   price       Float          @default(0)
   imageUrl    String?
+  customFields Json?         // Array of required/optional dynamic questions per event
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
@@ -67,6 +76,7 @@ model Registration {
   razorpayOrderId   String?            @unique
   razorpayPaymentId String?            @unique
   status            RegistrationStatus @default(PENDING)
+  customAnswers     Json?              // Captured form inputs representing the 'customFields'
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
@@ -88,6 +98,7 @@ model Application {
   roleAppliedFor String
   message       String?  @db.Text
   resumeLink    String?
+  status        ApplicationStatus @default(NEW)
   createdAt     DateTime @default(now())
 
   @@index([email])
