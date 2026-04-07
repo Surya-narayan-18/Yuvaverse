@@ -84,10 +84,41 @@ async function loadEvents() {
         <td>${ev.venue}</td>
         <td>₹${ev.price}</td>
         <td><span style="background:#e5e7eb; padding:2px 8px; border-radius:12px; font-size:0.8rem;">${fieldsCount} Questions</span></td>
+        <td>
+          <button class="btn btn-delete" data-id="${ev.id}" style="background:#ef4444; color:white; padding:0.25rem 0.5rem; font-size:0.8rem;">Delete</button>
+        </td>
       `;
+      
+      tr.querySelector('.btn-delete')?.addEventListener('click', () => {
+        if (confirm(`Are you sure you want to delete "${ev.title}"? This will also remove all registrations for this event.`)) {
+          deleteEvent(ev.id);
+        }
+      });
+
       tbody.appendChild(tr);
     });
   } catch (error) {
     console.error('Error loading events:', error);
+  }
+}
+
+async function deleteEvent(id: string) {
+  try {
+    const res = await fetch(`/api/admin/events/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (res.ok) {
+      loadEvents();
+    } else {
+      const json = await res.json();
+      alert(`Failed to delete event: ${json.message || json.error}`);
+    }
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert('Error deleting event');
   }
 }

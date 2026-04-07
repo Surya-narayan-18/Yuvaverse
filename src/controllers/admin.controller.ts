@@ -75,6 +75,26 @@ export const createAdminEvent = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteAdminEvent = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    
+    // Check if event exists
+    const event = await prisma.event.findUnique({ where: { id } });
+    if (!event) {
+      return sendError(res, 'Event not found', 404);
+    }
+
+    // Delete event (registrations will be deleted via Cascade)
+    await prisma.event.delete({ where: { id } });
+
+    return sendSuccess(res, null, 'Event deleted successfully');
+  } catch (error) {
+    console.error('Event deletion error', error);
+    return sendError(res, 'Error deleting event', 500);
+  }
+};
+
 // --- REGISTRATIONS & REFUNDS ---
 export const getAdminRegistrations = async (_req: Request, res: Response) => {
   try {
