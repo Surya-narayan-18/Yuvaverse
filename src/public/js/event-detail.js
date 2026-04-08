@@ -50,7 +50,7 @@
         document.querySelectorAll('.form-input.error').forEach(el => el.classList.remove('error'));
         document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
     }
-    function validateForm(name, email) {
+    function validateForm(name, email, collegeId) {
         clearErrors();
         let valid = true;
         if (name.trim().length < 2) {
@@ -61,21 +61,27 @@
             showError(getField('studentEmail'), 'Please enter a valid email.');
             valid = false;
         }
+        if (collegeId.trim().length < 2) {
+            showError(getField('collegeId'), 'Please enter your College ID.');
+            valid = false;
+        }
         return valid;
     }
     // ── Razorpay Checkout ───────────────────────────────────────────
     async function startCheckout(event) {
         const nameEl = getField('studentName');
         const emailEl = getField('studentEmail');
+        const collegeEl = getField('collegeId');
         const name = nameEl.value.trim();
         const email = emailEl.value.trim();
-        if (!validateForm(name, email))
+        const collegeId = collegeEl.value.trim();
+        if (!validateForm(name, email, collegeId))
             return;
         const btn = document.getElementById('registerBtn');
         btn.classList.add('btn--loading');
         btn.textContent = '';
         const orderRes = await ApiClient.post('/registrations/order', {
-            studentName: name, studentEmail: email, eventId,
+            studentName: name, studentEmail: email, eventId, collegeId,
         });
         btn.classList.remove('btn--loading');
         btn.textContent = event.price === 0 ? 'Register Free' : 'Register Now →';

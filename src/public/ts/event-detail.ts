@@ -85,29 +85,32 @@ interface OrderResponseData {
     document.querySelectorAll('.form-input.error').forEach(el => el.classList.remove('error'));
     document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
   }
-  function validateForm(name: string, email: string): boolean {
+  function validateForm(name: string, email: string, collegeId: string): boolean {
     clearErrors();
     let valid = true;
     if (name.trim().length < 2) { showError(getField('studentName'), 'Please enter your full name.'); valid = false; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError(getField('studentEmail'), 'Please enter a valid email.'); valid = false; }
+    if (collegeId.trim().length < 2) { showError(getField('collegeId'), 'Please enter your College ID.'); valid = false; }
     return valid;
   }
 
   // ── Razorpay Checkout ───────────────────────────────────────────
   async function startCheckout(event: EventData): Promise<void> {
-    const nameEl  = getField('studentName');
-    const emailEl = getField('studentEmail');
-    const name    = nameEl.value.trim();
-    const email   = emailEl.value.trim();
+    const nameEl     = getField('studentName');
+    const emailEl    = getField('studentEmail');
+    const collegeEl  = getField('collegeId');
+    const name       = nameEl.value.trim();
+    const email      = emailEl.value.trim();
+    const collegeId  = collegeEl.value.trim();
 
-    if (!validateForm(name, email)) return;
+    if (!validateForm(name, email, collegeId)) return;
 
     const btn = document.getElementById('registerBtn') as HTMLButtonElement;
     btn.classList.add('btn--loading');
     btn.textContent = '';
 
     const orderRes = await ApiClient.post<OrderResponseData>('/registrations/order', {
-      studentName: name, studentEmail: email, eventId,
+      studentName: name, studentEmail: email, eventId, collegeId,
     });
 
     btn.classList.remove('btn--loading');

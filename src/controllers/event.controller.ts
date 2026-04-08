@@ -13,6 +13,7 @@ interface CreateEventBody {
   venue: string;
   price: number;
   imageUrl?: string | null;
+  bannerUrl?: string | null;
 }
 
 interface UpdateEventBody {
@@ -22,6 +23,7 @@ interface UpdateEventBody {
   venue?: string;
   price?: number;
   imageUrl?: string | null;
+  bannerUrl?: string | null;
 }
 
 interface ListEventsQuery {
@@ -115,6 +117,10 @@ export async function createEvent(req: Request, res: Response): Promise<void> {
   const { title, description, date, venue, price, imageUrl } =
     req.body as CreateEventBody;
 
+  // If a banner file was uploaded via multer-storage-cloudinary,
+  // req.file.path contains the full Cloudinary HTTPS URL.
+  const bannerUrl = (req.file as Express.Multer.File & { path: string })?.path ?? null;
+
   const event = await prisma.event.create({
     data: {
       title,
@@ -123,6 +129,7 @@ export async function createEvent(req: Request, res: Response): Promise<void> {
       venue,
       price,
       imageUrl: imageUrl ?? null,
+      bannerUrl,
     },
   });
 
@@ -152,6 +159,10 @@ export async function updateEvent(req: Request, res: Response): Promise<void> {
   if (body.venue !== undefined) data.venue = body.venue;
   if (body.price !== undefined) data.price = body.price;
   if ('imageUrl' in body) data.imageUrl = body.imageUrl ?? null;
+
+  // If a new banner was uploaded, overwrite bannerUrl
+  const uploadedBanner = (req.file as (Express.Multer.File & { path: string }) | undefined);
+  if (uploadedBanner) data.bannerUrl = uploadedBanner.path;
 
   const updated = await prisma.event.update({ where: { id }, data });
 

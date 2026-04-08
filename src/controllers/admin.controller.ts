@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../config/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import Razorpay from 'razorpay';
-import { ApplicationStatus } from '@prisma/client';
+import { ApplicationStatus, Prisma } from '@prisma/client';
 
 export const getDashboardAnalytics = async (_req: Request, res: Response) => {
   try {
@@ -62,10 +62,23 @@ export const getAdminEvents = async (_req: Request, res: Response) => {
 export const createAdminEvent = async (req: Request, res: Response) => {
   try {
     const { title, description, date, venue, price, imageUrl, customFields } = req.body;
+
+    // multer-storage-cloudinary places the CDN URL at req.file.path
+    const bannerUrl = (req.file as (Express.Multer.File & { path: string }) | undefined)?.path ?? null;
+
+    // customFields arrives as a JSON string in multipart submissions
+    let parsedCustomFields: Prisma.InputJsonValue = [];
+    if (customFields) {
+      try { parsedCustomFields = JSON.parse(customFields) as Prisma.InputJsonValue; } catch { parsedCustomFields = []; }
+    }
+
     const newEvent = await prisma.event.create({
       data: {
-        title, description, date: new Date(date), venue, price: Number(price), imageUrl, 
-        customFields: customFields ? customFields : []
+        title, description, date: new Date(date), venue,
+        price: Number(price),
+        imageUrl: imageUrl ?? null,
+        bannerUrl,
+        customFields: parsedCustomFields,
       }
     });
     return sendSuccess(res, newEvent);

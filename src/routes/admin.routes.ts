@@ -5,6 +5,7 @@ import {
   deleteAdminEvent
 } from '../controllers/admin.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
+import { uploadBanner } from '../middlewares/upload.middleware';
 import { Role } from '@prisma/client';
 
 const router = Router();
@@ -13,7 +14,7 @@ const router = Router();
 router.get('/analytics', authenticate, authorize(Role.ADMIN), getDashboardAnalytics);
 
 router.get('/events', authenticate, authorize(Role.ADMIN), getAdminEvents);
-router.post('/events', authenticate, authorize(Role.ADMIN), createAdminEvent);
+router.post('/events', authenticate, authorize(Role.ADMIN), uploadBanner, createAdminEvent);
 router.delete('/events/:id', authenticate, authorize(Role.ADMIN), deleteAdminEvent);
 
 router.get('/registrations', authenticate, authorize(Role.ADMIN), getAdminRegistrations);

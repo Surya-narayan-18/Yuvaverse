@@ -56,10 +56,11 @@ model Event {
   description String         @db.Text
   date        DateTime
   venue       String
-  price       Float          @default(0)
-  imageUrl    String?
-  customFields Json?         // Array of required/optional dynamic questions per event
-  createdAt   DateTime       @default(now())
+  price        Float          @default(0)
+  imageUrl     String?
+  bannerUrl    String?        // Cloudinary CDN URL for the event banner
+  customFields Json?          // Array of required/optional dynamic questions per event
+  createdAt    DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
   // Relations
@@ -73,6 +74,7 @@ model Registration {
   id                String             @id @default(cuid())
   studentName       String
   studentEmail      String
+  collegeId         String             // Student's college/university ID number
   razorpayOrderId   String?            @unique
   razorpayPaymentId String?            @unique
   status            RegistrationStatus @default(PENDING)

@@ -15,6 +15,7 @@ import {
 } from '../validators/event.validators';
 import { validate } from '../middlewares/validate.middleware';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
+import { uploadBanner } from '../middlewares/upload.middleware';
 
 const router = Router();
 
@@ -42,6 +43,7 @@ router.post(
   '/',
   authenticate,
   authorize(Role.ADMIN),
+  uploadBanner,          // stream banner to Cloudinary → req.file.path
   createEventValidators,
   validate,
   createEvent,
@@ -55,6 +57,7 @@ router.patch(
   '/:id',
   authenticate,
   authorize(Role.ADMIN),
+  uploadBanner,          // optional new banner on update
   updateEventValidators,
   validate,
   updateEvent,

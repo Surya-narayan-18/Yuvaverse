@@ -3,6 +3,7 @@ import { sendMail } from '../config/mailer';
 interface RegistrationEmailOptions {
   studentName: string;
   studentEmail: string;
+  collegeId: string;
   eventTitle: string;
   eventDate: Date;
   eventVenue: string;
@@ -34,6 +35,7 @@ export async function sendRegistrationConfirmationEmail(
   const {
     studentName,
     studentEmail,
+    collegeId,
     eventTitle,
     eventDate,
     eventVenue,
@@ -41,6 +43,10 @@ export async function sendRegistrationConfirmationEmail(
     razorpayPaymentId,
     registrationId,
   } = options;
+
+  const isFree = eventPrice === 0;
+  const paymentLabel = isFree ? 'Free Event 🎁' : `Paid — ${formatPrice(eventPrice)}`;
+  const paymentColor = isFree ? '#34d399' : '#60a5fa';
 
   const html = `
 <!DOCTYPE html>
@@ -95,8 +101,12 @@ export async function sendRegistrationConfirmationEmail(
                         <td style="padding:8px 0;color:#ffffff;font-size:14px;font-weight:500;">${eventVenue}</td>
                       </tr>
                       <tr>
-                        <td style="padding:8px 0;color:#8888aa;font-size:14px;">💰 Amount Paid</td>
-                        <td style="padding:8px 0;color:#34d399;font-size:14px;font-weight:600;">${formatPrice(eventPrice)}</td>
+                        <td style="padding:8px 0;color:#8888aa;font-size:14px;">🎓 College ID</td>
+                        <td style="padding:8px 0;color:#fbbf24;font-size:14px;font-weight:600;">${collegeId}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;color:#8888aa;font-size:14px;">💰 Payment</td>
+                        <td style="padding:8px 0;font-size:14px;font-weight:600;color:${paymentColor};">${paymentLabel}</td>
                       </tr>
                       ${
                         razorpayPaymentId
@@ -121,7 +131,7 @@ export async function sendRegistrationConfirmationEmail(
                   <td style="padding:16px 20px;">
                     <p style="margin:0;color:#6ee7b7;font-size:13px;line-height:1.6;">
                       <strong>📌 Note:</strong> Please save this email as your proof of registration.
-                      You may be asked to show this at the event venue.
+                      You may be asked to show your College ID at the event venue.
                     </p>
                   </td>
                 </tr>

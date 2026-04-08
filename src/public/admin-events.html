@@ -3,29 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Events - Yuvaverse</title>
+  <title>Manage Events - Yuvaverse Admin</title>
   <link rel="stylesheet" href="/css/global.css">
   <link rel="stylesheet" href="/css/admin-dashboard.css">
   <style>
-    /* Shared table styles can go here for now */
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--card-bg); }
-    th, td { text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-color); }
-    th { background: #f9fafb; font-weight: 600; color: var(--text-secondary); }
-    .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
-    .btn-primary { background: #3b82f6; color: white; }
-    
-    /* Modal */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50; }
-    .modal.active { display: flex; }
-    .modal-content { background: white; padding: 2rem; border-radius: 8px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;}
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-    .form-group input, .form-group textarea { width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; }
-    
-    .custom-fields-container { background: #f9fafb; padding: 1rem; border: 1px dashed var(--border-color); margin-top: 1rem; }
-    .custom-field-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
-    .custom-field-row input { flex: 1; }
-    .remove-field { background: #ef4444; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; }
+    /* ── Table ───────────────────────────────────────────────────────── */
+    table { width:100%; border-collapse:collapse; margin-top:1rem; background:var(--card-bg); border-radius:8px; overflow:hidden; }
+    th, td { text-align:left; padding:1rem; border-bottom:1px solid var(--border-color); }
+    th { background:#f9fafb; font-weight:600; color:var(--text-secondary); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; }
+    .btn { padding:0.5rem 1rem; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:opacity .15s; }
+    .btn:hover { opacity:.85; }
+    .btn-primary { background:#3b82f6; color:white; }
+
+    /* ── Modal backdrop ──────────────────────────────────────────────── */
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:50; padding:1rem; }
+    .modal.active { display:flex; }
+
+    /* ── Modal card ──────────────────────────────────────────────────── */
+    .modal-content {
+      background:#fff;
+      padding:2rem;
+      border-radius:12px;
+      width:100%;
+      max-width:560px;
+      max-height:92vh;
+      overflow-y:auto;
+      box-shadow:0 25px 60px rgba(0,0,0,.25);
+    }
+    .modal-content h2 { margin:0 0 1.5rem; font-size:1.25rem; }
+
+    .form-group { margin-bottom:1rem; }
+    .form-group label { display:block; margin-bottom:0.4rem; font-weight:500; font-size:0.875rem; color:#374151; }
+    .form-group input,
+    .form-group textarea,
+    .form-group select { width:100%; padding:0.5rem 0.75rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box; }
+    .form-group textarea { resize:vertical; min-height:80px; }
+
+    /* ── Banner uploader ─────────────────────────────────────────────── */
+    .banner-upload-area {
+      border:2px dashed #d1d5db;
+      border-radius:8px;
+      padding:1.5rem;
+      text-align:center;
+      cursor:pointer;
+      transition:border-color .2s, background .2s;
+      position:relative;
+      overflow:hidden;
+    }
+    .banner-upload-area:hover { border-color:#3b82f6; background:#eff6ff; }
+    .banner-upload-area input[type="file"] {
+      position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+    }
+    .banner-upload-area .upload-hint { pointer-events:none; }
+    .banner-upload-area .upload-hint svg { display:block; margin:0 auto 0.5rem; color:#9ca3af; }
+    .banner-upload-area .upload-hint p { margin:0; font-size:0.8rem; color:#6b7280; }
+    .banner-upload-area .upload-hint strong { color:#374151; }
+
+    /* ── Banner live preview ─────────────────────────────────────────── */
+    #banner-preview {
+      display:none;
+      margin-top:0.75rem;
+      border-radius:8px;
+      overflow:hidden;
+      border:1px solid #e5e7eb;
+      position:relative;
+    }
+    #banner-preview img { width:100%; height:140px; object-fit:cover; display:block; }
+    #remove-banner {
+      position:absolute; top:6px; right:6px;
+      background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%;
+      width:24px; height:24px; cursor:pointer; font-size:14px; line-height:24px; text-align:center;
+      padding:0;
+    }
+
+    /* ── Custom fields builder ───────────────────────────────────────── */
+    .custom-fields-container { background:#f9fafb; padding:1rem; border:1px dashed #d1d5db; border-radius:8px; margin-top:0.5rem; }
+    .custom-fields-container h4 { margin:0 0 0.25rem; font-size:0.85rem; }
+    .custom-field-row { display:flex; gap:0.5rem; margin-bottom:0.5rem; align-items:center; }
+    .custom-field-row input { flex:1; }
+    .remove-field { background:#ef4444; color:white; border:none; padding:0.25rem 0.5rem; border-radius:4px; cursor:pointer; white-space:nowrap; }
+
+    /* ── Table banner thumbnail ──────────────────────────────────────── */
+    .event-banner-thumb { width:56px; height:36px; object-fit:cover; border-radius:4px; border:1px solid #e5e7eb; }
+    .no-banner { width:56px; height:36px; background:#f3f4f6; border-radius:4px; border:1px solid #e5e7eb; display:inline-flex; align-items:center; justify-content:center; font-size:0.65rem; color:#9ca3af; }
   </style>
 </head>
 <body class="admin-body">
@@ -44,22 +104,23 @@
     </aside>
 
     <main class="main-content">
-      <header class="dashboard-header" style="display:flex; justify-content: space-between; align-items: center;">
+      <header class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <h1>Events Management</h1>
           <p>Create and manage club events.</p>
         </div>
-        <button class="btn btn-primary" id="open-create-modal">Create Event</button>
+        <button class="btn btn-primary" id="open-create-modal">+ Create Event</button>
       </header>
 
       <table>
         <thead>
           <tr>
+            <th>Banner</th>
             <th>Date</th>
             <th>Title</th>
             <th>Venue</th>
             <th>Price</th>
-            <th>Custom Fields</th>
+            <th>Fields</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -70,36 +131,76 @@
     </main>
   </div>
 
-  <!-- Create Modal -->
+  <!-- ── Create / Edit Modal ───────────────────────────────────────────── -->
   <div class="modal" id="create-modal">
     <div class="modal-content">
-      <h2>Create New Event</h2>
-      <form id="create-event-form">
+      <h2 id="modal-title">Create New Event</h2>
+
+      <!-- enctype must be multipart so the file reaches the server -->
+      <form id="create-event-form" enctype="multipart/form-data">
+
         <div class="form-group">
-          <label>Title</label><input type="text" id="ev-title" required>
-        </div>
-        <div class="form-group">
-          <label>Description</label><textarea id="ev-desc" required></textarea>
-        </div>
-        <div class="form-group" style="display:flex; gap: 1rem;">
-          <div style="flex:1"><label>Date & Time</label><input type="datetime-local" id="ev-date" required></div>
-          <div style="flex:1"><label>Venue</label><input type="text" id="ev-venue" required></div>
-        </div>
-        <div class="form-group">
-          <label>Price (₹)</label><input type="number" id="ev-price" value="0" required>
-        </div>
-        
-        <div class="custom-fields-container">
-          <h4>Dynamic Form Fields</h4>
-          <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 1rem;">Ask extra questions during registration (e.g., T-Shirt Size, Dept).</p>
-          <div id="dynamic-fields-wrapper"></div>
-          <button type="button" class="btn" id="add-field-btn" style="background:#e5e7eb; margin-top:0.5rem; font-size:0.8rem;">+ Add Question</button>
+          <label for="ev-title">Title *</label>
+          <input type="text" id="ev-title" name="title" placeholder="e.g. Tech Hackathon 2026" required>
         </div>
 
-        <div style="display:flex; gap:1rem; margin-top: 2rem;">
-          <button type="submit" class="btn btn-primary" style="flex:1">Save Event</button>
-          <button type="button" class="btn" id="close-create-modal" style="flex:1; background:#ef4444; color:white;">Cancel</button>
+        <div class="form-group">
+          <label for="ev-desc">Description *</label>
+          <textarea id="ev-desc" name="description" placeholder="What's this event about?" required></textarea>
         </div>
+
+        <div class="form-group" style="display:flex; gap:1rem;">
+          <div style="flex:1">
+            <label for="ev-date">Date &amp; Time *</label>
+            <input type="datetime-local" id="ev-date" name="date" required>
+          </div>
+          <div style="flex:1">
+            <label for="ev-venue">Venue *</label>
+            <input type="text" id="ev-venue" name="venue" placeholder="e.g. Seminar Hall A" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="ev-price">Price (₹) — set 0 for free</label>
+          <input type="number" id="ev-price" name="price" value="0" min="0" required>
+        </div>
+
+        <!-- Banner Upload -->
+        <div class="form-group">
+          <label>Event Banner <span style="color:#6b7280;font-weight:400">(JPG / PNG / WebP · max 5 MB)</span></label>
+          <div class="banner-upload-area" id="banner-drop-zone">
+            <input type="file" id="ev-banner" name="banner" accept="image/jpeg,image/png,image/webp">
+            <div class="upload-hint">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+              </svg>
+              <p><strong>Click to upload</strong> or drag &amp; drop</p>
+              <p>Recommended: 1200 × 630 px</p>
+            </div>
+          </div>
+          <div id="banner-preview">
+            <img id="banner-preview-img" src="" alt="Banner preview">
+            <button type="button" id="remove-banner" title="Remove banner">✕</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Custom Fields -->
+        <div class="custom-fields-container">
+          <h4>Dynamic Form Fields</h4>
+          <p style="font-size:0.8rem;color:#6b7280;margin-bottom:0.75rem;">
+            Ask extra questions during registration (e.g. T-Shirt Size, Department).
+          </p>
+          <div id="dynamic-fields-wrapper"></div>
+          <button type="button" class="btn" id="add-field-btn" style="background:#e5e7eb;margin-top:0.5rem;font-size:0.8rem;">
+            + Add Question
+          </button>
+        </div>
+
+        <div style="display:flex;gap:1rem;margin-top:2rem;">
+          <button type="submit" class="btn btn-primary" id="save-btn" style="flex:1">Save Event</button>
+          <button type="button" class="btn" id="close-create-modal" style="flex:1;background:#ef4444;color:white;">Cancel</button>
+        </div>
+
       </form>
     </div>
   </div>
