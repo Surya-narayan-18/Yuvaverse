@@ -51,11 +51,12 @@ interface OrderResponseData {
     const gradient = CARD_GRADIENTS[0];
     const date = new Date(event.date);
 
-    // Image
+    // Image — prefer Cloudinary bannerUrl, fall back to legacy imageUrl
     const imgEl = document.getElementById('eventImage') as HTMLElement;
     if (imgEl) {
       imgEl.style.cssText += `background:${gradient}`;
-      if (event.imageUrl) imgEl.innerHTML = `<img src="${event.imageUrl}" alt="${event.title}"/>`;
+      const bannerSrc = event.bannerUrl ?? event.imageUrl;
+      if (bannerSrc) imgEl.innerHTML = `<img src="${bannerSrc}" alt="${event.title}" style="width:100%;height:100%;object-fit:cover;"/>`;
     }
 
     // Text fields

@@ -65,6 +65,7 @@ export async function listEvents(req: Request, res: Response): Promise<void> {
         venue: true,
         price: true,
         imageUrl: true,
+        bannerUrl: true,
         createdAt: true,
         _count: { select: { registrations: true } },
       },

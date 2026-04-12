@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { 
-  getDashboardAnalytics, getAdminEvents, createAdminEvent, 
+  getDashboardAnalytics, getAdminEvents, createAdminEvent, updateAdminEvent,
   getAdminRegistrations, refundRegistration, getAdminApplications, updateApplicationStatus,
   deleteAdminEvent
 } from '../controllers/admin.controller';
@@ -15,6 +15,7 @@ router.get('/analytics', authenticate, authorize(Role.ADMIN), getDashboardAnalyt
 
 router.get('/events', authenticate, authorize(Role.ADMIN), getAdminEvents);
 router.post('/events', authenticate, authorize(Role.ADMIN), uploadBanner, createAdminEvent);
+router.patch('/events/:id', authenticate, authorize(Role.ADMIN), uploadBanner, updateAdminEvent);
 router.delete('/events/:id', authenticate, authorize(Role.ADMIN), deleteAdminEvent);
 
 router.get('/registrations', authenticate, authorize(Role.ADMIN), getAdminRegistrations);

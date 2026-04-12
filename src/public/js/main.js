@@ -119,8 +119,9 @@ function buildEventCard(event, index) {
     const badgeClass = event.price === 0 ? 'badge--free' : 'badge--price';
     const regCount = event._count?.registrations ?? 0;
     const seatsLabel = regCount > 50 ? `<span class="badge badge--live"><span class="live-dot"></span>Filling Fast</span>` : '';
-    const imgHtml = event.imageUrl
-        ? `<img src="${event.imageUrl}" alt="${event.title}" loading="lazy"/>`
+    const bannerSrc = event.bannerUrl ?? event.imageUrl;
+    const imgHtml = bannerSrc
+        ? `<img src="${bannerSrc}" alt="${event.title}" loading="lazy"/>`
         : '';
     return `
   <article class="event-card fade-up" style="animation-delay:${index * 80}ms">

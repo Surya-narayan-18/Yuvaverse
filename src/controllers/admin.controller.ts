@@ -4,6 +4,16 @@ import { sendSuccess, sendError } from '../utils/response';
 import Razorpay from 'razorpay';
 import { ApplicationStatus, Prisma } from '@prisma/client';
 
+interface UpdateEventBody {
+  title?: string;
+  description?: string;
+  date?: string;
+  venue?: string;
+  price?: string | number;
+  imageUrl?: string | null;
+  bannerUrl?: string | null;
+}
+
 export const getDashboardAnalytics = async (_req: Request, res: Response) => {
   try {
     // 1. Total Revenue from successful registrations
@@ -85,6 +95,56 @@ export const createAdminEvent = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Event creation error', error);
     return sendError(res, 'Error creating event', 500);
+  }
+};
+
+export const updateAdminEvent = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const body = req.body as UpdateEventBody;
+
+    const existing = await prisma.event.findUnique({ where: { id } });
+    if (!existing) {
+      return sendError(res, 'Event not found', 404);
+    }
+
+    // Build partial update — only include explicitly sent fields
+    const data: {
+      title?: string;
+      description?: string;
+      date?: Date;
+      venue?: string;
+      price?: number;
+      imageUrl?: string | null;
+      bannerUrl?: string | null;
+    } = {};
+
+    if (body.title       !== undefined) data.title       = body.title;
+    if (body.description !== undefined) data.description = body.description;
+    if (body.date        !== undefined) data.date        = new Date(body.date);
+    if (body.venue       !== undefined) data.venue       = body.venue;
+    if (body.price       !== undefined) data.price       = Number(body.price);
+    if ('imageUrl' in body)             data.imageUrl    = body.imageUrl ?? null;
+
+    // multer-storage-cloudinary puts the CDN URL at req.file.path
+    const uploaded = (req.file as (Express.Multer.File & { path: string }) | undefined);
+    if (uploaded) data.bannerUrl = uploaded.path;
+
+    // customFields handled separately if sent
+    let updatePayload: Prisma.EventUpdateInput = { ...data };
+    if (req.body.customFields) {
+      try {
+        updatePayload.customFields = JSON.parse(req.body.customFields as string) as Prisma.InputJsonValue;
+      } catch {
+        // ignore malformed JSON
+      }
+    }
+
+    const updated = await prisma.event.update({ where: { id }, data: updatePayload });
+    return sendSuccess(res, updated, 'Event updated successfully');
+  } catch (error) {
+    console.error('Event update error', error);
+    return sendError(res, 'Error updating event', 500);
   }
 };
 
