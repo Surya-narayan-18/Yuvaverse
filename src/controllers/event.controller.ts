@@ -6,26 +6,6 @@ import { sendSuccess, sendError } from '../utils/response';
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface CreateEventBody {
-  title: string;
-  description: string;
-  date: Date;
-  venue: string;
-  price: number;
-  imageUrl?: string | null;
-  bannerUrl?: string | null;
-}
-
-interface UpdateEventBody {
-  title?: string;
-  description?: string;
-  date?: Date;
-  venue?: string;
-  price?: number;
-  imageUrl?: string | null;
-  bannerUrl?: string | null;
-}
-
 interface ListEventsQuery {
   page?: number;
   limit?: number;
@@ -111,80 +91,3 @@ export async function getEventById(req: Request, res: Response): Promise<void> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /api/events  (ADMIN only)
-// ─────────────────────────────────────────────────────────────────────────────
-
-export async function createEvent(req: Request, res: Response): Promise<void> {
-  const { title, description, date, venue, price, imageUrl } =
-    req.body as CreateEventBody;
-
-  // If a banner file was uploaded via multer-storage-cloudinary,
-  // req.file.path contains the full Cloudinary HTTPS URL.
-  const bannerUrl = (req.file as Express.Multer.File & { path: string })?.path ?? null;
-
-  const event = await prisma.event.create({
-    data: {
-      title,
-      description,
-      date: new Date(date),
-      venue,
-      price,
-      imageUrl: imageUrl ?? null,
-      bannerUrl,
-    },
-  });
-
-  sendSuccess(res, event, 'Event created successfully.', 201);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PATCH /api/events/:id  (ADMIN only)
-// ─────────────────────────────────────────────────────────────────────────────
-
-export async function updateEvent(req: Request, res: Response): Promise<void> {
-  const id = String(req.params['id']);
-  const body = req.body as UpdateEventBody;
-
-  // Confirm event exists before updating
-  const existing = await prisma.event.findUnique({ where: { id } });
-  if (!existing) {
-    sendError(res, 'Event not found.', 404);
-    return;
-  }
-
-  // Build partial update — only include fields that were explicitly sent
-  const data: UpdateEventBody = {};
-  if (body.title !== undefined) data.title = body.title;
-  if (body.description !== undefined) data.description = body.description;
-  if (body.date !== undefined) data.date = new Date(body.date);
-  if (body.venue !== undefined) data.venue = body.venue;
-  if (body.price !== undefined) data.price = body.price;
-  if ('imageUrl' in body) data.imageUrl = body.imageUrl ?? null;
-
-  // If a new banner was uploaded, overwrite bannerUrl
-  const uploadedBanner = (req.file as (Express.Multer.File & { path: string }) | undefined);
-  if (uploadedBanner) data.bannerUrl = uploadedBanner.path;
-
-  const updated = await prisma.event.update({ where: { id }, data });
-
-  sendSuccess(res, updated, 'Event updated successfully.');
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DELETE /api/events/:id  (ADMIN only)
-// ─────────────────────────────────────────────────────────────────────────────
-
-export async function deleteEvent(req: Request, res: Response): Promise<void> {
-  const id = String(req.params['id']);
-
-  const existing = await prisma.event.findUnique({ where: { id } });
-  if (!existing) {
-    sendError(res, 'Event not found.', 404);
-    return;
-  }
-
-  // Cascade delete is handled by Prisma schema (onDelete: Cascade on Registration)
-  await prisma.event.delete({ where: { id } });
-
-  sendSuccess(res, null, 'Event deleted successfully.');
-}

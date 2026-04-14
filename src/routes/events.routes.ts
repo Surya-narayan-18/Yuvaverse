@@ -1,21 +1,13 @@
 import { Router } from 'express';
-import { Role } from '@prisma/client';
 import {
   listEvents,
   getEventById,
-  createEvent,
-  updateEvent,
-  deleteEvent,
 } from '../controllers/event.controller';
 import {
-  createEventValidators,
-  updateEventValidators,
   listEventsValidators,
   eventIdParamValidator,
 } from '../validators/event.validators';
 import { validate } from '../middlewares/validate.middleware';
-import { authenticate, authorize } from '../middlewares/auth.middleware';
-import { uploadBanner } from '../middlewares/upload.middleware';
 
 const router = Router();
 
@@ -32,48 +24,5 @@ router.get('/', listEventsValidators, validate, listEvents);
  * Returns a single event with its registration count.
  */
 router.get('/:id', eventIdParamValidator, validate, getEventById);
-
-// ─── Admin-Protected Routes ───────────────────────────────────────────────────
-
-/**
- * POST /api/events
- * Creates a new event. Requires ADMIN role.
- */
-router.post(
-  '/',
-  authenticate,
-  authorize(Role.ADMIN),
-  uploadBanner,          // stream banner to Cloudinary → req.file.path
-  createEventValidators,
-  validate,
-  createEvent,
-);
-
-/**
- * PATCH /api/events/:id
- * Partially updates an event. Requires ADMIN role.
- */
-router.patch(
-  '/:id',
-  authenticate,
-  authorize(Role.ADMIN),
-  uploadBanner,          // optional new banner on update
-  updateEventValidators,
-  validate,
-  updateEvent,
-);
-
-/**
- * DELETE /api/events/:id
- * Deletes an event and all its registrations (cascade). Requires ADMIN role.
- */
-router.delete(
-  '/:id',
-  authenticate,
-  authorize(Role.ADMIN),
-  eventIdParamValidator,
-  validate,
-  deleteEvent,
-);
 
 export default router;

@@ -1,7 +1,24 @@
+# Node & Compilation
 node_modules/
 dist/
-.env
-*.log
 *.tsbuildinfo
-prisma/migrations/
+
+# Environment Variables
+.env
+
+# Logs and Debugging
+*.log
+server_crash_log.txt
+ts_errors.txt
+npm-debug.log*
+
+# Uploads
 uploads/
+src/public/uploads/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Database (Local Prototyping)
+prisma/migrations/
