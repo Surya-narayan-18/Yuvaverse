@@ -22,3 +22,6 @@ Thumbs.db
 
 # Database (Local Prototyping)
 prisma/migrations/
+
+# Scripts (contain hardcoded credentials — never commit)
+scripts/

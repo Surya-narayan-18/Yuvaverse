@@ -85,8 +85,11 @@ app.use(globalErrorHandler);
 
 async function bootstrap(): Promise<void> {
   try {
-    // Verify Prisma/DB connection before accepting traffic
-    await prisma.$connect();
+    // Use a lightweight query to verify DB reachability through PgBouncer.
+    // prisma.$connect() is incompatible with Supabase's Transaction Pooler
+    // (port 6543) because PgBouncer manages connections per-transaction and
+    // does not support persistent client-side connection pools.
+    await prisma.$queryRaw`SELECT 1`;
     console.log('✅  Database connected successfully.');
 
     app.listen(PORT, () => {
@@ -96,7 +99,6 @@ async function bootstrap(): Promise<void> {
     });
   } catch (error) {
     console.error('❌  Failed to connect to the database:', error);
-    await prisma.$disconnect();
     process.exit(1);
   }
 }
