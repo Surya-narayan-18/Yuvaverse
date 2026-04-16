@@ -26,6 +26,32 @@ const sendNotifyBtn  = document.getElementById('send-notify-btn');
 // ── DOM refs — Toast ──────────────────────────────────────────────────────────
 const toastEl = document.getElementById('toast');
 
+// ── DOM refs — Delete confirm modal ──────────────────────────────────────────
+const confirmModal = document.getElementById('confirm-modal');
+const confirmMsg   = document.getElementById('confirm-msg');
+const confirmYes   = document.getElementById('confirm-yes');
+const confirmNo    = document.getElementById('confirm-no');
+
+// Returns a Promise<boolean> — resolves true if user clicks Yes
+function showConfirm(eventTitle) {
+  confirmMsg.textContent = `"${eventTitle}" and all its registrations will be permanently deleted. This cannot be undone.`;
+  confirmModal.classList.add('active');
+  return new Promise((resolve) => {
+    function onYes() { cleanup(); resolve(true);  }
+    function onNo()  { cleanup(); resolve(false); }
+    function onBackdrop(e) { if (e.target === confirmModal) { cleanup(); resolve(false); } }
+    function cleanup() {
+      confirmYes.removeEventListener('click', onYes);
+      confirmNo.removeEventListener('click', onNo);
+      confirmModal.removeEventListener('click', onBackdrop);
+      confirmModal.classList.remove('active');
+    }
+    confirmYes.addEventListener('click', onYes);
+    confirmNo.addEventListener('click', onNo);
+    confirmModal.addEventListener('click', onBackdrop);
+  });
+}
+
 // ── State ─────────────────────────────────────────────────────────────────────
 let editingEventId  = null; // null = create mode
 let notifyingEventId = null;
@@ -301,10 +327,9 @@ async function loadEvents() {
 
       tr.querySelector('.btn-edit-row')?.addEventListener('click',   () => openEditModal(ev));
       tr.querySelector('.btn-notify-row')?.addEventListener('click', () => openNotifyModal(ev));
-      tr.querySelector('.btn-delete-row')?.addEventListener('click', () => {
-        if (confirm(`Delete "${ev.title}"? All its registrations will also be removed.`)) {
-          deleteEvent(ev.id);
-        }
+      tr.querySelector('.btn-delete-row')?.addEventListener('click', async () => {
+        const confirmed = await showConfirm(ev.title);
+        if (confirmed) deleteEvent(ev.id);
       });
 
       tbody.appendChild(tr);

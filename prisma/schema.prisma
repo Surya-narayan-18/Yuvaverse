@@ -87,7 +87,8 @@ model Registration {
   eventId String
   event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
-  @@index([eventId])
+  @@unique([eventId, studentEmail])  // One registration per email per event
+  @@unique([eventId, collegeId])     // One registration per college ID per event
   @@index([studentEmail])
   @@map("registrations")
 }

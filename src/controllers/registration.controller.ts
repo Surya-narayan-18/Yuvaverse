@@ -45,7 +45,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // 2. Check if student has already registered for this event
+  // 2. Check for duplicate email registration for this event
   const alreadyRegistered = await prisma.registration.findFirst({
     where: {
       eventId,
@@ -54,7 +54,20 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     },
   });
   if (alreadyRegistered) {
-    sendError(res, 'You have already registered for this event.', 409);
+    sendError(res, 'This email is already registered for this event.', 409);
+    return;
+  }
+
+  // 3. Check for duplicate college ID for this event
+  const collegeIdTaken = await prisma.registration.findFirst({
+    where: {
+      eventId,
+      collegeId,
+      status: RegistrationStatus.SUCCESS,
+    },
+  });
+  if (collegeIdTaken) {
+    sendError(res, 'This college ID is already registered for this event.', 409);
     return;
   }
 

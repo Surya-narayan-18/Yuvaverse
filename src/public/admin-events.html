@@ -143,6 +143,27 @@
     #toast.show { opacity:1; pointer-events:auto; transform:translateY(0); }
     #toast.success { background:#059669; }
     #toast.error   { background:#dc2626; }
+
+    /* ── Delete confirmation modal ───────────────────────────────────── */
+    .confirm-modal {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.5); backdrop-filter:blur(3px);
+      align-items:center; justify-content:center; z-index:100; padding:1rem;
+    }
+    .confirm-modal.active { display:flex; }
+    .confirm-box {
+      background:#fff; border-radius:12px; padding:2rem;
+      max-width:400px; width:100%;
+      box-shadow:0 20px 50px rgba(0,0,0,.3); text-align:center;
+    }
+    .confirm-box .confirm-icon { font-size:2.5rem; margin-bottom:0.75rem; }
+    .confirm-box h3 { margin:0 0 0.5rem; font-size:1.1rem; color:#111827; }
+    .confirm-box p  { margin:0 0 1.5rem; font-size:0.875rem; color:#6b7280; line-height:1.5; }
+    .confirm-actions { display:flex; gap:0.75rem; }
+    .confirm-actions button { flex:1; padding:0.65rem 1rem; border:none; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.9rem; transition:opacity .15s; }
+    .confirm-actions button:hover { opacity:.85; }
+    #confirm-yes { background:#ef4444; color:white; }
+    #confirm-no  { background:#f3f4f6; color:#374151; }
   </style>
 </head>
 <body class="admin-body">
@@ -295,6 +316,19 @@
         📨 Send to All Registrants
       </button>
 
+    </div>
+  </div>
+
+  <!-- Delete confirmation modal -->
+  <div class="confirm-modal" id="confirm-modal">
+    <div class="confirm-box">
+      <div class="confirm-icon">🗑️</div>
+      <h3 id="confirm-title">Delete Event?</h3>
+      <p id="confirm-msg">This will permanently delete the event and all its registrations. This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button id="confirm-no">Cancel</button>
+        <button id="confirm-yes">Yes, Delete</button>
+      </div>
     </div>
   </div>
 
