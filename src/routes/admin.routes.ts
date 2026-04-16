@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { 
   getDashboardAnalytics, getAdminEvents, createAdminEvent, updateAdminEvent,
   getAdminRegistrations, refundRegistration, getAdminApplications, updateApplicationStatus,
-  deleteAdminEvent
+  deleteAdminEvent, sendEventAnnouncement
 } from '../controllers/admin.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
 import { uploadBanner } from '../middlewares/upload.middleware';
@@ -17,6 +17,7 @@ router.get('/events', authenticate, authorize(Role.ADMIN), getAdminEvents);
 router.post('/events', authenticate, authorize(Role.ADMIN), uploadBanner, createAdminEvent);
 router.patch('/events/:id', authenticate, authorize(Role.ADMIN), uploadBanner, updateAdminEvent);
 router.delete('/events/:id', authenticate, authorize(Role.ADMIN), deleteAdminEvent);
+router.post('/events/:id/notify', authenticate, authorize(Role.ADMIN), sendEventAnnouncement);
 
 router.get('/registrations', authenticate, authorize(Role.ADMIN), getAdminRegistrations);
 router.post('/registrations/:id/refund', authenticate, authorize(Role.ADMIN), refundRegistration);

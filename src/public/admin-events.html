@@ -15,6 +15,14 @@
     .btn:hover { opacity:.85; }
     .btn-primary { background:#3b82f6; color:white; }
 
+    /* ── Table action buttons ─────────────────────────────────────────── */
+    .action-cell { display:flex; gap:0.35rem; align-items:center; flex-wrap:nowrap; }
+    .btn-sm { padding:0.28rem 0.55rem; font-size:0.78rem; border:none; border-radius:5px; cursor:pointer; font-weight:600; transition:opacity .15s; white-space:nowrap; }
+    .btn-sm:hover { opacity:.82; }
+    .btn-edit-row   { background:#3b82f6; color:white; }
+    .btn-delete-row { background:#ef4444; color:white; }
+    .btn-notify-row { background:#7c3aed; color:white; }
+
     /* ── Modal backdrop ──────────────────────────────────────────────── */
     .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:50; padding:1rem; }
     .modal.active { display:flex; }
@@ -29,8 +37,24 @@
       max-height:92vh;
       overflow-y:auto;
       box-shadow:0 25px 60px rgba(0,0,0,.25);
+      position:relative;
     }
-    .modal-content h2 { margin:0 0 1.5rem; font-size:1.25rem; }
+
+    /* ── Modal header row (title + ✕ close) ─────────────────────────── */
+    .modal-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:1.5rem;
+    }
+    .modal-header h2 { margin:0; font-size:1.25rem; }
+    .modal-close-x {
+      background:none; border:none; cursor:pointer;
+      font-size:1.4rem; line-height:1; color:#6b7280;
+      padding:0.2rem 0.4rem; border-radius:4px;
+      transition:background .15s, color .15s;
+    }
+    .modal-close-x:hover { background:#fee2e2; color:#dc2626; }
 
     .form-group { margin-bottom:1rem; }
     .form-group label { display:block; margin-bottom:0.4rem; font-weight:500; font-size:0.875rem; color:#374151; }
@@ -86,6 +110,39 @@
     /* ── Table banner thumbnail ──────────────────────────────────────── */
     .event-banner-thumb { width:56px; height:36px; object-fit:cover; border-radius:4px; border:1px solid #e5e7eb; }
     .no-banner { width:56px; height:36px; background:#f3f4f6; border-radius:4px; border:1px solid #e5e7eb; display:inline-flex; align-items:center; justify-content:center; font-size:0.65rem; color:#9ca3af; }
+
+    /* ── Notify modal specifics ──────────────────────────────────────── */
+    .notify-event-label {
+      background:#f5f3ff; border:1px solid #ddd6fe;
+      border-radius:8px; padding:0.6rem 1rem;
+      font-size:0.9rem; color:#5b21b6; font-weight:600;
+      margin-bottom:1.25rem;
+    }
+    .notify-hint {
+      font-size:0.8rem; color:#6b7280;
+      margin-bottom:1rem; line-height:1.5;
+    }
+    #send-notify-btn {
+      width:100%; padding:0.65rem 1rem;
+      background:#7c3aed; color:white;
+      border:none; border-radius:6px;
+      font-weight:600; cursor:pointer; font-size:0.9rem;
+      transition:background .15s;
+    }
+    #send-notify-btn:hover { background:#6d28d9; }
+    #send-notify-btn:disabled { opacity:.6; cursor:not-allowed; }
+
+    /* ── Toast notification ──────────────────────────────────────────── */
+    #toast {
+      position:fixed; bottom:1.5rem; right:1.5rem; z-index:200;
+      padding:0.8rem 1.25rem; border-radius:8px; font-size:0.875rem;
+      font-weight:600; color:#fff; opacity:0; pointer-events:none;
+      transition:opacity .3s, transform .3s; transform:translateY(8px);
+      max-width:340px; box-shadow:0 4px 20px rgba(0,0,0,.25);
+    }
+    #toast.show { opacity:1; pointer-events:auto; transform:translateY(0); }
+    #toast.success { background:#059669; }
+    #toast.error   { background:#dc2626; }
   </style>
 </head>
 <body class="admin-body">
@@ -121,7 +178,7 @@
             <th>Venue</th>
             <th>Price</th>
             <th>Fields</th>
-            <th>Action</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="events-tbody">
@@ -134,7 +191,12 @@
   <!-- ── Create / Edit Modal ───────────────────────────────────────────── -->
   <div class="modal" id="create-modal">
     <div class="modal-content">
-      <h2 id="modal-title">Create New Event</h2>
+
+      <!-- Header with ✕ close button -->
+      <div class="modal-header">
+        <h2 id="modal-title">Create New Event</h2>
+        <button type="button" class="modal-close-x" id="close-create-modal" title="Close">✕</button>
+      </div>
 
       <!-- enctype must be multipart so the file reaches the server -->
       <form id="create-event-form" enctype="multipart/form-data">
@@ -198,12 +260,46 @@
 
         <div style="display:flex;gap:1rem;margin-top:2rem;">
           <button type="submit" class="btn btn-primary" id="save-btn" style="flex:1">Save Event</button>
-          <button type="button" class="btn" id="close-create-modal" style="flex:1;background:#ef4444;color:white;">Cancel</button>
         </div>
 
       </form>
     </div>
   </div>
+
+  <!-- ── Notify Registrants Modal ──────────────────────────────────────── -->
+  <div class="modal" id="notify-modal">
+    <div class="modal-content" style="max-width:480px;">
+
+      <div class="modal-header">
+        <h2>📢 Notify Registrants</h2>
+        <button type="button" class="modal-close-x" id="close-notify-modal" title="Close">✕</button>
+      </div>
+
+      <div class="notify-event-label" id="notify-event-name">Event Name</div>
+
+      <p class="notify-hint">
+        This will send a custom announcement email to all <strong>confirmed registrants</strong> of this event.
+      </p>
+
+      <div class="form-group">
+        <label for="notify-subject">Email Subject</label>
+        <input type="text" id="notify-subject" placeholder="e.g. Important Update about the Event">
+      </div>
+
+      <div class="form-group">
+        <label for="notify-message">Message</label>
+        <textarea id="notify-message" style="min-height:130px;" placeholder="Write your announcement here..."></textarea>
+      </div>
+
+      <button type="button" id="send-notify-btn">
+        📨 Send to All Registrants
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast"></div>
 
   <script type="module" src="/js/admin/events.js"></script>
 </body>

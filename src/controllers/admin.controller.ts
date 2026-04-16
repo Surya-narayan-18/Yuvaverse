@@ -3,6 +3,7 @@ import prisma from '../config/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import Razorpay from 'razorpay';
 import { ApplicationStatus, Prisma } from '@prisma/client';
+import { sendAnnouncementEmail } from '../mailers/announcement.mailer';
 
 interface UpdateEventBody {
   title?: string;
@@ -239,5 +240,59 @@ export const updateApplicationStatus = async (req: Request, res: Response) => {
     return sendSuccess(res, updated);
   } catch (error) {
     return sendError(res, 'Error updating status', 500);
+  }
+};
+
+// --- BROADCAST EMAIL ---
+export const sendEventAnnouncement = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { subject, message } = req.body as { subject?: string; message?: string };
+
+    if (!subject?.trim() || !message?.trim()) {
+      return sendError(res, 'Subject and message are required', 400);
+    }
+
+    // Verify the event exists
+    const event = await prisma.event.findUnique({ where: { id } });
+    if (!event) {
+      return sendError(res, 'Event not found', 404);
+    }
+
+    // Get all successful registrants for this event
+    const registrations = await prisma.registration.findMany({
+      where: { eventId: id, status: 'SUCCESS' },
+      select: { studentEmail: true, studentName: true },
+    });
+
+    if (registrations.length === 0) {
+      return sendError(res, 'No confirmed registrants found for this event', 404);
+    }
+
+    // Send email to each registrant (sequentially to avoid SMTP rate limits)
+    let emailsSent = 0;
+    const errors: string[] = [];
+
+    for (const reg of registrations) {
+      try {
+        await sendAnnouncementEmail({
+          toEmail: reg.studentEmail,
+          studentName: reg.studentName,
+          eventTitle: event.title,
+          subject: subject.trim(),
+          message: message.trim(),
+        });
+        emailsSent++;
+      } catch (err) {
+        console.error(`Failed to send email to ${reg.studentEmail}:`, err);
+        errors.push(reg.studentEmail);
+      }
+    }
+
+    return sendSuccess(res, { emailsSent, failed: errors.length, totalRegistrants: registrations.length },
+      `Announcement sent to ${emailsSent} of ${registrations.length} registrants.`);
+  } catch (error) {
+    console.error('Announcement email error:', error);
+    return sendError(res, 'Error sending announcement', 500);
   }
 };
