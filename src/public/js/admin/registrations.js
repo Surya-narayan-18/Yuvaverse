@@ -1,134 +1,231 @@
 import { checkAuth } from './authGuard.js';
 const token = checkAuth();
-let allRegistrations = [];
+
+let allRegistrations      = [];
 let filteredRegistrations = [];
-document.addEventListener('DOMContentLoaded', () => {
-    loadEventsDropdown();
-    loadRegistrations();
-    // Client-side search (applies within current event filter)
-    document.getElementById('search-filter')?.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const base = filteredRegistrations;
-        const searched = base.filter(r => r.studentName.toLowerCase().includes(term) ||
-            r.studentEmail.toLowerCase().includes(term));
-        renderTable(searched);
-    });
-    // Event filter dropdown
-    document.getElementById('event-filter')?.addEventListener('change', (e) => {
-        const selectedEventId = e.target.value;
-        applyEventFilter(selectedEventId);
-    });
-    // CSV export — uses currently filtered data
-    document.getElementById('export-csv-btn')?.addEventListener('click', () => {
-        if (!filteredRegistrations.length)
-            return alert('No data to export');
-        const eventName = getSelectedEventName();
-        const headers = ['Date', 'Student Name', 'Student Email', 'College ID', 'Event', 'Status', 'Payment ID', 'Custom Answers'];
-        const csvRows = [headers.join(',')];
-        filteredRegistrations.forEach(r => {
-            const date = new Date(r.createdAt).toLocaleDateString();
-            const customStr = r.customAnswers ? JSON.stringify(r.customAnswers).replace(/"/g, '""') : '';
-            const row = [
-                date,
-                `"${r.studentName}"`,
-                `"${r.studentEmail}"`,
-                `"${r.collegeId || ''}"`,
-                `"${r.event?.title || 'Unknown'}"`,
-                r.status,
-                r.razorpayPaymentId || '',
-                `"${customStr}"`
-            ];
-            csvRows.push(row.join(','));
-        });
-        const csvData = csvRows.join('\n');
-        const blob = new Blob([csvData], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const filename = eventName
-            ? `registrations_${eventName.replace(/\s+/g, '_')}_${Date.now()}.csv`
-            : `registrations_all_${Date.now()}.csv`;
-        a.download = filename;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    });
+
+// ── Toast helper ─────────────────────────────────────────────────────────────
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function showToast(msg, type = 'success') {
+  if (!toastEl) return;
+  toastEl.textContent = msg;
+  toastEl.className   = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastEl.className = ''; }, 4500);
+}
+
+// ── Broadcast modal ───────────────────────────────────────────────────────────
+const broadcastModal   = document.getElementById('broadcast-modal');
+const broadcastSendBtn = document.getElementById('broadcast-send-btn');
+
+function openBroadcastModal() {
+  // Reset compose form and result card
+  document.getElementById('broadcast-subject').value = '';
+  document.getElementById('broadcast-message').value = '';
+  document.getElementById('broadcast-form').style.display  = 'block';
+  document.getElementById('result-card').style.display     = 'none';
+  broadcastSendBtn.textContent = '📨 Send Broadcast';
+  broadcastSendBtn.disabled    = false;
+
+  // Compute live recipient stats from already-loaded registrations
+  updateBroadcastStats();
+
+  broadcastModal.classList.add('active');
+}
+
+function closeBroadcastModal() {
+  broadcastModal.classList.remove('active');
+}
+
+function updateBroadcastStats() {
+  // Unique emails from SUCCESS registrations in the current allRegistrations cache.
+  // This gives the admin an instant preview without an extra API call.
+  const successRegs    = allRegistrations.filter(r => r.status === 'SUCCESS');
+  const uniqueEmails   = new Set(successRegs.map(r => r.studentEmail));
+  const totalSuccess   = successRegs.length;
+  const uniqueCount    = uniqueEmails.size;
+  const dupesSkipped   = totalSuccess - uniqueCount;
+
+  document.getElementById('stat-unique').textContent = uniqueCount;
+  document.getElementById('stat-total').textContent  = totalSuccess;
+  document.getElementById('stat-dupes').textContent  = dupesSkipped;
+}
+
+document.getElementById('open-broadcast-btn')?.addEventListener('click', openBroadcastModal);
+document.getElementById('close-broadcast-btn')?.addEventListener('click', closeBroadcastModal);
+
+// Close on backdrop click
+broadcastModal?.addEventListener('click', (e) => {
+  if (e.target === broadcastModal) closeBroadcastModal();
 });
+
+// Send broadcast
+broadcastSendBtn?.addEventListener('click', async () => {
+  const subject = document.getElementById('broadcast-subject').value.trim();
+  const message = document.getElementById('broadcast-message').value.trim();
+
+  if (!subject || !message) {
+    showToast('Please fill in both Subject and Message.', 'error');
+    return;
+  }
+
+  broadcastSendBtn.textContent = 'Sending…';
+  broadcastSendBtn.disabled    = true;
+
+  try {
+    const res  = await fetch('/api/admin/registrations/broadcast', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ subject, message }),
+    });
+    const json = await res.json().catch(() => ({}));
+
+    if (res.ok) {
+      // Hide compose form, show success card
+      document.getElementById('broadcast-form').style.display = 'none';
+      document.getElementById('res-sent').textContent         = json.data?.emailsSent   ?? 0;
+      document.getElementById('res-failed').textContent       = json.data?.failed        ?? 0;
+      document.getElementById('result-card').style.display    = 'block';
+      showToast(`✅ Broadcast sent to ${json.data?.emailsSent ?? 0} unique recipients!`, 'success');
+    } else {
+      showToast(`❌ ${json.message ?? 'Failed to send broadcast.'}`, 'error');
+      broadcastSendBtn.textContent = '📨 Send Broadcast';
+      broadcastSendBtn.disabled    = false;
+    }
+  } catch (err) {
+    console.error('Broadcast error:', err);
+    showToast('❌ Network error — please try again.', 'error');
+    broadcastSendBtn.textContent = '📨 Send Broadcast';
+    broadcastSendBtn.disabled    = false;
+  }
+});
+
+// ── DOMContentLoaded ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadEventsDropdown();
+  loadRegistrations();
+
+  // Client-side search (within current event filter)
+  document.getElementById('search-filter')?.addEventListener('input', (e) => {
+    const term     = e.target.value.toLowerCase();
+    const searched = filteredRegistrations.filter(
+      r => r.studentName.toLowerCase().includes(term) ||
+           r.studentEmail.toLowerCase().includes(term)
+    );
+    renderTable(searched);
+  });
+
+  // Event filter dropdown
+  document.getElementById('event-filter')?.addEventListener('change', (e) => {
+    applyEventFilter(e.target.value);
+  });
+
+  // CSV export — uses currently filtered data
+  document.getElementById('export-csv-btn')?.addEventListener('click', () => {
+    if (!filteredRegistrations.length) return alert('No data to export');
+    const eventName = getSelectedEventName();
+    const headers   = ['Date','Student Name','Student Email','College ID','Event','Status','Payment ID','Custom Answers'];
+    const csvRows   = [headers.join(',')];
+    filteredRegistrations.forEach(r => {
+      const date      = new Date(r.createdAt).toLocaleDateString();
+      const customStr = r.customAnswers ? JSON.stringify(r.customAnswers).replace(/"/g, '""') : '';
+      csvRows.push([
+        date,
+        `"${r.studentName}"`,
+        `"${r.studentEmail}"`,
+        `"${r.collegeId || ''}"`,
+        `"${r.event?.title || 'Unknown'}"`,
+        r.status,
+        r.razorpayPaymentId || '',
+        `"${customStr}"`,
+      ].join(','));
+    });
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const url  = window.URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = eventName
+      ? `registrations_${eventName.replace(/\s+/g,'_')}_${Date.now()}.csv`
+      : `registrations_all_${Date.now()}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  });
+});
+
 // ── Load events into dropdown ─────────────────────────────────────────────────
 async function loadEventsDropdown() {
-    try {
-        const res = await fetch('/api/admin/events', { headers: { Authorization: `Bearer ${token}` } });
-        const json = await res.json();
-        const select = document.getElementById('event-filter');
-        if (!select || !json.data)
-            return;
-        // Clear existing options except "All Events"
-        select.innerHTML = '<option value="">All Events</option>';
-        json.data.forEach(ev => {
-            const opt = document.createElement('option');
-            opt.value = ev.id;
-            opt.textContent = ev.title;
-            select.appendChild(opt);
-        });
-    }
-    catch (err) {
-        console.error('Failed to load events dropdown:', err);
-    }
+  try {
+    const res    = await fetch('/api/admin/events', { headers: { Authorization: `Bearer ${token}` } });
+    const json   = await res.json();
+    const select = document.getElementById('event-filter');
+    if (!select || !json.data) return;
+    select.innerHTML = '<option value="">All Events</option>';
+    json.data.forEach(ev => {
+      const opt       = document.createElement('option');
+      opt.value       = ev.id;
+      opt.textContent = ev.title;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error('Failed to load events dropdown:', err);
+  }
 }
+
 // ── Load all registrations ────────────────────────────────────────────────────
 async function loadRegistrations() {
-    try {
-        const res = await fetch('/api/admin/registrations', { headers: { Authorization: `Bearer ${token}` } });
-        const json = await res.json();
-        allRegistrations = json.data || [];
-        filteredRegistrations = [...allRegistrations];
-        renderTable(filteredRegistrations);
-    }
-    catch (error) {
-        console.error('Error loading registrations:', error);
-    }
+  try {
+    const res            = await fetch('/api/admin/registrations', { headers: { Authorization: `Bearer ${token}` } });
+    const json           = await res.json();
+    allRegistrations      = json.data || [];
+    filteredRegistrations = [...allRegistrations];
+    renderTable(filteredRegistrations);
+  } catch (error) {
+    console.error('Error loading registrations:', error);
+  }
 }
+
 // ── Apply event filter ────────────────────────────────────────────────────────
 function applyEventFilter(eventId) {
-    filteredRegistrations = eventId
-        ? allRegistrations.filter(r => r.eventId === eventId || r.event?.id === eventId)
-        : [...allRegistrations];
-    // Clear search box when changing event filter
-    const searchEl = document.getElementById('search-filter');
-    if (searchEl)
-        searchEl.value = '';
-    renderTable(filteredRegistrations);
+  filteredRegistrations = eventId
+    ? allRegistrations.filter(r => r.eventId === eventId || r.event?.id === eventId)
+    : [...allRegistrations];
+  const searchEl = document.getElementById('search-filter');
+  if (searchEl) searchEl.value = '';
+  renderTable(filteredRegistrations);
 }
+
 function getSelectedEventName() {
-    const select = document.getElementById('event-filter');
-    return select?.options[select.selectedIndex]?.text?.replace('All Events', '') ?? '';
+  const select = document.getElementById('event-filter');
+  return select?.options[select.selectedIndex]?.text?.replace('All Events','') ?? '';
 }
+
 // ── Render table ──────────────────────────────────────────────────────────────
 function renderTable(data) {
-    const tbody = document.getElementById('regs-tbody');
-    if (!tbody)
-        return;
-    tbody.innerHTML = '';
-    if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:2rem;">No registrations found.</td></tr>`;
-        return;
+  const tbody = document.getElementById('regs-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:2rem;">No registrations found.</td></tr>`;
+    return;
+  }
+  data.forEach((r) => {
+    const date = new Date(r.createdAt).toLocaleDateString();
+    let answersHtml = '<span style="color:#9ca3af; font-size:0.8em;">None</span>';
+    if (r.customAnswers && Object.keys(r.customAnswers).length > 0) {
+      answersHtml = Object.entries(r.customAnswers)
+        .map(([k, v]) => `<div><strong>${k}:</strong> ${v}</div>`)
+        .join('');
     }
-    data.forEach((r) => {
-        const date = new Date(r.createdAt).toLocaleDateString();
-        // Formatting JSON Custom Answers
-        let answersHtml = '<span style="color:#9ca3af; font-size:0.8em;">None</span>';
-        if (r.customAnswers && Object.keys(r.customAnswers).length > 0) {
-            answersHtml = Object.entries(r.customAnswers)
-                .map(([k, v]) => `<div><strong>${k}:</strong> ${v}</div>`)
-                .join('');
-        }
-        // Status Badge
-        let badgeClass = 'badge-pending';
-        if (r.status === 'SUCCESS')
-            badgeClass = 'badge-success';
-        else if (r.status === 'FAILED')
-            badgeClass = 'badge-failed';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+    let badgeClass = 'badge-pending';
+    if (r.status === 'SUCCESS') badgeClass = 'badge-success';
+    else if (r.status === 'FAILED') badgeClass = 'badge-failed';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
       <td>${date}</td>
       <td>
         <strong>${r.studentName}</strong><br/>
@@ -142,35 +239,35 @@ function renderTable(data) {
         ${r.status === 'SUCCESS' ? `<button class="refund-btn" data-id="${r.id}">Refund</button>` : ''}
       </td>
     `;
-        tbody.appendChild(tr);
+    tbody.appendChild(tr);
+  });
+
+  // Attach refund listeners
+  document.querySelectorAll('.refund-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = e.target.dataset.id;
+      if (confirm('Are you sure you want to trigger a refund via Razorpay?')) {
+        await triggerRefund(id);
+      }
     });
-    // Attach refund listeners
-    document.querySelectorAll('.refund-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const id = e.target.dataset.id;
-            if (confirm('Are you sure you want to trigger a refund via Razorpay?')) {
-                await triggerRefund(id);
-            }
-        });
-    });
+  });
 }
+
 // ── Refund ────────────────────────────────────────────────────────────────────
 async function triggerRefund(id) {
-    try {
-        const res = await fetch(`/api/admin/registrations/${id}/refund`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        const json = await res.json();
-        if (json.success) {
-            alert('Refund successful!');
-            loadRegistrations();
-        }
-        else {
-            alert('Refund failed: ' + json.error);
-        }
+  try {
+    const res  = await fetch(`/api/admin/registrations/${id}/refund`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('✅ Refund successful!', 'success');
+      loadRegistrations();
+    } else {
+      showToast('❌ Refund failed: ' + json.error, 'error');
     }
-    catch (error) {
-        alert('Error connecting to refund endpoint');
-    }
+  } catch (error) {
+    showToast('❌ Error connecting to refund endpoint', 'error');
+  }
 }

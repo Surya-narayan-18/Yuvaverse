@@ -11,13 +11,85 @@
     th, td { text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-color); }
     th { background: #f9fafb; font-weight: 600; color: var(--text-secondary); cursor: pointer; }
     th:hover { background: #f3f4f6; }
-    .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
-    .btn-export { background: #10b981; color: white; }
+    .btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: opacity .15s; }
+    .btn:hover { opacity: .85; }
+    .btn-export    { background: #10b981; color: white; }
+    .btn-broadcast { background: #7c3aed; color: white; }
     .badge { padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: bold; }
     .badge-success { background: #d1fae5; color: #065f46; }
-    .badge-failed { background: #fee2e2; color: #991b1b; }
+    .badge-failed  { background: #fee2e2; color: #991b1b; }
     .badge-pending { background: #fef3c7; color: #92400e; }
     .refund-btn { background: #ef4444; color: white; padding: 0.25rem 0.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+
+    /* ── Modal ───────────────────────────────────────────────────────── */
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:50; padding:1rem; }
+    .modal.active { display:flex; }
+    .modal-content {
+      background:#fff; padding:2rem; border-radius:12px;
+      width:100%; max-width:520px; max-height:92vh; overflow-y:auto;
+      box-shadow:0 25px 60px rgba(0,0,0,.25); position:relative;
+    }
+    .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; }
+    .modal-header h2 { margin:0; font-size:1.2rem; }
+    .modal-close-x {
+      background:none; border:none; cursor:pointer; font-size:1.4rem;
+      line-height:1; color:#6b7280; padding:0.2rem 0.4rem; border-radius:4px;
+      transition:background .15s, color .15s;
+    }
+    .modal-close-x:hover { background:#fee2e2; color:#dc2626; }
+
+    /* ── Broadcast modal specifics ───────────────────────────────────── */
+    .broadcast-info {
+      background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+      border: 1px solid #ddd6fe; border-radius: 8px;
+      padding: 0.85rem 1rem; margin-bottom: 1.25rem;
+      font-size: 0.85rem; color: #5b21b6; line-height: 1.5;
+    }
+    .broadcast-info strong { display: block; margin-bottom: 0.25rem; font-size: 0.9rem; }
+    .stat-row { display:flex; gap:1rem; margin-bottom: 1.25rem; }
+    .stat-box {
+      flex:1; background:#f9fafb; border:1px solid #e5e7eb;
+      border-radius:8px; padding:0.75rem 1rem; text-align:center;
+    }
+    .stat-box .stat-num { font-size:1.5rem; font-weight:700; color:#111827; }
+    .stat-box .stat-lbl { font-size:0.72rem; color:#6b7280; text-transform:uppercase; letter-spacing:.04em; }
+    .form-group { margin-bottom:1rem; }
+    .form-group label { display:block; margin-bottom:0.4rem; font-weight:500; font-size:0.875rem; color:#374151; }
+    .form-group input, .form-group textarea {
+      width:100%; padding:0.5rem 0.75rem; border:1px solid #d1d5db;
+      border-radius:6px; font-size:0.9rem; box-sizing:border-box;
+    }
+    .form-group textarea { resize:vertical; min-height:120px; }
+    #broadcast-send-btn {
+      width:100%; padding:0.7rem; background:#7c3aed; color:white;
+      border:none; border-radius:6px; font-weight:700; font-size:0.95rem;
+      cursor:pointer; transition:background .15s;
+    }
+    #broadcast-send-btn:hover    { background:#6d28d9; }
+    #broadcast-send-btn:disabled { opacity:.6; cursor:not-allowed; }
+
+    /* ── Success result card ──────────────────────────────────────────── */
+    .result-card {
+      display:none; background:#f0fdf4; border:1px solid #bbf7d0;
+      border-radius:10px; padding:1.25rem; margin-top:1rem; text-align:center;
+    }
+    .result-card .result-icon { font-size:2.5rem; margin-bottom:0.5rem; }
+    .result-card .result-title { font-weight:700; color:#065f46; font-size:1rem; margin-bottom:0.75rem; }
+    .result-card .result-stats { display:flex; justify-content:center; gap:2rem; }
+    .result-card .rs { font-size:0.85rem; color:#374151; }
+    .result-card .rs strong { display:block; font-size:1.3rem; color:#059669; }
+
+    /* ── Toast ───────────────────────────────────────────────────────── */
+    #toast {
+      position:fixed; bottom:1.5rem; right:1.5rem; z-index:200;
+      padding:0.8rem 1.25rem; border-radius:8px; font-size:0.875rem;
+      font-weight:600; color:#fff; opacity:0; pointer-events:none;
+      transition:opacity .3s, transform .3s; transform:translateY(8px);
+      max-width:340px; box-shadow:0 4px 20px rgba(0,0,0,.25);
+    }
+    #toast.show { opacity:1; pointer-events:auto; transform:translateY(0); }
+    #toast.success { background:#059669; }
+    #toast.error   { background:#dc2626; }
   </style>
 </head>
 <body class="admin-body">
@@ -38,15 +110,20 @@
     <main class="main-content">
       <header class="dashboard-header" style="display:flex; justify-content: space-between; align-items: center;">
         <div>
-          <h1>Registrations & Payments</h1>
+          <h1>Registrations &amp; Payments</h1>
           <p>View participants and manage refunds.</p>
         </div>
-        <button class="btn btn-export" id="export-csv-btn">Export to CSV</button>
+        <div style="display:flex; gap:0.75rem;">
+          <button class="btn btn-broadcast" id="open-broadcast-btn">📢 Broadcast Email</button>
+          <button class="btn btn-export"    id="export-csv-btn">Export to CSV</button>
+        </div>
       </header>
 
       <div style="margin-bottom: 1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
-        <input type="text" id="search-filter" placeholder="Search by name or email..." style="padding:0.5rem; width: 260px; border:1px solid var(--border-color); border-radius:4px;">
-        <select id="event-filter" style="padding:0.5rem 0.75rem; border:1px solid var(--border-color); border-radius:4px; min-width:220px; font-size:0.9rem; background:var(--card-bg); color:inherit;">
+        <input type="text" id="search-filter" placeholder="Search by name or email..."
+          style="padding:0.5rem; width: 260px; border:1px solid var(--border-color); border-radius:4px;">
+        <select id="event-filter"
+          style="padding:0.5rem 0.75rem; border:1px solid var(--border-color); border-radius:4px; min-width:220px; font-size:0.9rem; background:var(--card-bg); color:inherit;">
           <option value="">All Events</option>
         </select>
       </div>
@@ -71,6 +148,69 @@
       </div>
     </main>
   </div>
+
+  <!-- ── Broadcast Email Modal ─────────────────────────────────────────────── -->
+  <div class="modal" id="broadcast-modal">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>📢 Broadcast Email</h2>
+        <button type="button" class="modal-close-x" id="close-broadcast-btn" title="Close">✕</button>
+      </div>
+
+      <!-- Info banner -->
+      <div class="broadcast-info">
+        <strong>📌 Smart Deduplication Enabled</strong>
+        This sends one email per person — users who registered for multiple events receive exactly
+        <strong>one</strong> copy. Only confirmed (SUCCESS) registrants are targeted.
+      </div>
+
+      <!-- Live recipient count stats -->
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-num" id="stat-unique">—</div>
+          <div class="stat-lbl">Unique Recipients</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-total">—</div>
+          <div class="stat-lbl">Total Registrations</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-dupes">—</div>
+          <div class="stat-lbl">Duplicates Skipped</div>
+        </div>
+      </div>
+
+      <!-- Compose form -->
+      <div id="broadcast-form">
+        <div class="form-group">
+          <label for="broadcast-subject">Email Subject *</label>
+          <input type="text" id="broadcast-subject" placeholder="e.g. 🎉 Exciting News from Yuvaverse!">
+        </div>
+        <div class="form-group">
+          <label for="broadcast-message">Message *</label>
+          <textarea id="broadcast-message" placeholder="Write your announcement here..."></textarea>
+        </div>
+        <button type="button" id="broadcast-send-btn">
+          📨 Send Broadcast
+        </button>
+      </div>
+
+      <!-- Success result (shown after send) -->
+      <div class="result-card" id="result-card">
+        <div class="result-icon">✅</div>
+        <div class="result-title">Broadcast Sent Successfully!</div>
+        <div class="result-stats">
+          <div class="rs"><strong id="res-sent">0</strong> Emails Sent</div>
+          <div class="rs"><strong id="res-failed" style="color:#dc2626;">0</strong> Failed</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
 
   <script type="module" src="/js/admin/registrations.js"></script>
 </body>

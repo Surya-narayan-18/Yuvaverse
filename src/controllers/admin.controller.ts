@@ -296,3 +296,59 @@ export const sendEventAnnouncement = async (req: Request, res: Response) => {
     return sendError(res, 'Error sending announcement', 500);
   }
 };
+
+// --- GLOBAL BROADCAST EMAIL (deduped across ALL registrants) ---
+export const broadcastEmail = async (req: Request, res: Response) => {
+  try {
+    const { subject, message } = req.body as { subject?: string; message?: string };
+
+    if (!subject?.trim() || !message?.trim()) {
+      return sendError(res, 'Subject and message are required', 400);
+    }
+
+    // Fetch unique emails at the DB level using Prisma's distinct — most efficient approach.
+    // Only SUCCESS registrations so we target confirmed attendees.
+    const uniqueRegistrants = await prisma.registration.findMany({
+      where:  { status: 'SUCCESS' },
+      select: { studentEmail: true, studentName: true },
+      distinct: ['studentEmail'],
+      orderBy: { createdAt: 'asc' }, // keep earliest name for a given email
+    });
+
+    if (uniqueRegistrants.length === 0) {
+      return sendError(res, 'No confirmed registrants found across all events', 404);
+    }
+
+    let emailsSent = 0;
+    const failedEmails: string[] = [];
+
+    for (const reg of uniqueRegistrants) {
+      try {
+        await sendAnnouncementEmail({
+          toEmail:    reg.studentEmail,
+          studentName: reg.studentName,
+          eventTitle: 'Yuvaverse Events',   // generic label for broadcast
+          subject:    subject.trim(),
+          message:    message.trim(),
+        });
+        emailsSent++;
+      } catch (err) {
+        console.error(`Broadcast failed for ${reg.studentEmail}:`, err);
+        failedEmails.push(reg.studentEmail);
+      }
+    }
+
+    return sendSuccess(
+      res,
+      {
+        emailsSent,
+        failed:            failedEmails.length,
+        uniqueRecipients:  uniqueRegistrants.length,
+      },
+      `Broadcast sent to ${emailsSent} unique registrant(s).`,
+    );
+  } catch (error) {
+    console.error('Broadcast email error:', error);
+    return sendError(res, 'Error sending broadcast', 500);
+  }
+};
