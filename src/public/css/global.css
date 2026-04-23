@@ -560,32 +560,32 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
   display: block;
 }
 .hero__photo-card--main {
-  width: 44%;
+  width: 48%;
   aspect-ratio: 1/1;
-  top: 4%; right: 2%;
+  top: 0; right: 0;
   z-index: 2;
   border-radius: 18px;
-  transform: rotate(2deg);
+  transform: rotate(1.5deg);
 }
 .hero__photo-card--mid {
-  width: 44%;
+  width: 45%;
   aspect-ratio: 1/1;
-  bottom: 2%; left: 28%;
+  bottom: 0; left: 22%;
   z-index: 3;
   border-radius: 18px;
-  transform: rotate(-1.5deg);
+  transform: rotate(-3deg);
 }
 .hero__photo-card--side {
-  width: 44%;
+  width: 41%;
   aspect-ratio: 1/1;
-  top: 4%; left: 2%;
+  top: 8%; left: 1%;
   z-index: 1;
   border-radius: 18px;
-  transform: rotate(-2deg);
+  transform: rotate(-4.5deg);
 }
-.hero__photo-card--main:hover { transform: rotate(2deg) translateY(-5px) scale(1.02); }
-.hero__photo-card--mid:hover   { transform: rotate(-1.5deg) translateY(-5px) scale(1.02); }
-.hero__photo-card--side:hover  { transform: rotate(-2deg) translateY(-5px) scale(1.02); }
+.hero__photo-card--main:hover { transform: rotate(1.5deg) translateY(-5px) scale(1.02); }
+.hero__photo-card--mid:hover   { transform: rotate(-3deg) translateY(-5px) scale(1.02); }
+.hero__photo-card--side:hover  { transform: rotate(-4.5deg) translateY(-5px) scale(1.02); }
 
 /* Floating label chips on photos */
 .hero__float-label {
@@ -628,24 +628,23 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
   font-weight: 500;
 }
 /* Label positions */
-/* Memories — floats at top-center above the collage */
+/* Memories — top area, shifted left of centre */
 .hero__float-label--memories {
-  top: -18px; left: 50%;
-  transform: translateX(-50%);
+  top: -16px; left: 28%;
   z-index: 12;
 }
 .hero__float-label--memories .fl-icon { background: rgba(108,99,255,0.15); }
 .hero__float-label--memories .fl-icon svg { stroke: var(--clr-accent); }
-/* Ideas — bottom-left, below mid card */
+/* Ideas — bottom-left, sits lower */
 .hero__float-label--ideas {
-  bottom: -18px; left: 4%;
+  bottom: -22px; left: 3%;
   z-index: 12;
 }
 .hero__float-label--ideas .fl-icon { background: rgba(239,68,68,0.12); }
 .hero__float-label--ideas .fl-icon svg { stroke: #ef4444; }
-/* Connections — bottom-right */
+/* Connections — bottom-right, slightly higher than Ideas */
 .hero__float-label--connections {
-  bottom: -18px; right: 4%;
+  bottom: -12px; right: 2%;
   z-index: 12;
 }
 .hero__float-label--connections .fl-icon { background: rgba(34,197,94,0.12); }
