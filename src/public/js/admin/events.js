@@ -110,6 +110,18 @@ function openEditModal(ev) {
   document.getElementById('ev-max-team').value = String(ev.maxTeamSize ?? 1);
   document.getElementById('ev-max-regs').value = ev.maxRegistrations != null ? String(ev.maxRegistrations) : '';
 
+  // Registration deadline — convert ISO to datetime-local (YYYY-MM-DDTHH:MM)
+  const deadlineEl = document.getElementById('ev-reg-deadline');
+  if (deadlineEl) {
+    if (ev.registrationDeadline) {
+      const dd  = new Date(ev.registrationDeadline);
+      const pad = (n) => String(n).padStart(2, '0');
+      deadlineEl.value = `${dd.getFullYear()}-${pad(dd.getMonth()+1)}-${pad(dd.getDate())}T${pad(dd.getHours())}:${pad(dd.getMinutes())}`;
+    } else {
+      deadlineEl.value = '';
+    }
+  }
+
   // datetime-local format → YYYY-MM-DDTHH:MM
   if (ev.date) {
     const d   = new Date(ev.date);
@@ -209,9 +221,10 @@ form.addEventListener('submit', async (e) => {
   fd.append('price',        document.getElementById('ev-price').value);
   fd.append('customFields', JSON.stringify(customFields));
   // New group registration fields
-  fd.append('eventType',       document.getElementById('ev-type').value);
-  fd.append('maxTeamSize',     document.getElementById('ev-max-team').value);
-  fd.append('maxRegistrations', document.getElementById('ev-max-regs').value);
+  fd.append('eventType',            document.getElementById('ev-type').value);
+  fd.append('maxTeamSize',          document.getElementById('ev-max-team').value);
+  fd.append('maxRegistrations',     document.getElementById('ev-max-regs').value);
+  fd.append('registrationDeadline', document.getElementById('ev-reg-deadline')?.value ?? '');
   const bannerFile = bannerInput.files?.[0];
   if (bannerFile) fd.append('banner', bannerFile);
 
@@ -339,6 +352,8 @@ async function loadEvents() {
         statusLabel = 'Completed'; statusColor = '#f3f4f6;color:#6b7280';
       } else if (ev.maxRegistrations != null && ev.currentRegistrations >= ev.maxRegistrations) {
         statusLabel = 'Full'; statusColor = '#fee2e2;color:#991b1b';
+      } else if (ev.registrationDeadline && new Date(ev.registrationDeadline) < now) {
+        statusLabel = 'Reg. Closed'; statusColor = '#fef3c7;color:#92400e';
       } else {
         statusLabel = 'Open'; statusColor = '#d1fae5;color:#065f46';
       }

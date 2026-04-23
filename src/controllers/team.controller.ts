@@ -51,9 +51,12 @@ export async function createTeamOrder(req: Request, res: Response): Promise<void
     return;
   }
 
-  // 3. Deadline check — event date must be in the future
-  if (new Date(event.date) < new Date()) {
-    sendError(res, 'This event has already passed.', 400);
+  // 3. Deadline check — use registrationDeadline if set, otherwise event date
+  const closingTime = event.registrationDeadline ?? event.date;
+  if (new Date(closingTime) < new Date()) {
+    sendError(res, event.registrationDeadline
+      ? 'Registrations for this event have closed.'
+      : 'This event has already passed.', 400);
     return;
   }
 

@@ -255,8 +255,9 @@
         <!-- Group Registration Settings -->
         <div style="background:#f9fafb;border:1px dashed #d1d5db;border-radius:8px;padding:1rem;margin-bottom:0.5rem;">
           <h4 style="margin:0 0 0.75rem;font-size:0.85rem;color:#374151;">🏆 Event Settings</h4>
+          <!-- Row 1: type / team size / max registrations -->
           <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-            <div class="form-group" style="flex:1;min-width:140px;margin-bottom:0;">
+            <div class="form-group" style="flex:1;min-width:140px;margin-bottom:0.75rem;">
               <label for="ev-type">Event Type</label>
               <select id="ev-type" name="eventType">
                 <option value="">— Select —</option>
@@ -267,14 +268,22 @@
                 <option value="Meetup">Meetup</option>
               </select>
             </div>
-            <div class="form-group" style="flex:1;min-width:120px;margin-bottom:0;">
+            <div class="form-group" style="flex:1;min-width:120px;margin-bottom:0.75rem;">
               <label for="ev-max-team">Max Team Size</label>
               <input type="number" id="ev-max-team" name="maxTeamSize" value="1" min="1" max="20" placeholder="1 = individual">
             </div>
-            <div class="form-group" style="flex:1;min-width:120px;margin-bottom:0;">
+            <div class="form-group" style="flex:1;min-width:120px;margin-bottom:0.75rem;">
               <label for="ev-max-regs">Max Registrations</label>
               <input type="number" id="ev-max-regs" name="maxRegistrations" min="1" placeholder="Leave blank = unlimited">
             </div>
+          </div>
+          <!-- Row 2: registration closing date -->
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="ev-reg-deadline" style="display:flex;align-items:center;gap:.4rem;">
+              📅 Registration Closing Date &amp; Time
+              <span style="font-size:0.78rem;color:#9ca3af;font-weight:400;">(leave blank = closes when event starts)</span>
+            </label>
+            <input type="datetime-local" id="ev-reg-deadline" name="registrationDeadline">
           </div>
         </div>
 

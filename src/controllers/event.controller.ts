@@ -35,17 +35,21 @@ export async function listEvents(req: Request, res: Response): Promise<void> {
 
   const eventTypeWhere = eventType ? { eventType } : {};
 
-  // Use raw SQL to get IDs of events that are full (field-to-field comparison not supported in Prisma ORM)
-  const fullEventIds: { id: string }[] = await prisma.$queryRaw`
+  // Use raw SQL to get IDs of events that should be hidden:
+  //   - full (currentRegistrations >= maxRegistrations)
+  //   - registration deadline passed (registrationDeadline < now)
+  const hiddenEventIds: { id: string }[] = await prisma.$queryRaw`
     SELECT id FROM events
-    WHERE "maxRegistrations" IS NOT NULL
-      AND "currentRegistrations" >= "maxRegistrations"
+    WHERE
+      ("maxRegistrations" IS NOT NULL AND "currentRegistrations" >= "maxRegistrations")
+      OR
+      ("registrationDeadline" IS NOT NULL AND "registrationDeadline" < NOW())
   `;
-  const fullIds = fullEventIds.map((r) => r.id);
+  const hiddenIds = hiddenEventIds.map((r) => r.id);
 
   const where = {
-    date: { gte: now },                                         // hide past events
-    ...(fullIds.length > 0 ? { id: { notIn: fullIds } } : {}), // hide full events
+    date: { gte: now },                                               // hide past events
+    ...(hiddenIds.length > 0 ? { id: { notIn: hiddenIds } } : {}),   // hide full/deadline-passed events
     ...searchWhere,
     ...eventTypeWhere,
   };
@@ -75,6 +79,7 @@ export async function listEvents(req: Request, res: Response): Promise<void> {
         maxTeamSize: true,
         maxRegistrations: true,
         currentRegistrations: true,
+        registrationDeadline: true,
         createdAt: true,
         _count: { select: { registrations: true } },
       },
