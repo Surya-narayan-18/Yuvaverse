@@ -50,7 +50,6 @@
 
 <main class="main-content">
 
-
 <main style="padding-top:calc(var(--navbar-h) + 2.5rem); padding-bottom:5rem;" id="eventContent">
   <div class="container">
     <a href="/events.html" class="btn btn--ghost btn--sm" style="margin-bottom:2rem;display:inline-flex">
@@ -87,7 +86,9 @@
 
       <!-- ── RIGHT: Registration Card ──────────────────────── -->
       <aside>
-        <div class="register-card">
+
+        <!-- ─ INDIVIDUAL REGISTRATION (default; hidden for team events) ─ -->
+        <div class="register-card" id="individualForm">
           <div class="register-card__price">
             <span id="registerPrice">—</span>
             <span> / person</span>
@@ -119,12 +120,64 @@
             🔒 Secure registration via Yuvaverse. Your College ID will be verified at the event.
           </p>
         </div>
+
+        <!-- ─ TEAM REGISTRATION (shown only for team events) ─ -->
+        <div class="register-card" id="teamForm" style="display:none;">
+          <div class="register-card__price">
+            <span id="teamRegisterPrice">—</span>
+            <span> / team</span>
+          </div>
+          <p id="teamSizeHint" style="font-size:0.82rem;color:var(--clr-text-muted);margin-bottom:1.25rem;"></p>
+
+          <!-- Team Name -->
+          <div class="form-group">
+            <label class="form-label" for="teamName">Team Name <span aria-hidden="true">*</span></label>
+            <input class="form-input" id="teamName" type="text" placeholder="e.g. Team Phoenix" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+
+          <!-- Leader section -->
+          <p style="font-size:0.8rem;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">👑 Team Leader (you)</p>
+
+          <div class="form-group">
+            <label class="form-label" for="leaderName">Leader Name <span aria-hidden="true">*</span></label>
+            <input class="form-input" id="leaderName" type="text" placeholder="Your full name" autocomplete="name" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="leaderEmail">Leader Email <span aria-hidden="true">*</span></label>
+            <input class="form-input" id="leaderEmail" type="email" placeholder="Your email" autocomplete="email" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="leaderPhone">Leader Phone <span aria-hidden="true">*</span></label>
+            <input class="form-input" id="leaderPhone" type="tel" placeholder="10-digit mobile number" autocomplete="tel" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+
+          <!-- Dynamic member rows -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:1rem 0 .5rem;">
+            <p style="font-size:0.8rem;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:.06em;margin:0;">👥 Additional Members</p>
+            <button type="button" class="btn btn--ghost btn--sm" id="addMemberBtn" style="padding:.3rem .75rem;font-size:.8rem;">+ Add</button>
+          </div>
+          <div id="teamMembersContainer">
+            <!-- member rows injected by JS -->
+          </div>
+
+          <button class="btn btn--accent btn--full" id="teamRegisterBtn" style="margin-top:1rem">
+            Register Team →
+          </button>
+
+          <p style="font-size:.78rem;color:var(--clr-text-subtle);margin-top:1rem;text-align:center;line-height:1.5">
+            🔒 Confirmation email will be sent to the team leader only.
+          </p>
+        </div>
+
       </aside>
 
     </div><!-- /event-detail-layout -->
   </div>
 </main>
-
 
 </main>
 

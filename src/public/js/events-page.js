@@ -3,16 +3,18 @@
 // YUVAVERSE — EVENTS-PAGE.JS
 // All-events page: categories, sort, view toggle, paginated grid
 // API shape: { events: [{id,title,description,date,venue,price,
-//              imageUrl,bannerUrl,_count:{registrations}}],
+//              imageUrl,bannerUrl,eventType,maxTeamSize,
+//              currentRegistrations,maxRegistrations,
+//              _count:{registrations}}],
 //              pagination: {total,totalPages,currentPage,limit} }
 // ================================================================
 (function () {
 
-  let currentPage   = 1;
-  let currentSearch = '';
-  let currentCat    = '';
-  let currentSort   = 'latest';
-  let searchTimer   = null;
+  let currentPage     = 1;
+  let currentSearch   = '';
+  let currentCat      = '';       // maps to eventType filter param
+  let currentSort     = 'newest'; // newest | oldest | name
+  let searchTimer     = null;
   const LIMIT = 9;
 
   // ── Helpers ────────────────────────────────────────────────────
@@ -64,15 +66,36 @@
     return GRADIENTS[n % GRADIENTS.length];
   }
 
+  // ── Event type badge color map ───────────────────────────────────
+  const TYPE_COLORS = {
+    Workshop:    { bg: '#ede9fe', color: '#6d28d9' },
+    Hackathon:   { bg: '#dbeafe', color: '#1e40af' },
+    Competition: { bg: '#fce7f3', color: '#be185d' },
+    Seminar:     { bg: '#d1fae5', color: '#065f46' },
+    Meetup:      { bg: '#fef3c7', color: '#92400e' },
+  };
+
   // ── Build a single card ─────────────────────────────────────────
   function buildCard(ev) {
-    const isFree  = ev.price === 0 || ev.price === '0' || ev.price == null;
-    const price   = fmtPrice(ev.price);
-    const dateStr = fmtDate(ev.date);
-    const timeStr = fmtTime(ev.date);
-    const going   = ev._count?.registrations ?? 0;
-    const imgSrc  = ev.bannerUrl || ev.imageUrl || '';
-    const grad    = pickGradient(ev.title);
+    const isFree    = ev.price === 0 || ev.price === '0' || ev.price == null;
+    const price     = fmtPrice(ev.price);
+    const dateStr   = fmtDate(ev.date);
+    const timeStr   = fmtTime(ev.date);
+    const going     = ev._count?.registrations ?? 0;
+    const imgSrc    = ev.bannerUrl || ev.imageUrl || '';
+    const grad      = pickGradient(ev.title);
+    const isTeam    = ev.maxTeamSize > 1;
+
+    // Event type badge
+    const tc = ev.eventType && TYPE_COLORS[ev.eventType];
+    const typeBadge = ev.eventType
+      ? `<span class="ev-card__badge ev-card__badge--type" style="background:${tc?.bg ?? '#f3f4f6'};color:${tc?.color ?? '#374151'};">${ev.eventType}</span>`
+      : '';
+
+    // Team badge
+    const teamBadge = isTeam
+      ? `<span class="ev-card__badge ev-card__badge--team" style="background:#6d28d9;color:#fff;">👥 Team ≤${ev.maxTeamSize}</span>`
+      : '';
 
     return `
 <div class="ev-card" role="listitem">
@@ -80,6 +103,8 @@
     ${imgSrc ? `<img src="${imgSrc}" alt="${ev.title}" loading="lazy"/>` : ''}
     <div class="ev-card__badges">
       <span class="ev-card__badge ${isFree ? 'ev-card__badge--free' : 'ev-card__badge--paid'}">${price}</span>
+      ${typeBadge}
+      ${teamBadge}
     </div>
     <button class="ev-card__bookmark" aria-label="Bookmark event">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
@@ -108,7 +133,7 @@
         <span class="ev-card__going">${going > 0 ? `${going}+ going` : 'Be the first!'}</span>
       </div>
       <a href="/event-detail.html?id=${ev.id}" class="ev-card__register" id="registerBtn-${ev.id}">
-        Register Now →
+        ${isTeam ? 'Register Team →' : 'Register Now →'}
       </a>
     </div>
   </div>
@@ -150,8 +175,10 @@
     const query = new URLSearchParams({
       page:  String(currentPage),
       limit: String(LIMIT),
+      sort:  currentSort,
     });
     if (currentSearch) query.set('search', currentSearch);
+    if (currentCat)    query.set('eventType', currentCat);  // server-side filter
 
     let res;
     try {
@@ -167,23 +194,7 @@
     }
 
     const { events, pagination: pg } = res.data;
-
-    // Client-side category filter (server doesn't support category param yet)
-    let filtered = events || [];
-    if (currentCat) {
-      filtered = filtered.filter(ev => {
-        const haystack = `${ev.title} ${ev.description} ${ev.venue}`.toLowerCase();
-        return haystack.includes(currentCat.toLowerCase());
-      });
-    }
-
-    // Client-side sort
-    if (currentSort === 'oldest') {
-      filtered = [...filtered].sort((a, b) => new Date(a.date) - new Date(b.date));
-    } else if (currentSort === 'name') {
-      filtered = [...filtered].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-    }
-    // 'latest' is default from API (date: asc means soonest first which is fine)
+    const filtered = events || [];
 
     if (!filtered.length) {
       grid.innerHTML = buildEmpty(
@@ -228,7 +239,7 @@
     });
   }
 
-  // ── Category pills ──────────────────────────────────────────────
+  // ── Category pills — now sends eventType to server ──────────────
   function initCategories() {
     document.querySelectorAll('.ev-cat-pill').forEach(pill => {
       pill.addEventListener('click', () => {
@@ -269,10 +280,11 @@
     });
   }
 
-  // ── Sort ────────────────────────────────────────────────────────
+  // ── Sort — sends to server ───────────────────────────────────────
   function initSort() {
     const sel = document.getElementById('sortSelect');
     if (!sel) return;
+    sel.value = currentSort;
     sel.addEventListener('change', () => {
       currentSort = sel.value;
       currentPage = 1;

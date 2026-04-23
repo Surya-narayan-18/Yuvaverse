@@ -14,6 +14,7 @@ import registrationsRouter from './routes/registrations.routes';
 import applicationsRouter from './routes/applications.routes';
 import contactRouter from './routes/contact.routes';
 import adminRouter from './routes/admin.routes';
+import teamsRouter from './routes/teams.routes';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // App Factory
@@ -71,6 +72,7 @@ app.get('/api/health', (_req: Request, res: Response): void => {
 app.use('/api/auth', authRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/registrations', registrationsRouter);
+app.use('/api/teams', teamsRouter);
 app.use('/api/applications', applicationsRouter);
 app.use('/api/contact', contactRouter);
 app.use('/api/admin', adminRouter);

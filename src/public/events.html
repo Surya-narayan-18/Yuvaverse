@@ -95,27 +95,28 @@
       </button>
       <button class="ev-cat-pill" data-cat="Workshop" role="tab" aria-selected="false" id="catWorkshop">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-        Workshops
+        Workshop
       </button>
-      <button class="ev-cat-pill" data-cat="Cultural" role="tab" aria-selected="false" id="catCultural">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2a9 9 0 1 0 9 9"/><path d="M12 7v5l3 3"/><circle cx="18.5" cy="5.5" r="2.5"/></svg>
-        Cultural
-      </button>
-      <button class="ev-cat-pill" data-cat="Tech" role="tab" aria-selected="false" id="catTech">
+      <button class="ev-cat-pill" data-cat="Hackathon" role="tab" aria-selected="false" id="catHackathon">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-        Tech
-      </button>
-      <button class="ev-cat-pill" data-cat="Networking" role="tab" aria-selected="false" id="catNetworking">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Networking
+        Hackathon
       </button>
       <button class="ev-cat-pill" data-cat="Competition" role="tab" aria-selected="false" id="catCompetition">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-        Competitions
+        Competition
+      </button>
+      <button class="ev-cat-pill" data-cat="Seminar" role="tab" aria-selected="false" id="catSeminar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Seminar
+      </button>
+      <button class="ev-cat-pill" data-cat="Meetup" role="tab" aria-selected="false" id="catMeetup">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2a9 9 0 1 0 9 9"/><path d="M12 7v5l3 3"/><circle cx="18.5" cy="5.5" r="2.5"/></svg>
+        Meetup
       </button>
     </div>
   </div>
 </section>
+
 
 <!-- ── EVENTS LISTING ──────────────────────────────────────────── -->
 <section class="ev-listing section--sm" aria-label="Events listing">
@@ -127,9 +128,9 @@
         <div class="ev-sort">
           <label for="sortSelect" class="ev-sort__label">Sort by:</label>
           <select id="sortSelect" class="ev-sort__select">
-            <option value="latest">Latest</option>
-            <option value="oldest">Oldest</option>
-            <option value="name">Name</option>
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="name">Name (A–Z)</option>
           </select>
         </div>
         <div class="ev-view-toggle" role="group" aria-label="View mode">

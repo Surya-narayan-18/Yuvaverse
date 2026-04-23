@@ -63,7 +63,12 @@ export const getDashboardAnalytics = async (_req: Request, res: Response) => {
 // --- EVENTS ---
 export const getAdminEvents = async (_req: Request, res: Response) => {
   try {
-    const events = await prisma.event.findMany({ orderBy: { createdAt: 'desc' } });
+    const events = await prisma.event.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: { select: { registrations: true, teams: true } },
+      },
+    });
     return sendSuccess(res, events);
   } catch (error) {
     return sendError(res, 'Internal Server Error', 500);
@@ -72,7 +77,10 @@ export const getAdminEvents = async (_req: Request, res: Response) => {
 
 export const createAdminEvent = async (req: Request, res: Response) => {
   try {
-    const { title, description, date, venue, price, imageUrl, customFields } = req.body;
+    const {
+      title, description, date, venue, price, imageUrl, customFields,
+      eventType, maxTeamSize, maxRegistrations, registrationDeadline,
+    } = req.body;
 
     // multer-storage-cloudinary places the CDN URL at req.file.path
     const bannerUrl = (req.file as (Express.Multer.File & { path: string }) | undefined)?.path ?? null;
@@ -90,6 +98,10 @@ export const createAdminEvent = async (req: Request, res: Response) => {
         imageUrl: imageUrl ?? null,
         bannerUrl,
         customFields: parsedCustomFields,
+        eventType: eventType || null,
+        maxTeamSize: maxTeamSize ? Number(maxTeamSize) : 1,
+        maxRegistrations: maxRegistrations ? Number(maxRegistrations) : null,
+        registrationDeadline: registrationDeadline ? new Date(registrationDeadline) : null,
       }
     });
     return sendSuccess(res, newEvent);
@@ -102,7 +114,12 @@ export const createAdminEvent = async (req: Request, res: Response) => {
 export const updateAdminEvent = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const body = req.body as UpdateEventBody;
+    const body = req.body as UpdateEventBody & {
+      eventType?: string;
+      maxTeamSize?: string | number;
+      maxRegistrations?: string | number;
+      registrationDeadline?: string;
+    };
 
     const existing = await prisma.event.findUnique({ where: { id } });
     if (!existing) {
@@ -118,6 +135,10 @@ export const updateAdminEvent = async (req: Request, res: Response) => {
       price?: number;
       imageUrl?: string | null;
       bannerUrl?: string | null;
+      eventType?: string | null;
+      maxTeamSize?: number;
+      maxRegistrations?: number | null;
+      registrationDeadline?: Date | null;
     } = {};
 
     if (body.title       !== undefined) data.title       = body.title;
@@ -126,6 +147,12 @@ export const updateAdminEvent = async (req: Request, res: Response) => {
     if (body.venue       !== undefined) data.venue       = body.venue;
     if (body.price       !== undefined) data.price       = Number(body.price);
     if ('imageUrl' in body)             data.imageUrl    = body.imageUrl ?? null;
+    if (body.eventType   !== undefined) data.eventType   = body.eventType || null;
+    if (body.maxTeamSize !== undefined) data.maxTeamSize = Number(body.maxTeamSize);
+    if (body.maxRegistrations !== undefined)
+      data.maxRegistrations = body.maxRegistrations ? Number(body.maxRegistrations) : null;
+    if (body.registrationDeadline !== undefined)
+      data.registrationDeadline = body.registrationDeadline ? new Date(body.registrationDeadline) : null;
 
     // multer-storage-cloudinary puts the CDN URL at req.file.path
     const uploaded = (req.file as (Express.Multer.File & { path: string }) | undefined);

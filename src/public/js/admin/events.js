@@ -105,6 +105,11 @@ function openEditModal(ev) {
   document.getElementById('ev-venue').value  = ev.venue;
   document.getElementById('ev-price').value  = String(ev.price);
 
+  // New fields
+  document.getElementById('ev-type').value     = ev.eventType || '';
+  document.getElementById('ev-max-team').value = String(ev.maxTeamSize ?? 1);
+  document.getElementById('ev-max-regs').value = ev.maxRegistrations != null ? String(ev.maxRegistrations) : '';
+
   // datetime-local format → YYYY-MM-DDTHH:MM
   if (ev.date) {
     const d   = new Date(ev.date);
@@ -203,6 +208,10 @@ form.addEventListener('submit', async (e) => {
   fd.append('venue',        document.getElementById('ev-venue').value);
   fd.append('price',        document.getElementById('ev-price').value);
   fd.append('customFields', JSON.stringify(customFields));
+  // New group registration fields
+  fd.append('eventType',       document.getElementById('ev-type').value);
+  fd.append('maxTeamSize',     document.getElementById('ev-max-team').value);
+  fd.append('maxRegistrations', document.getElementById('ev-max-regs').value);
   const bannerFile = bannerInput.files?.[0];
   if (bannerFile) fd.append('banner', bannerFile);
 
@@ -298,6 +307,7 @@ async function loadEvents() {
     }
 
     json.data.forEach(ev => {
+      const now         = new Date();
       const date        = new Date(ev.date).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
       const fieldsCount = ev.customFields ? ev.customFields.length : 0;
       const priceLabel  = ev.price === 0
@@ -308,6 +318,32 @@ async function loadEvents() {
         ? `<img class="event-banner-thumb" src="${thumbSrc}" alt="Banner">`
         : `<div class="no-banner">No banner</div>`;
 
+      // Event Type badge
+      const typeColors = { Workshop:'#ede9fe;color:#6d28d9', Hackathon:'#dbeafe;color:#1e40af', Competition:'#fce7f3;color:#be185d', Seminar:'#d1fae5;color:#065f46', Meetup:'#fef3c7;color:#92400e' };
+      const typeStyle = ev.eventType ? (typeColors[ev.eventType] || '#f3f4f6;color:#374151') : '#f3f4f6;color:#9ca3af';
+      const typeLabel = `<span style="background:${typeStyle.split(';')[0]};${typeStyle.split(';')[1] || ''};padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">${ev.eventType || '—'}</span>`;
+
+      // Team badge
+      const teamBadge = (ev.maxTeamSize > 1)
+        ? `<span style="background:#ede9fe;color:#6d28d9;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">👥 up to ${ev.maxTeamSize}</span>`
+        : `<span style="background:#f3f4f6;color:#6b7280;padding:2px 8px;border-radius:12px;font-size:0.75rem;">Solo</span>`;
+
+      // Slots badge
+      const slotLabel = ev.maxRegistrations != null
+        ? `${ev.currentRegistrations}/${ev.maxRegistrations}`
+        : `${ev.currentRegistrations}/∞`;
+
+      // Status badge
+      let statusLabel, statusColor;
+      if (new Date(ev.date) < now) {
+        statusLabel = 'Completed'; statusColor = '#f3f4f6;color:#6b7280';
+      } else if (ev.maxRegistrations != null && ev.currentRegistrations >= ev.maxRegistrations) {
+        statusLabel = 'Full'; statusColor = '#fee2e2;color:#991b1b';
+      } else {
+        statusLabel = 'Open'; statusColor = '#d1fae5;color:#065f46';
+      }
+      const statusBadge = `<span style="background:${statusColor.split(';')[0]};${statusColor.split(';')[1] || ''};padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">${statusLabel}</span>`;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${thumbHtml}</td>
@@ -315,6 +351,10 @@ async function loadEvents() {
         <td><strong>${ev.title}</strong></td>
         <td>${ev.venue}</td>
         <td>${priceLabel}</td>
+        <td>${typeLabel}</td>
+        <td>${teamBadge}</td>
+        <td style="font-size:0.8rem;">${slotLabel}</td>
+        <td>${statusBadge}</td>
         <td><span style="background:#e5e7eb;padding:2px 8px;border-radius:12px;font-size:0.75rem;">${fieldsCount} Q</span></td>
         <td>
           <div class="action-cell">

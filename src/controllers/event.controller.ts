@@ -17,11 +17,13 @@ interface ListEventsQuery {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function listEvents(req: Request, res: Response): Promise<void> {
-  const { page = 1, limit = 9, search } = req.query as unknown as ListEventsQuery;
+  const { page = 1, limit = 9, search, sort, eventType } = req.query as unknown as ListEventsQuery & { sort?: string; eventType?: string };
 
   const skip = (page - 1) * limit;
+  const now = new Date();
 
-  const where = search
+  // Build search filter
+  const searchWhere = search
     ? {
         OR: [
           { title: { contains: search, mode: 'insensitive' as const } },
@@ -31,10 +33,33 @@ export async function listEvents(req: Request, res: Response): Promise<void> {
       }
     : {};
 
+  const eventTypeWhere = eventType ? { eventType } : {};
+
+  // Use raw SQL to get IDs of events that are full (field-to-field comparison not supported in Prisma ORM)
+  const fullEventIds: { id: string }[] = await prisma.$queryRaw`
+    SELECT id FROM events
+    WHERE "maxRegistrations" IS NOT NULL
+      AND "currentRegistrations" >= "maxRegistrations"
+  `;
+  const fullIds = fullEventIds.map((r) => r.id);
+
+  const where = {
+    date: { gte: now },                                         // hide past events
+    ...(fullIds.length > 0 ? { id: { notIn: fullIds } } : {}), // hide full events
+    ...searchWhere,
+    ...eventTypeWhere,
+  };
+
+  // Sort order
+  let orderBy: { date: 'asc' | 'desc' } | { title: 'asc' } = { date: 'asc' }; // soonest first (default = "newest upcoming")
+  if (sort === 'oldest') orderBy = { date: 'asc' };
+  else if (sort === 'newest') orderBy = { date: 'desc' };
+  else if (sort === 'name') orderBy = { title: 'asc' };
+
   const [events, total] = await Promise.all([
     prisma.event.findMany({
       where,
-      orderBy: { date: 'asc' },
+      orderBy,
       skip,
       take: limit,
       select: {
@@ -46,6 +71,10 @@ export async function listEvents(req: Request, res: Response): Promise<void> {
         price: true,
         imageUrl: true,
         bannerUrl: true,
+        eventType: true,
+        maxTeamSize: true,
+        maxRegistrations: true,
+        currentRegistrations: true,
         createdAt: true,
         _count: { select: { registrations: true } },
       },
@@ -67,6 +96,7 @@ export async function listEvents(req: Request, res: Response): Promise<void> {
     },
   });
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/events/:id  (public)

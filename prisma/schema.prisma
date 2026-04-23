@@ -61,11 +61,20 @@ model Event {
   imageUrl     String?
   bannerUrl    String?        // Cloudinary CDN URL for the event banner
   customFields Json?          // Array of required/optional dynamic questions per event
+
+  // ── Group registration fields (all optional / defaulted — backward compat) ──
+  eventType            String?   // Workshop | Hackathon | Competition | Seminar | Meetup
+  maxTeamSize          Int       @default(1)   // 1 = individual event; >1 = team event
+  maxRegistrations     Int?      // null = unlimited
+  currentRegistrations Int       @default(0)   // denormalized counter (teams for group, individuals for solo)
+  registrationDeadline DateTime? // optional custom deadline
+
   createdAt    DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
   // Relations
   registrations Registration[]
+  teams         Team[]
 
   @@map("events")
 }
@@ -91,6 +100,39 @@ model Registration {
   @@unique([eventId, collegeId])     // One registration per college ID per event
   @@index([studentEmail])
   @@map("registrations")
+}
+
+/// A team registration for a group event.
+model Team {
+  id                String     @id @default(cuid())
+  eventId           String
+  event             Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  teamName          String
+  leaderName        String
+  leaderEmail       String
+  leaderPhone       String
+  memberCount       Int        @default(1)
+  status            String    @default("PENDING") // PENDING | SUCCESS | FAILED
+  razorpayOrderId   String?    @unique
+  razorpayPaymentId String?    @unique
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  members TeamMember[]
+
+  @@index([leaderEmail])
+  @@map("teams")
+}
+
+/// An individual member of a team registration.
+model TeamMember {
+  id     String @id @default(cuid())
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  name   String
+  email  String
+
+  @@map("team_members")
 }
 
 /// A recruitment application submitted via the "Join Us" page.

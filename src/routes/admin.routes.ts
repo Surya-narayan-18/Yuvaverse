@@ -4,6 +4,7 @@ import {
   getAdminRegistrations, refundRegistration, getAdminApplications, updateApplicationStatus,
   deleteAdminEvent, sendEventAnnouncement, broadcastEmail
 } from '../controllers/admin.controller';
+import { getAdminTeams } from '../controllers/team.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
 import { uploadBanner } from '../middlewares/upload.middleware';
 import { Role } from '@prisma/client';
@@ -22,6 +23,8 @@ router.post('/events/:id/notify', authenticate, authorize(Role.ADMIN), sendEvent
 router.get('/registrations', authenticate, authorize(Role.ADMIN), getAdminRegistrations);
 router.post('/registrations/:id/refund', authenticate, authorize(Role.ADMIN), refundRegistration);
 router.post('/registrations/broadcast', authenticate, authorize(Role.ADMIN), broadcastEmail);
+
+router.get('/teams', authenticate, authorize(Role.ADMIN), getAdminTeams);
 
 router.get('/applications', authenticate, authorize(Role.ADMIN), getAdminApplications);
 router.patch('/applications/:id/status', authenticate, authorize(Role.ADMIN), updateApplicationStatus);
