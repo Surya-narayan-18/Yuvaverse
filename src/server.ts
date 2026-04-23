@@ -58,6 +58,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ─── Static Assets (Vanilla HTML/CSS/TS-compiled-JS frontend) ────────────────
 
 app.use(express.static(path.join(__dirname, '..', 'src', 'public')));
+app.use('/gallery', express.static(path.join(__dirname, '..', 'gallery')));
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <!-- Theme Initialization (Prevents FOUC) -->
+  <script>
+    (function(){
+      try {
+        var theme = localStorage.getItem('yuvaverse-theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Event Gallery — Yuvaverse</title>
+  <meta name="description" content="Relive the magic of Yuvaverse events. Browse our gallery of unforgettable campus moments."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="stylesheet" href="/css/global.css"/>
+  <style>
+    /* ── Gallery Hero ── */
+    .gallery-hero {
+      padding-block: 5rem 4rem;
+      background: linear-gradient(135deg, var(--clr-primary) 0%, #1e1b4b 100%);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .gallery-hero::before {
+      content: '';
+      position: absolute;
+      top: -20%; right: -10%;
+      width: 450px; height: 450px;
+      background: radial-gradient(circle, rgba(108,99,255,0.25) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .gallery-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -15%; left: -5%;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(168,139,255,0.18) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .gallery-hero__inner {
+      position: relative;
+      z-index: 1;
+    }
+    .gallery-hero__eyebrow {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #a78bfa;
+      background: rgba(108,99,255,0.2);
+      border: 1px solid rgba(108,99,255,0.4);
+      padding: 0.3rem 0.875rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+    .gallery-hero h1 { color: #fff; margin-bottom: 0.75rem; }
+    .gallery-hero p  { color: rgba(255,255,255,0.68); max-width: 480px; margin-inline: auto; }
+
+    /* ── Lightbox ── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 2rem;
+    }
+    .lightbox.lightbox--open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .lightbox__img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: 12px;
+      object-fit: contain;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+    .lightbox--open .lightbox__img { transform: scale(1); }
+    .lightbox__close {
+      position: absolute;
+      top: 1.25rem; right: 1.5rem;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      font-size: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lightbox__close:hover { background: rgba(255,255,255,0.22); }
+    .lightbox__caption {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: rgba(255,255,255,0.75);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container navbar__inner">
+    <a href="/" class="navbar__logo" aria-label="Yuvaverse Home">
+      <img src="/assets/logo_light.png" alt="Yuvaverse Logo" class="logo-img-light"/>
+      <img src="/assets/logo_dark.png" alt="Yuvaverse Logo" class="logo-img-dark"/>
+    </a>
+    <ul class="navbar__links" id="navLinks" role="list">
+      <li><a href="/"             class="nav-link" id="navHome">Home</a></li>
+      <li><a href="/events.html"  class="nav-link" id="navEvents">Events</a></li>
+      <li><a href="/about.html"   class="nav-link" id="navAbout">About</a></li>
+      <li><a href="/join.html"    class="nav-link" id="navJoin">Join Us</a></li>
+      <li><a href="/contact.html" class="nav-link" id="navContact">Contact</a></li>
+    </ul>
+    <div class="navbar__actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <a href="/events.html" class="btn btn--accent btn--sm">Explore Events</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<main class="main-content">
+
+  <!-- Hero Banner -->
+  <section class="gallery-hero">
+    <div class="container gallery-hero__inner">
+      <span class="gallery-hero__eyebrow">📸 Our Moments</span>
+      <h1>Event Gallery</h1>
+      <p>Snapshots of laughter, learning, and legacy — every event told in pixels.</p>
+    </div>
+  </section>
+
+  <!-- Gallery Grid -->
+  <section class="section" aria-label="Photo gallery">
+    <div class="container">
+
+      <div class="gallery-grid" id="galleryGrid">
+
+        <!-- Row 1 -->
+        <div class="gallery-item gallery-item--wide fade-up"
+             data-img="/gallery/IMG_5697.JPG.jpeg"
+             data-title="Colours of Yuvaverse"
+             data-sub="Cultural Night · 2024"
+             role="button" tabindex="0" aria-label="Open Colours of Yuvaverse photo">
+          <img src="/gallery/IMG_5697.JPG.jpeg" alt="Colours of Yuvaverse — cultural night" loading="eager"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Colours of Yuvaverse</p>
+            <p class="gallery-item__sub">Cultural Night · 2024</p>
+          </div>
+        </div>
+
+        <div class="gallery-item gallery-item--tall fade-up" style="animation-delay:80ms"
+             data-img="/gallery/IMG_1874.JPG.jpeg"
+             data-title="A Night of Innovation"
+             data-sub="Tech Summit · Main Stage"
+             role="button" tabindex="0" aria-label="Open Tech Summit photo">
+          <img src="/gallery/IMG_1874.JPG.jpeg" alt="Tech Summit — main stage" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">A Night of Innovation</p>
+            <p class="gallery-item__sub">Tech Summit · Main Stage</p>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="gallery-item fade-up" style="animation-delay:160ms"
+             data-img="/gallery/IMG_5698.JPG.jpeg"
+             data-title="On Stage &amp; Alive"
+             data-sub="Live Performance"
+             role="button" tabindex="0" aria-label="Open performance photo">
+          <img src="/gallery/IMG_5698.JPG.jpeg" alt="Live performance on stage" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">On Stage &amp; Alive</p>
+            <p class="gallery-item__sub">Live Performance</p>
+          </div>
+        </div>
+
+        <div class="gallery-item fade-up" style="animation-delay:240ms"
+             data-img="/gallery/IMG_1906.JPG.jpeg"
+             data-title="Building Bonds"
+             data-sub="Campus Connect Night"
+             role="button" tabindex="0" aria-label="Open Campus Connect photo">
+          <img src="/gallery/IMG_1906.JPG.jpeg" alt="Campus Connect Night — students bonding" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Building Bonds</p>
+            <p class="gallery-item__sub">Campus Connect Night</p>
+          </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="gallery-item gallery-item--wide fade-up" style="animation-delay:320ms"
+             data-img="/gallery/IMG_5699.JPG.jpeg"
+             data-title="Every Moment Counts"
+             data-sub="End-of-Year Celebration"
+             role="button" tabindex="0" aria-label="Open celebration photo">
+          <img src="/gallery/IMG_5699.JPG.jpeg" alt="End-of-Year Celebration" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Every Moment Counts</p>
+            <p class="gallery-item__sub">End-of-Year Celebration</p>
+          </div>
+        </div>
+
+        <div class="gallery-item gallery-item--tall fade-up" style="animation-delay:400ms"
+             data-img="/gallery/IMG_4931.JPG.jpeg"
+             data-title="The Crowd Goes Wild"
+             data-sub="Annual Fest · 2024"
+             role="button" tabindex="0" aria-label="Open annual fest crowd photo">
+          <img src="/gallery/IMG_4931.JPG.jpeg" alt="Annual Fest — crowd energy" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">The Crowd Goes Wild</p>
+            <p class="gallery-item__sub">Annual Fest · 2024</p>
+          </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="gallery-item fade-up" style="animation-delay:480ms"
+             data-img="/gallery/IMG_5704.JPG.jpeg"
+             data-title="Smiles &amp; Stories"
+             data-sub="Campus Life Moments"
+             role="button" tabindex="0" aria-label="Open campus life photo">
+          <img src="/gallery/IMG_5704.JPG.jpeg" alt="Campus life — smiles and stories" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Smiles &amp; Stories</p>
+            <p class="gallery-item__sub">Campus Life Moments</p>
+          </div>
+        </div>
+
+        <div class="gallery-item fade-up" style="animation-delay:560ms"
+             data-img="/gallery/IMG_5705.JPG.jpeg"
+             data-title="Connections That Matter"
+             data-sub="Networking &amp; Bonding"
+             role="button" tabindex="0" aria-label="Open networking photo">
+          <img src="/gallery/IMG_5705.JPG.jpeg" alt="Networking event — connections" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Connections That Matter</p>
+            <p class="gallery-item__sub">Networking &amp; Bonding</p>
+          </div>
+        </div>
+
+        <!-- Row 5 -->
+        <div class="gallery-item gallery-item--wide fade-up" style="animation-delay:640ms"
+             data-img="/gallery/IMG_6862.JPG.jpeg"
+             data-title="The Grand Closing Night"
+             data-sub="Grand Finale · 2024"
+             role="button" tabindex="0" aria-label="Open grand finale photo">
+          <img src="/gallery/IMG_6862.JPG.jpeg" alt="Grand Finale closing night" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">The Grand Closing Night</p>
+            <p class="gallery-item__sub">Grand Finale · 2024</p>
+          </div>
+        </div>
+
+        <div class="gallery-item fade-up" style="animation-delay:720ms"
+             data-img="/gallery/IMG_5711.JPG.jpeg"
+             data-title="Ideas That Inspire"
+             data-sub="Innovation Workshop"
+             role="button" tabindex="0" aria-label="Open innovation workshop photo">
+          <img src="/gallery/IMG_5711.JPG.jpeg" alt="Innovation Workshop — brainstorming ideas" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Ideas That Inspire</p>
+            <p class="gallery-item__sub">Innovation Workshop</p>
+          </div>
+        </div>
+
+        <div class="gallery-item fade-up" style="animation-delay:800ms"
+             data-img="/gallery/IMG_4855.JPG.jpeg"
+             data-title="Unforgettable Memories"
+             data-sub="Annual Fest Highlights"
+             role="button" tabindex="0" aria-label="Open annual fest highlights photo">
+          <img src="/gallery/IMG_4855.JPG.jpeg" alt="Annual Fest highlights" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Unforgettable Memories</p>
+            <p class="gallery-item__sub">Annual Fest Highlights</p>
+          </div>
+        </div>
+
+        <div class="gallery-item fade-up" style="animation-delay:880ms"
+             data-img="/gallery/IMG_1581.JPG.jpeg"
+             data-title="Energy &amp; Excitement"
+             data-sub="Campus Events"
+             role="button" tabindex="0" aria-label="Open campus energy photo">
+          <img src="/gallery/IMG_1581.JPG.jpeg" alt="Campus events — energy and excitement" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Energy &amp; Excitement</p>
+            <p class="gallery-item__sub">Campus Events</p>
+          </div>
+        </div>
+
+        <div class="gallery-item fade-up" style="animation-delay:960ms"
+             data-img="/gallery/IMG_1588.JPG.jpeg"
+             data-title="Lights &amp; Celebrations"
+             data-sub="Cultural Fest Night"
+             role="button" tabindex="0" aria-label="Open cultural fest photo">
+          <img src="/gallery/IMG_1588.JPG.jpeg" alt="Cultural Fest — lights and celebrations" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Lights &amp; Celebrations</p>
+            <p class="gallery-item__sub">Cultural Fest Night</p>
+          </div>
+        </div>
+
+        <div class="gallery-item fade-up" style="animation-delay:1040ms"
+             data-img="/gallery/IMG_2074.JPG.jpeg"
+             data-title="Learning Together"
+             data-sub="Workshop &amp; Sessions"
+             role="button" tabindex="0" aria-label="Open workshop photo">
+          <img src="/gallery/IMG_2074.JPG.jpeg" alt="Workshop — learning together" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Learning Together</p>
+            <p class="gallery-item__sub">Workshop &amp; Sessions</p>
+          </div>
+        </div>
+
+        <div class="gallery-item gallery-item--wide fade-up" style="animation-delay:1120ms"
+             data-img="/gallery/IMG_1575.JPG.jpeg"
+             data-title="Moments We Cherish"
+             data-sub="Campus Life"
+             role="button" tabindex="0" aria-label="Open cherished moments photo">
+          <img src="/gallery/IMG_1575.JPG.jpeg" alt="Campus life — cherished moments" loading="lazy"/>
+          <div class="gallery-item__overlay"></div>
+          <div class="gallery-item__label">
+            <p class="gallery-item__title">Moments We Cherish</p>
+            <p class="gallery-item__sub">Campus Life</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image lightbox">
+  <button class="lightbox__close" id="lightboxClose" aria-label="Close lightbox">✕</button>
+  <img class="lightbox__img" id="lightboxImg" src="" alt=""/>
+  <p class="lightbox__caption" id="lightboxCaption"></p>
+</div>
+
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer__bottom" style="border-top:none;padding-top:0">
+      <p>© <span id="footerYear"></span> Yuvaverse. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script>
+  document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+  // ── Lightbox logic ──
+  const lightbox    = document.getElementById('lightbox');
+  const lbImg       = document.getElementById('lightboxImg');
+  const lbCaption   = document.getElementById('lightboxCaption');
+  const lbClose     = document.getElementById('lightboxClose');
+
+  document.getElementById('galleryGrid').addEventListener('click', openItem);
+  document.getElementById('galleryGrid').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') openItem(e);
+  });
+
+  function openItem(e) {
+    const item = e.target.closest('.gallery-item');
+    if (!item) return;
+    lbImg.src = item.dataset.img;
+    lbImg.alt = item.dataset.title;
+    lbCaption.textContent = `${item.dataset.title} — ${item.dataset.sub}`;
+    lightbox.classList.add('lightbox--open');
+    document.body.style.overflow = 'hidden';
+    lbClose.focus();
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('lightbox--open');
+    document.body.style.overflow = '';
+  }
+
+  lbClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+</body>
+</html>

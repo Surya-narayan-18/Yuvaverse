@@ -199,30 +199,103 @@
   </div>
 </section>
 
-<!-- ── ABOUT TEASER ────────────────────────────────────────────── -->
-<section class="section about-teaser" aria-labelledby="aboutTitle">
+<!-- ── PAST EVENT GLIMPSES ─────────────────────────────────────── -->
+<section class="glimpses" id="glimpses" aria-labelledby="glimpsesTitle">
   <div class="container">
-    <div class="about-teaser__inner">
-      <div class="about-teaser__visual" aria-hidden="true">
-        <span class="about-teaser__monogram">YV</span>
-      </div>
-      <div class="about-teaser__content">
-        <span class="section__eyebrow">Who We Are</span>
-        <h2 id="aboutTitle">Built by Students,<br>For Students</h2>
-        <p>Yuvaverse is a student-run event organization club with one mission — making campus life extraordinary. We plan, produce, and execute events that leave a lasting mark.</p>
-        <ul class="value-list" aria-label="Our values">
-          <li class="value-item">Innovation-first event design</li>
-          <li class="value-item">Inclusive and accessible experiences</li>
-          <li class="value-item">Strong industry and campus partnerships</li>
-          <li class="value-item">Student growth through real opportunities</li>
-        </ul>
-        <a href="/about.html" class="btn btn--primary">Meet the Team →</a>
+    <div class="section__header">
+      <span class="section__eyebrow">Relive the Magic</span>
+      <h2 id="glimpsesTitle">Past Event Glimpses</h2>
+      <p>A look back at the moments that made us who we are today.</p>
+    </div>
+  </div>
+
+  <!-- Horizontal auto-scroll filmstrip -->
+  <div class="filmstrip" id="filmstrip" role="region" aria-label="Past events photo carousel">
+    <div class="filmstrip__track" id="filmstripTrack">
+      <!-- Cards injected by JS (doubled for seamless loop) -->
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Footer with gallery button -->
+    <div class="glimpses__footer">
+      <p class="glimpses__note">✨ Every moment crafted with passion and purpose.</p>
+      <a href="/gallery.html" class="btn btn--outline btn--lg" id="viewGalleryBtn">View Full Gallery →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── JOIN THE TEAM CTA ──────────────────────────────────────── -->
+<section class="join-cta" id="joinCta" aria-labelledby="joinCtaTitle">
+  <div class="container">
+    <div class="join-cta__inner">
+      <span class="join-cta__eyebrow">Be Part of the Story</span>
+      <h2 id="joinCtaTitle">Shape the Next Chapter of Yuvaverse</h2>
+      <p>Join a passionate team of students who live and breathe events. Whether you're into design, logistics, or marketing — there's a place for you.</p>
+      <div class="join-cta__buttons">
+        <a href="/join.html" class="btn btn--accent btn--lg" id="joinTeamBtn">Join the Team →</a>
+        <a href="/about.html" class="btn btn--ghost-white btn--lg" id="learnMoreBtn">Learn More</a>
       </div>
     </div>
   </div>
 </section>
 
 </main>
+
+<!-- ── FILMSTRIP CAROUSEL SCRIPT ─────────────────────────────── -->
+<script>
+(function () {
+  'use strict';
+
+  const CARDS = [
+    { img: '/gallery/IMG_1575.JPG.jpeg', tag: 'Campus Life',         title: 'Moments We Cherish' },
+    { img: '/gallery/IMG_1581.JPG.jpeg', tag: 'Events',              title: 'Energy & Excitement' },
+    { img: '/gallery/IMG_1588.JPG.jpeg', tag: 'Cultural Fest',       title: 'Lights & Celebrations' },
+    { img: '/gallery/IMG_1874.JPG.jpeg', tag: 'Tech Summit',         title: 'A Night of Innovation' },
+    { img: '/gallery/IMG_1906.JPG.jpeg', tag: 'Campus Connect',      title: 'Building Bonds That Last' },
+    { img: '/gallery/IMG_2074.JPG.jpeg', tag: 'Workshop',            title: 'Learning Together' },
+    { img: '/gallery/IMG_4855.JPG.jpeg', tag: 'Annual Fest',         title: 'Unforgettable Memories' },
+    { img: '/gallery/IMG_4931.JPG.jpeg', tag: 'Events',              title: 'The Crowd Goes Wild' },
+    { img: '/gallery/IMG_5697.JPG.jpeg', tag: 'Cultural Night',      title: 'Colours of Yuvaverse' },
+    { img: '/gallery/IMG_5698.JPG.jpeg', tag: 'Performance',         title: 'On Stage & Alive' },
+    { img: '/gallery/IMG_5699.JPG.jpeg', tag: 'Celebration',         title: 'Every Moment Counts' },
+    { img: '/gallery/IMG_5704.JPG.jpeg', tag: 'Campus Life',         title: 'Smiles & Stories' },
+    { img: '/gallery/IMG_5705.JPG.jpeg', tag: 'Networking',          title: 'Connections That Matter' },
+    { img: '/gallery/IMG_5711.JPG.jpeg', tag: 'Innovation Workshop', title: 'Ideas That Inspire' },
+    { img: '/gallery/IMG_6862.JPG.jpeg', tag: 'Grand Finale',        title: 'The Grand Closing Night' },
+  ];
+
+  const track = document.getElementById('filmstripTrack');
+  if (!track) return;
+
+  // Build card HTML helper
+  function makeCard(c, eager) {
+    return `
+      <div class="fstrip-card">
+        <img src="${c.img}" alt="${c.title}" loading="${eager ? 'eager' : 'lazy'}" />
+        <div class="fstrip-card__overlay"></div>
+        <div class="fstrip-card__caption">
+          <span class="fstrip-card__tag">${c.tag}</span>
+          <p class="fstrip-card__title">${c.title}</p>
+        </div>
+      </div>`;
+  }
+
+  // Double the set for a seamless infinite loop
+  track.innerHTML = [...CARDS, ...CARDS].map((c, i) => makeCard(c, i < 2)).join('');
+
+  // Slow continuous CSS animation is handled by the stylesheet.
+  // Pause on hover via JS so we can restore the exact position.
+  const filmstrip = document.getElementById('filmstrip');
+  filmstrip?.addEventListener('mouseenter', () => {
+    track.style.animationPlayState = 'paused';
+  });
+  filmstrip?.addEventListener('mouseleave', () => {
+    track.style.animationPlayState = 'running';
+  });
+})();
+</script>
+
 
 <!-- ── FOOTER ───────────────────────────────────────────────────── -->
 <footer class="footer" role="contentinfo">
