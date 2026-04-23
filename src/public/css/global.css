@@ -628,41 +628,51 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
   font-weight: 500;
 }
 /* Label positions */
+/* Memories — floats at top-center above the collage */
 .hero__float-label--memories {
-  top: -12px; left: 10%;
+  top: -18px; left: 50%;
+  transform: translateX(-50%);
   z-index: 12;
 }
 .hero__float-label--memories .fl-icon { background: rgba(108,99,255,0.15); }
 .hero__float-label--memories .fl-icon svg { stroke: var(--clr-accent); }
+/* Ideas — bottom-left, below mid card */
 .hero__float-label--ideas {
-  bottom: -10px; left: 0;
+  bottom: -18px; left: 4%;
   z-index: 12;
 }
 .hero__float-label--ideas .fl-icon { background: rgba(239,68,68,0.12); }
 .hero__float-label--ideas .fl-icon svg { stroke: #ef4444; }
+/* Connections — bottom-right */
 .hero__float-label--connections {
-  bottom: -14px; right: -10px;
+  bottom: -18px; right: 4%;
   z-index: 12;
 }
 .hero__float-label--connections .fl-icon { background: rgba(34,197,94,0.12); }
 .hero__float-label--connections .fl-icon svg { stroke: #22c55e; }
 
-/* Italic "Events · People · Experiences" text in collage */
+/* "Events · People · Experiences" — cursive float to the right of collage */
 .hero__tagline-float {
   position: absolute;
-  top: 40%;
-  right: -5%;
-  font-family: var(--ff-heading);
-  font-size: 1.05rem;
-  font-style: italic;
+  top: 50%;
+  right: -14%;
+  transform: translateY(-50%);
+  font-family: 'Dancing Script', 'Pacifico', cursive;
+  font-size: 1.35rem;
   font-weight: 600;
-  color: var(--clr-text-muted);
-  line-height: 1.6;
+  font-style: normal;
+  color: var(--clr-text-subtle);
+  line-height: 2;
   text-align: right;
   z-index: 5;
   pointer-events: none;
+  white-space: nowrap;
 }
-.hero__tagline-float .heart { color: var(--clr-accent); }
+[data-theme="dark"] .hero__tagline-float { color: rgba(255,255,255,0.35); }
+.hero__tagline-float .heart {
+  color: var(--clr-accent);
+  font-size: 1.1rem;
+}
 
 /* Decorative scattered shapes */
 .hero__decor {
