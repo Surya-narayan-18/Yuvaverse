@@ -15,12 +15,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Join Us — Yuvaverse</title>
-  <meta name="description" content="Join the Yuvaverse team! Apply for a role in event management, design, marketing, and more."/>
+  <meta name="description" content="Join the Yuvaverse team! Apply for a role in event management, design, marketing, tech, and more. Shape the next chapter with us."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="stylesheet" href="/css/global.css"/>
+  <link rel="stylesheet" href="/css/inner-pages.css"/>
 </head>
 <body>
 
+<!-- ── NAVBAR ──────────────────────────────────────────────────── -->
 <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
   <div class="container navbar__inner">
     <a href="/" class="navbar__logo" aria-label="Yuvaverse Home">
@@ -31,7 +33,7 @@
       <li><a href="/"              class="nav-link" id="navHome">Home</a></li>
       <li><a href="/events.html"   class="nav-link" id="navEvents">Events</a></li>
       <li><a href="/about.html"    class="nav-link" id="navAbout">About</a></li>
-      <li><a href="/join.html"     class="nav-link" id="navJoin">Join Us</a></li>
+      <li><a href="/join.html"     class="nav-link nav-link--active" id="navJoin">Join Us</a></li>
       <li><a href="/contact.html"  class="nav-link" id="navContact">Contact</a></li>
     </ul>
     <div class="navbar__actions">
@@ -51,128 +53,335 @@
 
 <main class="main-content">
 
+<!-- ── ENHANCED PAGE HERO ─────────────────────────────────────── -->
+<section class="inner-hero" aria-labelledby="joinHeroTitle">
+  <!-- Background blobs -->
+  <div class="inner-hero__blob inner-hero__blob--tl" aria-hidden="true"></div>
+  <div class="inner-hero__blob inner-hero__blob--br" aria-hidden="true"></div>
+  <!-- Grid overlay -->
+  <div class="inner-hero__grid" aria-hidden="true"></div>
+  <!-- Floating shapes -->
+  <div class="inner-hero__shape inner-hero__shape--dot-teal" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-pink" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-green" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-amber" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--diamond" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--ring" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--squiggle" aria-hidden="true">
+    <svg width="52" height="28" viewBox="0 0 52 28" fill="none"><path d="M2 14 Q13 2 24 14 Q35 26 46 14" stroke="#6C63FF" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+  </div>
+  <div class="inner-hero__shape inner-hero__shape--squiggle-right" aria-hidden="true">
+    <svg width="40" height="22" viewBox="0 0 52 28" fill="none"><path d="M2 14 Q13 26 24 14 Q35 2 46 14" stroke="#f472b6" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6"/></svg>
+  </div>
+  <div class="inner-hero__shape inner-hero__shape--star" aria-hidden="true">
+    <svg width="28" height="28" viewBox="0 0 36 36" fill="none"><path d="M18 2L22 14H34L24 21L28 33L18 26L8 33L12 21L2 14H14Z" fill="#F59E0B" opacity="0.65"/></svg>
+  </div>
 
-<section class="page-hero" aria-labelledby="pageTitle">
+  <div class="container inner-hero__inner">
+    <span class="inner-hero__eyebrow">We're Recruiting</span>
+    <h1 class="inner-hero__title" id="joinHeroTitle">
+      Join the <span class="inner-hero__title-accent">Yuvaverse</span> Team
+    </h1>
+    <p class="inner-hero__subtitle">
+      Help us craft extraordinary campus experiences. We're looking for passionate, driven individuals across all departments.
+    </p>
+    <div class="inner-hero__cta">
+      <a href="#applyForm" class="btn btn--accent btn--lg" id="applyNowBtn">Apply Now →</a>
+      <a href="/about.html" class="btn btn--ghost btn--lg">Learn About Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── WHY JOIN STRIP ─────────────────────────────────────────── -->
+<div class="why-join-strip" aria-label="Why join Yuvaverse">
   <div class="container">
-    <span class="section__eyebrow">We're Recruiting</span>
-    <h1 id="pageTitle">Join the Yuvaverse Team</h1>
-    <p>Help us craft extraordinary campus experiences. We're looking for passionate, driven individuals across all departments.</p>
+    <div class="why-join-grid">
+      <div class="why-join-item">
+        <div class="why-join-item__icon why-join-item__icon--purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div>
+          <p class="why-join-item__title">Real Experience</p>
+          <p class="why-join-item__desc">Work on live events, not dummy projects.</p>
+        </div>
+      </div>
+      <div class="why-join-item">
+        <div class="why-join-item__icon why-join-item__icon--teal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <p class="why-join-item__title">Great Network</p>
+          <p class="why-join-item__desc">Connect with peers, faculty, and industry leaders.</p>
+        </div>
+      </div>
+      <div class="why-join-item">
+        <div class="why-join-item__icon why-join-item__icon--amber">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        </div>
+        <div>
+          <p class="why-join-item__title">Recognition</p>
+          <p class="why-join-item__desc">Get certified and recognized for your work.</p>
+        </div>
+      </div>
+      <div class="why-join-item">
+        <div class="why-join-item__icon why-join-item__icon--rose">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div>
+          <p class="why-join-item__title">Fun Community</p>
+          <p class="why-join-item__desc">A team that works hard and celebrates harder.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ROLES + FORM ────────────────────────────────────────────── -->
+<section class="section section--sm" id="applyForm" aria-labelledby="applyTitle">
+  <div class="container">
+    <div class="form-section-inner">
+
+      <!-- Section header -->
+      <div class="section__header" style="text-align:left;margin-bottom:2rem">
+        <span class="section__eyebrow">Open Positions</span>
+        <h2 id="applyTitle">Open Roles</h2>
+        <p>Pick your passion. Every role matters and has real impact.</p>
+      </div>
+
+      <!-- Roles grid -->
+      <div class="roles-grid" role="list" aria-label="Open roles">
+        <div class="role-card" role="listitem">
+          <span class="role-card__icon">🎨</span>
+          <p class="role-card__name">Design</p>
+          <p class="role-card__desc">UI/UX & Graphics</p>
+        </div>
+        <div class="role-card" role="listitem">
+          <span class="role-card__icon">📢</span>
+          <p class="role-card__name">Marketing</p>
+          <p class="role-card__desc">Campaigns & Promotions</p>
+        </div>
+        <div class="role-card" role="listitem">
+          <span class="role-card__icon">💻</span>
+          <p class="role-card__name">Tech</p>
+          <p class="role-card__desc">Web & Development</p>
+        </div>
+        <div class="role-card" role="listitem">
+          <span class="role-card__icon">📋</span>
+          <p class="role-card__name">Operations</p>
+          <p class="role-card__desc">Logistics & Planning</p>
+        </div>
+        <div class="role-card" role="listitem">
+          <span class="role-card__icon">📸</span>
+          <p class="role-card__name">Media</p>
+          <p class="role-card__desc">Photography & Video</p>
+        </div>
+        <div class="role-card" role="listitem">
+          <span class="role-card__icon">🤝</span>
+          <p class="role-card__name">Outreach</p>
+          <p class="role-card__desc">Sponsors & Partnerships</p>
+        </div>
+      </div>
+
+      <!-- Perk chips -->
+      <div class="perk-chips" role="list" aria-label="Benefits of joining">
+        <span class="perk-chip" role="listitem"><span class="perk-chip__dot" style="background:#6C63FF"></span>Certificate of Participation</span>
+        <span class="perk-chip" role="listitem"><span class="perk-chip__dot" style="background:#22d3ee"></span>Build Your Portfolio</span>
+        <span class="perk-chip" role="listitem"><span class="perk-chip__dot" style="background:#4ade80"></span>Free Event Access</span>
+        <span class="perk-chip" role="listitem"><span class="perk-chip__dot" style="background:#f59e0b"></span>Mentorship & Growth</span>
+        <span class="perk-chip" role="listitem"><span class="perk-chip__dot" style="background:#f472b6"></span>Fun Team Culture</span>
+      </div>
+
+      <!-- Application Form -->
+      <div class="form-card" id="formWrapper">
+        <h2 style="margin-bottom:.5rem;font-size:1.375rem">Apply Now</h2>
+        <p style="margin-bottom:2rem">Fill in the form below. We review all applications within 3-5 working days.</p>
+
+        <form id="joinForm" novalidate>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="name">Full Name <span>*</span></label>
+              <input class="form-input" id="name" type="text" placeholder="Your full name" autocomplete="name" required/>
+              <span class="form-error" role="alert"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="email">Email <span>*</span></label>
+              <input class="form-input" id="email" type="email" placeholder="your@email.com" autocomplete="email" required/>
+              <span class="form-error" role="alert"></span>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="phone">Phone <span>*</span></label>
+              <input class="form-input" id="phone" type="tel" placeholder="10-digit mobile number" autocomplete="tel" required/>
+              <span class="form-error" role="alert"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="roleAppliedFor">Role Applying For <span>*</span></label>
+              <select class="form-input form-select" id="roleAppliedFor" required>
+                <option value="">Select a role…</option>
+                <option>Event Management</option>
+                <option>UI/UX Design</option>
+                <option>Graphic Design</option>
+                <option>Marketing &amp; Promotions</option>
+                <option>Social Media</option>
+                <option>Tech &amp; Web Development</option>
+                <option>Photography &amp; Videography</option>
+                <option>Outreach &amp; Sponsorships</option>
+                <option>Operations &amp; Logistics</option>
+              </select>
+              <span class="form-error" role="alert"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="resumeLink">Portfolio / Resume Link</label>
+            <input class="form-input" id="resumeLink" type="url" placeholder="https://drive.google.com/…"/>
+            <span class="form-error" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="message">Why do you want to join? (Optional)</label>
+            <textarea class="form-textarea" id="message" placeholder="Tell us a bit about yourself and why you'd be a great fit…"></textarea>
+          </div>
+
+          <button class="btn btn--accent btn--full" id="submitBtn" type="submit">Submit Application →</button>
+        </form>
+      </div>
+
+      <!-- Success state -->
+      <div id="successState" style="display:none;text-align:center;padding:4rem 2rem" class="form-card">
+        <div style="font-size:4rem;margin-bottom:1.25rem">🎉</div>
+        <h2 style="margin-bottom:.75rem">Application Received!</h2>
+        <p>Thanks for applying! We'll review your application and reach out within 3-5 working days. Check your inbox for a confirmation email.</p>
+        <a href="/" class="btn btn--primary" style="margin-top:2rem">Back to Home</a>
+      </div>
+
+    </div>
   </div>
 </section>
 
-<section class="section section--sm">
-  <div class="container" style="max-width:680px">
-
-    <!-- Roles grid -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:3rem">
-      <div class="form-card" style="padding:1.25rem;text-align:center">
-        <div style="font-size:1.75rem;margin-bottom:.5rem">🎨</div>
-        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Design</p>
+<!-- ── FAQ SECTION ────────────────────────────────────────────── -->
+<section class="section section--sm" style="background:var(--clr-surface);border-top:1px solid var(--clr-border)" aria-labelledby="faqTitle">
+  <div class="container">
+    <div class="section__header">
+      <span class="section__eyebrow">Got Questions?</span>
+      <h2 id="faqTitle">Common Questions</h2>
+      <p>Everything you need to know before applying.</p>
+    </div>
+    <div class="faq-list" id="faqList" role="list">
+      <div class="faq-item" role="listitem">
+        <button class="faq-item__q" aria-expanded="false" id="faq1-btn" aria-controls="faq1-ans">
+          Do I need prior experience to apply?
+          <svg class="faq-item__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-item__a" id="faq1-ans" role="region" aria-labelledby="faq1-btn">
+          <p>Nope! We welcome students of all experience levels. What matters most is passion, willingness to learn, and a collaborative attitude.</p>
+        </div>
       </div>
-      <div class="form-card" style="padding:1.25rem;text-align:center">
-        <div style="font-size:1.75rem;margin-bottom:.5rem">📢</div>
-        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Marketing</p>
+      <div class="faq-item" role="listitem">
+        <button class="faq-item__q" aria-expanded="false" id="faq2-btn" aria-controls="faq2-ans">
+          How much time do I need to commit?
+          <svg class="faq-item__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-item__a" id="faq2-ans" role="region" aria-labelledby="faq2-btn">
+          <p>Typically 5-8 hours per week, with more during event weeks. We're flexible and understand academic priorities — studies always come first!</p>
+        </div>
       </div>
-      <div class="form-card" style="padding:1.25rem;text-align:center">
-        <div style="font-size:1.75rem;margin-bottom:.5rem">💻</div>
-        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Tech</p>
+      <div class="faq-item" role="listitem">
+        <button class="faq-item__q" aria-expanded="false" id="faq3-btn" aria-controls="faq3-ans">
+          When will I hear back after applying?
+          <svg class="faq-item__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-item__a" id="faq3-ans" role="region" aria-labelledby="faq3-btn">
+          <p>We review all applications within 3-5 working days. Shortlisted candidates will be invited to a brief 15-minute video call with our team leads.</p>
+        </div>
       </div>
-      <div class="form-card" style="padding:1.25rem;text-align:center">
-        <div style="font-size:1.75rem;margin-bottom:.5rem">📋</div>
-        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Operations</p>
-      </div>
-      <div class="form-card" style="padding:1.25rem;text-align:center">
-        <div style="font-size:1.75rem;margin-bottom:.5rem">📸</div>
-        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Media</p>
-      </div>
-      <div class="form-card" style="padding:1.25rem;text-align:center">
-        <div style="font-size:1.75rem;margin-bottom:.5rem">🤝</div>
-        <p style="font-size:.8rem;font-weight:600;color:var(--clr-text);margin:0">Outreach</p>
+      <div class="faq-item" role="listitem">
+        <button class="faq-item__q" aria-expanded="false" id="faq4-btn" aria-controls="faq4-ans">
+          Is this a paid position?
+          <svg class="faq-item__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-item__a" id="faq4-ans" role="region" aria-labelledby="faq4-btn">
+          <p>Most roles are voluntary, but you'll earn official certificates, get free event access, and gain real-world experience that's invaluable for your career. Some senior roles may include stipends during major events.</p>
+        </div>
       </div>
     </div>
-
-    <!-- Form -->
-    <div class="form-card" id="formWrapper">
-      <h2 style="margin-bottom:.5rem;font-size:1.375rem">Apply Now</h2>
-      <p style="margin-bottom:2rem">Fill in the form below. We review all applications within 3-5 working days.</p>
-
-      <form id="joinForm" novalidate>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label" for="name">Full Name <span>*</span></label>
-            <input class="form-input" id="name" type="text" placeholder="Your full name" autocomplete="name" required/>
-            <span class="form-error" role="alert"></span>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="email">Email <span>*</span></label>
-            <input class="form-input" id="email" type="email" placeholder="your@email.com" autocomplete="email" required/>
-            <span class="form-error" role="alert"></span>
-          </div>
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label" for="phone">Phone <span>*</span></label>
-            <input class="form-input" id="phone" type="tel" placeholder="10-digit mobile number" autocomplete="tel" required/>
-            <span class="form-error" role="alert"></span>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="roleAppliedFor">Role Applying For <span>*</span></label>
-            <select class="form-input form-select" id="roleAppliedFor" required>
-              <option value="">Select a role…</option>
-              <option>Event Management</option>
-              <option>UI/UX Design</option>
-              <option>Graphic Design</option>
-              <option>Marketing &amp; Promotions</option>
-              <option>Social Media</option>
-              <option>Tech &amp; Web Development</option>
-              <option>Photography &amp; Videography</option>
-              <option>Outreach &amp; Sponsorships</option>
-              <option>Operations &amp; Logistics</option>
-            </select>
-            <span class="form-error" role="alert"></span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="resumeLink">Portfolio / Resume Link</label>
-          <input class="form-input" id="resumeLink" type="url" placeholder="https://drive.google.com/…"/>
-          <span class="form-error" role="alert"></span>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="message">Why do you want to join? (Optional)</label>
-          <textarea class="form-textarea" id="message" placeholder="Tell us a bit about yourself and why you'd be a great fit…"></textarea>
-        </div>
-
-        <button class="btn btn--accent btn--full" id="submitBtn" type="submit">Submit Application →</button>
-      </form>
-    </div>
-
-    <!-- Success state -->
-    <div id="successState" style="display:none;text-align:center;padding:4rem 2rem" class="form-card">
-      <div style="font-size:4rem;margin-bottom:1.25rem">🎉</div>
-      <h2 style="margin-bottom:.75rem">Application Received!</h2>
-      <p>Thanks for applying! We'll review your application and reach out within 3-5 working days. Check your inbox for a confirmation email.</p>
-      <a href="/" class="btn btn--primary" style="margin-top:2rem">Back to Home</a>
-    </div>
-
   </div>
 </section>
 
+<!-- ── JOIN CTA BANNER ─────────────────────────────────────────── -->
+<section class="join-cta" id="joinCta" aria-labelledby="joinCtaTitle">
+  <div class="container">
+    <div class="join-cta__inner">
+      <span class="join-cta__eyebrow">Take the Leap</span>
+      <h2 id="joinCtaTitle">Your Campus Journey Starts Here</h2>
+      <p>Don't miss this chance to be part of something extraordinary. Applications are reviewed on a rolling basis.</p>
+      <div class="join-cta__buttons">
+        <a href="#applyForm" class="btn btn--accent btn--lg" id="ctaApplyBtn">Apply Now →</a>
+        <a href="/about.html" class="btn btn--ghost-white btn--lg">Learn More About Us</a>
+      </div>
+    </div>
+  </div>
+</section>
 
 </main>
 
+<!-- ── FOOTER ───────────────────────────────────────────────────── -->
 <footer class="footer" role="contentinfo">
   <div class="container">
-    <div class="footer__bottom" style="border-top:none;padding-top:0">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <a href="/" class="navbar__logo" aria-label="Yuvaverse Home">
+          <img src="/assets/logo_dark.png" alt="Yuvaverse Logo" style="height:34px;width:auto"/>
+        </a>
+        <p style="margin-top:1rem">Crafting unforgettable campus experiences. Join us and be part of something extraordinary.</p>
+      </div>
+      <div>
+        <p class="footer__heading">Quick Links</p>
+        <ul class="footer__links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/events.html">Events</a></li>
+          <li><a href="/about.html">About Us</a></li>
+          <li><a href="/join.html">Join Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer__heading">Contact</p>
+        <ul class="footer__links">
+          <li><a href="/contact.html">Get in Touch</a></li>
+          <li><a href="mailto:yuvaverse.org@gmail.com">yuvaverse.org@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
       <p>© <span id="footerYear"></span> Yuvaverse. All rights reserved.</p>
+      <p>Made with ❤️ by students, for students.</p>
     </div>
   </div>
 </footer>
 
 <script src="/js/main.js"></script>
 <script src="/js/join.js"></script>
-<script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
+<script>
+  document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item__q').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var item = this.closest('.faq-item');
+      var isOpen = item.classList.contains('open');
+      // close all
+      document.querySelectorAll('.faq-item').forEach(function(i) {
+        i.classList.remove('open');
+        i.querySelector('.faq-item__q').setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        this.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+</script>
 </body>
 </html>

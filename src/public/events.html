@@ -18,14 +18,7 @@
   <meta name="description" content="Browse all upcoming Yuvaverse events. Search, discover, and register for campus events near you."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="stylesheet" href="/css/global.css"/>
-  <style>
-    .pagination{display:flex;justify-content:center;gap:.5rem;margin-top:3rem;flex-wrap:wrap}
-    .page-btn{padding:.45rem .875rem;border-radius:var(--r-sm);border:1.5px solid var(--clr-border-strong);background:var(--clr-card);color:var(--clr-text-muted);font-family:var(--ff-heading);font-size:.85rem;font-weight:600;cursor:pointer;transition:all var(--t-fast)}
-    .page-btn:hover:not(:disabled){border-color:var(--clr-accent);color:var(--clr-accent)}
-    .page-btn--active{background:var(--clr-accent);border-color:var(--clr-accent);color:#fff}
-    .page-btn--nav{font-size:1rem}
-    .page-btn:disabled{opacity:.4;cursor:default}
-  </style>
+  <link rel="stylesheet" href="/css/events-page.css"/>
 </head>
 <body>
 
@@ -36,18 +29,18 @@
       <img src="/assets/logo_dark.png" alt="Yuvaverse Logo" class="logo-img-dark"/>
     </a>
     <ul class="navbar__links" id="navLinks" role="list">
-      <li><a href="/"              class="nav-link" id="navHome">Home</a></li>
-      <li><a href="/events.html"   class="nav-link" id="navEvents">Events</a></li>
-      <li><a href="/about.html"    class="nav-link" id="navAbout">About</a></li>
-      <li><a href="/join.html"     class="nav-link" id="navJoin">Join Us</a></li>
-      <li><a href="/contact.html"  class="nav-link" id="navContact">Contact</a></li>
+      <li><a href="/"             class="nav-link" id="navHome">Home</a></li>
+      <li><a href="/events.html"  class="nav-link nav-link--active" id="navEvents">Events</a></li>
+      <li><a href="/about.html"   class="nav-link" id="navAbout">About</a></li>
+      <li><a href="/join.html"    class="nav-link" id="navJoin">Join Us</a></li>
+      <li><a href="/contact.html" class="nav-link" id="navContact">Contact</a></li>
     </ul>
     <div class="navbar__actions">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       </button>
-      <a href="/events.html" class="btn btn--accent btn--sm">Explore Events</a>
+      <a href="/events.html" class="btn btn--accent btn--sm" id="exploreEventsBtn">Explore Events →</a>
     </div>
     <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -59,26 +52,146 @@
 
 <main class="main-content">
 
+<!-- ── EVENTS HERO ─────────────────────────────────────────────── -->
+<section class="ev-hero" aria-labelledby="evHeroTitle">
+  <!-- Decorative blobs -->
+  <div class="ev-hero__blob ev-hero__blob--tl" aria-hidden="true"></div>
+  <div class="ev-hero__blob ev-hero__blob--br" aria-hidden="true"></div>
 
-<section class="page-hero" aria-labelledby="pageTitle">
-  <div class="container">
-    <span class="section__eyebrow">Discover &amp; Register</span>
-    <h1 id="pageTitle">All Events</h1>
-    <p>Browse all upcoming Yuvaverse events. Find something that excites you.</p>
+  <!-- Decorative floating shapes -->
+  <div class="ev-hero__shape ev-hero__shape--dot-teal" aria-hidden="true"></div>
+  <div class="ev-hero__shape ev-hero__shape--squiggle" aria-hidden="true">
+    <svg width="52" height="28" viewBox="0 0 52 28" fill="none"><path d="M2 14 Q13 2 24 14 Q35 26 46 14" stroke="#6C63FF" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+  </div>
+  <div class="ev-hero__shape ev-hero__shape--stars" aria-hidden="true">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M18 2L22 14H34L24 21L28 33L18 26L8 33L12 21L2 14H14Z" fill="#F59E0B" opacity="0.7"/></svg>
+  </div>
+  <div class="ev-hero__shape ev-hero__shape--dot-pink" aria-hidden="true"></div>
+  <div class="ev-hero__shape ev-hero__shape--dot-green" aria-hidden="true"></div>
+
+  <div class="container ev-hero__inner">
+    <span class="ev-hero__eyebrow">Discover &amp; Register</span>
+    <h1 class="ev-hero__title" id="evHeroTitle">
+      All <span class="ev-hero__title-accent">Events</span>
+    </h1>
+    <p class="ev-hero__subtitle">Browse all upcoming Yuvaverse events. Find something that excites you.</p>
+
+    <!-- Search bar -->
+    <div class="ev-search-row" role="search">
+      <div class="ev-search-bar">
+        <svg class="ev-search-bar__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="searchInput" placeholder="Search events by name, venue…" aria-label="Search events"/>
+      </div>
+      <button class="ev-filter-btn" id="filterBtn" aria-label="Filter events">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Category pills -->
+    <div class="ev-categories" id="evCategories" role="tablist" aria-label="Event categories">
+      <button class="ev-cat-pill ev-cat-pill--active" data-cat="" role="tab" aria-selected="true" id="catAll">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        All Events
+      </button>
+      <button class="ev-cat-pill" data-cat="Workshop" role="tab" aria-selected="false" id="catWorkshop">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+        Workshops
+      </button>
+      <button class="ev-cat-pill" data-cat="Cultural" role="tab" aria-selected="false" id="catCultural">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2a9 9 0 1 0 9 9"/><path d="M12 7v5l3 3"/><circle cx="18.5" cy="5.5" r="2.5"/></svg>
+        Cultural
+      </button>
+      <button class="ev-cat-pill" data-cat="Tech" role="tab" aria-selected="false" id="catTech">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Tech
+      </button>
+      <button class="ev-cat-pill" data-cat="Networking" role="tab" aria-selected="false" id="catNetworking">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Networking
+      </button>
+      <button class="ev-cat-pill" data-cat="Competition" role="tab" aria-selected="false" id="catCompetition">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        Competitions
+      </button>
+    </div>
   </div>
 </section>
 
-<section class="section section--sm" aria-label="Events listing">
+<!-- ── EVENTS LISTING ──────────────────────────────────────────── -->
+<section class="ev-listing section--sm" aria-label="Events listing">
   <div class="container">
-    <div class="search-bar" role="search">
-      <svg class="search-bar__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="search" id="searchInput" class="form-input" placeholder="Search events by name, venue…" aria-label="Search events"/>
+    <!-- Listing header -->
+    <div class="ev-listing__header">
+      <h2 class="ev-listing__title">Upcoming <span class="text-accent">Events</span></h2>
+      <div class="ev-listing__controls">
+        <div class="ev-sort">
+          <label for="sortSelect" class="ev-sort__label">Sort by:</label>
+          <select id="sortSelect" class="ev-sort__select">
+            <option value="latest">Latest</option>
+            <option value="oldest">Oldest</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
+        <div class="ev-view-toggle" role="group" aria-label="View mode">
+          <button class="ev-view-btn ev-view-btn--active" id="gridViewBtn" aria-label="Grid view" aria-pressed="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </button>
+          <button class="ev-view-btn" id="listViewBtn" aria-label="List view" aria-pressed="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="events-grid" id="eventsGrid" role="list" aria-label="Events"></div>
+
+    <!-- Events grid/list -->
+    <div class="ev-grid" id="eventsGrid" role="list" aria-label="Events"></div>
     <div class="pagination" id="pagination" role="navigation" aria-label="Events pagination"></div>
   </div>
 </section>
 
+<!-- ── FEATURE STRIP ──────────────────────────────────────────── -->
+<section class="ev-features" aria-label="Why attend our events">
+  <div class="container">
+    <div class="ev-features__grid">
+      <div class="ev-feature-item">
+        <div class="ev-feature-item__icon ev-feature-item__icon--purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div>
+          <h4 class="ev-feature-item__title">Exciting Events</h4>
+          <p class="ev-feature-item__desc">From tech to culture, we have events for everyone.</p>
+        </div>
+      </div>
+      <div class="ev-feature-item">
+        <div class="ev-feature-item__icon ev-feature-item__icon--blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <h4 class="ev-feature-item__title">Connect &amp; Grow</h4>
+          <p class="ev-feature-item__desc">Meet like-minded people and build real connections.</p>
+        </div>
+      </div>
+      <div class="ev-feature-item">
+        <div class="ev-feature-item__icon ev-feature-item__icon--teal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        </div>
+        <div>
+          <h4 class="ev-feature-item__title">Learn &amp; Explore</h4>
+          <p class="ev-feature-item__desc">Workshops and sessions to boost your skills.</p>
+        </div>
+      </div>
+      <div class="ev-feature-item">
+        <div class="ev-feature-item__icon ev-feature-item__icon--pink">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        </div>
+        <div>
+          <h4 class="ev-feature-item__title">Earn &amp; Enjoy</h4>
+          <p class="ev-feature-item__desc">Participate, win rewards and make memories.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 </main>
 
@@ -92,7 +205,7 @@
 </footer>
 
 <script src="/js/main.js"></script>
-<script src="/js/events.js"></script>
+<script src="/js/events-page.js"></script>
 <script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
 </body>
 </html>

@@ -17,7 +17,9 @@
   <title>About Us — Yuvaverse</title>
   <meta name="description" content="Learn about Yuvaverse — a student-run event organization club crafting extraordinary campus experiences since 2022."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap"/>
   <link rel="stylesheet" href="/css/global.css"/>
+  <link rel="stylesheet" href="/css/inner-pages.css"/>
 </head>
 <body>
 
@@ -29,11 +31,11 @@
       <img src="/assets/logo_dark.png" alt="Yuvaverse Logo" class="logo-img-dark"/>
     </a>
     <ul class="navbar__links" id="navLinks" role="list">
-      <li><a href="/"             class="nav-link">Home</a></li>
-      <li><a href="/events.html"  class="nav-link">Events</a></li>
-      <li><a href="/about.html"   class="nav-link nav-link--active">About</a></li>
-      <li><a href="/join.html"    class="nav-link">Join Us</a></li>
-      <li><a href="/contact.html" class="nav-link">Contact</a></li>
+      <li><a href="/"             class="nav-link" id="navHome">Home</a></li>
+      <li><a href="/events.html"  class="nav-link" id="navEvents">Events</a></li>
+      <li><a href="/about.html"   class="nav-link nav-link--active" id="navAbout">About</a></li>
+      <li><a href="/join.html"    class="nav-link" id="navJoin">Join Us</a></li>
+      <li><a href="/contact.html" class="nav-link" id="navContact">Contact</a></li>
     </ul>
     <div class="navbar__actions">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
@@ -52,43 +54,64 @@
 
 <main class="main-content">
 
+<!-- ── ENHANCED PAGE HERO ─────────────────────────────────────── -->
+<section class="inner-hero" aria-labelledby="aboutHeroTitle">
+  <!-- Background blobs -->
+  <div class="inner-hero__blob inner-hero__blob--tl" aria-hidden="true"></div>
+  <div class="inner-hero__blob inner-hero__blob--br" aria-hidden="true"></div>
+  <div class="inner-hero__blob inner-hero__blob--center" aria-hidden="true"></div>
+  <!-- Grid overlay -->
+  <div class="inner-hero__grid" aria-hidden="true"></div>
+  <!-- Floating shapes -->
+  <div class="inner-hero__shape inner-hero__shape--dot-teal" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-pink" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-green" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-amber" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-purple" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--diamond" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--ring" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--squiggle" aria-hidden="true">
+    <svg width="52" height="28" viewBox="0 0 52 28" fill="none"><path d="M2 14 Q13 2 24 14 Q35 26 46 14" stroke="#6C63FF" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+  </div>
+  <div class="inner-hero__shape inner-hero__shape--star" aria-hidden="true">
+    <svg width="32" height="32" viewBox="0 0 36 36" fill="none"><path d="M18 2L22 14H34L24 21L28 33L18 26L8 33L12 21L2 14H14Z" fill="#F59E0B" opacity="0.65"/></svg>
+  </div>
 
-<!-- ── PAGE HERO ───────────────────────────────────────────────── -->
-<section class="page-hero" style="padding-top:calc(var(--navbar-h) + 5rem);padding-bottom:5rem;background:var(--clr-bg);border:none;position:relative;overflow:hidden;" aria-labelledby="pageTitle">
-  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 70% 50%,rgba(52,152,219,0.08) 0%,transparent 70%);pointer-events:none" aria-hidden="true"></div>
-  <div class="container" style="position:relative">
-    <span class="section__eyebrow">Our Story</span>
-    <h1 id="pageTitle" style="max-width:700px;margin-inline:auto;margin-bottom:1.25rem">
-      Built by Students,<br/>Made for <em style="font-style:normal;color:var(--clr-accent)">Everyone</em>
+  <div class="container inner-hero__inner">
+    <span class="inner-hero__eyebrow">Our Story</span>
+    <h1 class="inner-hero__title" id="aboutHeroTitle">
+      Built by Students,<br/>Made for <span class="inner-hero__title-accent">Everyone</span>
     </h1>
-    <p style="font-size:1.1rem;max-width:560px;margin-inline:auto;margin-bottom:2.5rem">
+    <p class="inner-hero__subtitle">
       Yuvaverse is more than an event club — we're a movement that turns ordinary campus life into extraordinary memories.
     </p>
-    <div style="display:flex;gap:1rem;justify-content:center">
-      <a href="/join.html"    class="btn btn--accent btn--lg">Join Our Team →</a>
+    <div class="inner-hero__cta">
+      <a href="/join.html"    class="btn btn--accent btn--lg" id="aboutJoinBtn">Join Our Team →</a>
       <a href="/contact.html" class="btn btn--ghost btn--lg">Get in Touch</a>
     </div>
   </div>
 </section>
 
 <!-- ── STATS BAR ────────────────────────────────────────────────── -->
-<div class="container reveal" style="padding-block:0">
-  <div class="stats-bar" role="list" aria-label="Club statistics">
-    <div class="stats-bar__item" role="listitem">
-      <span class="stats-bar__number">50<span class="stats-bar__accent">+</span></span>
-      <span class="stats-bar__label">Events Hosted</span>
-    </div>
-    <div class="stats-bar__item" role="listitem">
-      <span class="stats-bar__number">2K<span class="stats-bar__accent">+</span></span>
-      <span class="stats-bar__label">Happy Attendees</span>
-    </div>
-    <div class="stats-bar__item" role="listitem">
-      <span class="stats-bar__number">10<span class="stats-bar__accent">+</span></span>
-      <span class="stats-bar__label">Campus Partners</span>
-    </div>
-    <div class="stats-bar__item" role="listitem">
-      <span class="stats-bar__number">3<span class="stats-bar__accent">+</span></span>
-      <span class="stats-bar__label">Years of Impact</span>
+<div class="stats-bar-wrap">
+  <div class="container reveal" style="padding-block:0">
+    <div class="stats-bar" role="list" aria-label="Club statistics">
+      <div class="stats-bar__item" role="listitem">
+        <span class="stats-bar__number">50<span class="stats-bar__accent">+</span></span>
+        <span class="stats-bar__label">Events Hosted</span>
+      </div>
+      <div class="stats-bar__item" role="listitem">
+        <span class="stats-bar__number">2K<span class="stats-bar__accent">+</span></span>
+        <span class="stats-bar__label">Happy Attendees</span>
+      </div>
+      <div class="stats-bar__item" role="listitem">
+        <span class="stats-bar__number">10<span class="stats-bar__accent">+</span></span>
+        <span class="stats-bar__label">Campus Partners</span>
+      </div>
+      <div class="stats-bar__item" role="listitem">
+        <span class="stats-bar__number">3<span class="stats-bar__accent">+</span></span>
+        <span class="stats-bar__label">Years of Impact</span>
+      </div>
     </div>
   </div>
 </div>
@@ -110,7 +133,7 @@
       </div>
       <div class="mission-card mission-card--vision">
         <div class="mission-card__icon">🚀</div>
-        <p class="mission-card__title" style="color:#a855f7">Our Vision</p>
+        <p class="mission-card__title">Our Vision</p>
         <h3>India's Most Impactful Student Platform</h3>
         <p>To become the leading student-run event organization in India — a launchpad where student passions meet professional opportunities and campus life transforms into a career.</p>
       </div>
@@ -127,32 +150,32 @@
       <p>Six principles that shape our culture and make Yuvaverse a place where every student can thrive.</p>
     </div>
     <div class="pillars-grid" role="list">
-      <div class="pillar-card" role="listitem">
+      <div class="pillar-card reveal" role="listitem">
         <span class="pillar-card__emoji">💡</span>
         <h4>Innovation</h4>
         <p>We experiment boldly. Every event is an opportunity to try something new and raise the bar for what campus experiences can be.</p>
       </div>
-      <div class="pillar-card" role="listitem">
+      <div class="pillar-card reveal" role="listitem">
         <span class="pillar-card__emoji">🤝</span>
         <h4>Inclusivity</h4>
         <p>Every student belongs at Yuvaverse — regardless of branch, year, or background. Our events are designed to welcome everyone.</p>
       </div>
-      <div class="pillar-card" role="listitem">
+      <div class="pillar-card reveal" role="listitem">
         <span class="pillar-card__emoji">⭐</span>
         <h4>Excellence</h4>
         <p>We obsess over the details. From logistics to live experiences, we hold ourselves to the highest standard of quality.</p>
       </div>
-      <div class="pillar-card" role="listitem">
+      <div class="pillar-card reveal" role="listitem">
         <span class="pillar-card__emoji">🔗</span>
         <h4>Collaboration</h4>
         <p>We believe in the power of teamwork. Every great event is the result of many minds working toward a shared goal.</p>
       </div>
-      <div class="pillar-card" role="listitem">
+      <div class="pillar-card reveal" role="listitem">
         <span class="pillar-card__emoji">🌱</span>
         <h4>Growth</h4>
         <p>We invest in our members. Every role at Yuvaverse is a real-world learning experience that accelerates personal and professional growth.</p>
       </div>
-      <div class="pillar-card" role="listitem">
+      <div class="pillar-card reveal" role="listitem">
         <span class="pillar-card__emoji">💥</span>
         <h4>Impact</h4>
         <p>We measure success by the smiles in the crowd. Our events create ripples that go far beyond the campus gates.</p>
@@ -164,7 +187,7 @@
 <!-- ── OUR STORY (TIMELINE) ────────────────────────────────────── -->
 <section class="section" aria-labelledby="storyTitle">
   <div class="container">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center">
+    <div class="story-grid">
 
       <div class="reveal">
         <span class="section__eyebrow">How We Got Here</span>
@@ -205,16 +228,15 @@
       </div>
 
       <!-- Right decorative visual -->
-      <div class="reveal" style="position:relative;aspect-ratio:3/4;border-radius:var(--r-xl);background:linear-gradient(135deg,var(--clr-primary) 0%,#1e3a5f 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;" aria-hidden="true">
-        <span style="font-family:var(--ff-heading);font-size:9rem;font-weight:800;color:rgba(255,255,255,0.08);letter-spacing:-0.05em;user-select:none;position:absolute">YV</span>
-        <div style="position:relative;z-index:1;text-align:center;padding:2rem">
-          <div style="font-size:4rem;margin-bottom:1rem">🎪</div>
-          <p style="color:rgba(255,255,255,0.85);font-family:var(--ff-heading);font-size:1.1rem;font-weight:600;line-height:1.5;max-width:240px;margin-inline:auto">"Every great event starts with a great team."</p>
-          <p style="color:rgba(255,255,255,0.45);font-size:0.85rem;margin-top:0.75rem">— Yuvaverse Founders</p>
+      <div class="reveal story-visual" aria-hidden="true">
+        <span class="story-visual__monogram">YV</span>
+        <div class="story-visual__content">
+          <span class="story-visual__emoji">🎪</span>
+          <p class="story-visual__quote">"Every great event starts with a great team."</p>
+          <p class="story-visual__attribution">— Yuvaverse Founders</p>
         </div>
-        <!-- Floating dots -->
-        <div style="position:absolute;top:10%;left:8%;width:60px;height:60px;border-radius:50%;background:rgba(52,152,219,0.25);filter:blur(20px)"></div>
-        <div style="position:absolute;bottom:15%;right:10%;width:80px;height:80px;border-radius:50%;background:rgba(168,85,247,0.2);filter:blur(30px)"></div>
+        <div class="story-visual__blob story-visual__blob--1"></div>
+        <div class="story-visual__blob story-visual__blob--2"></div>
       </div>
 
     </div>
@@ -230,37 +252,37 @@
       <p>A diverse group of passionate students who turn vision into reality — one event at a time.</p>
     </div>
     <div class="team-grid" role="list">
-      <div class="team-card" role="listitem">
+      <div class="team-card reveal" role="listitem">
         <div class="team-card__avatar" style="background:linear-gradient(135deg,#3498DB,#2C3E50)">S</div>
         <h3 class="team-card__name">Surya Narayan</h3>
         <p class="team-card__role">President &amp; Founder</p>
         <p class="team-card__quote">"If you can dream it, we can event it."</p>
       </div>
-      <div class="team-card" role="listitem">
+      <div class="team-card reveal" role="listitem">
         <div class="team-card__avatar" style="background:linear-gradient(135deg,#a855f7,#ec4899)">A</div>
         <h3 class="team-card__name">Ananya Sharma</h3>
         <p class="team-card__role">Head of Design</p>
         <p class="team-card__quote">"Good design is the silent ambassador of every event."</p>
       </div>
-      <div class="team-card" role="listitem">
+      <div class="team-card reveal" role="listitem">
         <div class="team-card__avatar" style="background:linear-gradient(135deg,#10b981,#059669)">R</div>
         <h3 class="team-card__name">Rahul Mehta</h3>
         <p class="team-card__role">Head of Operations</p>
         <p class="team-card__quote">"Logistics is love. Chaos is optional."</p>
       </div>
-      <div class="team-card" role="listitem">
+      <div class="team-card reveal" role="listitem">
         <div class="team-card__avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">P</div>
         <h3 class="team-card__name">Priya Reddy</h3>
         <p class="team-card__role">Head of Marketing</p>
         <p class="team-card__quote">"If no one knows about it, did it even happen?"</p>
       </div>
-      <div class="team-card" role="listitem">
+      <div class="team-card reveal" role="listitem">
         <div class="team-card__avatar" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">K</div>
         <h3 class="team-card__name">Karthik Iyer</h3>
         <p class="team-card__role">Tech Lead</p>
         <p class="team-card__quote">"Code is the stage on which the event performs."</p>
       </div>
-      <div class="team-card" role="listitem">
+      <div class="team-card reveal" role="listitem">
         <div class="team-card__avatar" style="background:linear-gradient(135deg,#f43f5e,#fb923c)">N</div>
         <h3 class="team-card__name">Nisha Gupta</h3>
         <p class="team-card__role">Head of Outreach</p>
@@ -277,7 +299,7 @@
       <h2 id="ctaTitle">Ready to Be Part of the Story?</h2>
       <p>Whether you want to attend an event, join our team, or partner with us — there's a place for you at Yuvaverse.</p>
       <div class="cta-banner__buttons">
-        <a href="/join.html"    class="btn btn--accent btn--lg">Join the Team →</a>
+        <a href="/join.html"    class="btn btn--accent btn--lg" id="ctaJoinBtn">Join the Team →</a>
         <a href="/events.html"  class="btn btn--ghost btn--lg" style="color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.3)">Explore Events</a>
         <a href="/contact.html" class="btn btn--ghost btn--lg" style="color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.3)">Contact Us</a>
       </div>
@@ -285,10 +307,9 @@
   </div>
 </section>
 
-<!-- ── FOOTER ───────────────────────────────────────────────────── -->
-
 </main>
 
+<!-- ── FOOTER ───────────────────────────────────────────────────── -->
 <footer class="footer" role="contentinfo">
   <div class="container">
     <div class="footer__inner">
