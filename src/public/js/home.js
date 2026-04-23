@@ -22,9 +22,5 @@
             if (grid)
                 renderEmptyState(grid, 'Could not load events. Please try again later.');
         });
-        // Smooth scroll for hero CTA
-        document.getElementById('scrollDown')?.addEventListener('click', () => {
-            document.getElementById('upcoming')?.scrollIntoView({ behavior: 'smooth' });
-        });
     });
 })();

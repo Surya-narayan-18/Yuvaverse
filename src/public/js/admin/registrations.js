@@ -119,10 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTable(searched);
   });
 
-  // Event filter dropdown
-  document.getElementById('event-filter')?.addEventListener('change', (e) => {
-    applyEventFilter(e.target.value);
-  });
+  // Dropdown filters
+  document.getElementById('event-filter')?.addEventListener('change', applyDropdownFilters);
+  document.getElementById('status-filter')?.addEventListener('change', applyDropdownFilters);
 
   // CSV export — uses currently filtered data
   document.getElementById('export-csv-btn')?.addEventListener('click', () => {
@@ -188,11 +187,17 @@ async function loadRegistrations() {
   }
 }
 
-// ── Apply event filter ────────────────────────────────────────────────────────
-function applyEventFilter(eventId) {
-  filteredRegistrations = eventId
-    ? allRegistrations.filter(r => r.eventId === eventId || r.event?.id === eventId)
-    : [...allRegistrations];
+// ── Apply dropdown filters ────────────────────────────────────────────────────
+function applyDropdownFilters() {
+  const eventId = document.getElementById('event-filter')?.value || '';
+  const statusId = document.getElementById('status-filter')?.value || '';
+
+  filteredRegistrations = allRegistrations.filter(r => {
+    const matchEvent = eventId ? (r.eventId === eventId || r.event?.id === eventId) : true;
+    const matchStatus = statusId ? (r.status === statusId) : true;
+    return matchEvent && matchStatus;
+  });
+
   const searchEl = document.getElementById('search-filter');
   if (searchEl) searchEl.value = '';
   renderTable(filteredRegistrations);
