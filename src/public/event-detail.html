@@ -18,6 +18,8 @@
   <meta name="description" content="View event details and register securely with Razorpay."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="stylesheet" href="/css/global.css"/>
+  <link rel="stylesheet" href="/css/inner-pages.css"/>
+  <link rel="stylesheet" href="/css/event-detail.css"/>
   <!-- Razorpay Checkout SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -42,7 +44,7 @@
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       </button>
     </div>
-    <button class="hamburger" id="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -50,48 +52,86 @@
 
 <main class="main-content">
 
-<main style="padding-top:calc(var(--navbar-h) + 2.5rem); padding-bottom:5rem;" id="eventContent">
-  <div class="container">
-    <a href="/events.html" class="btn btn--ghost btn--sm" style="margin-bottom:2rem;display:inline-flex">
-      ← Back to Events
+<!-- ── EVENT DETAIL HERO ──────────────────────────────────────── -->
+<section class="inner-hero ed-hero" aria-labelledby="eventTitle">
+  <!-- Background blobs -->
+  <div class="inner-hero__blob inner-hero__blob--tl" aria-hidden="true"></div>
+  <div class="inner-hero__blob inner-hero__blob--br" aria-hidden="true"></div>
+  <div class="inner-hero__blob inner-hero__blob--center" aria-hidden="true"></div>
+  <!-- Grid overlay -->
+  <div class="inner-hero__grid" aria-hidden="true"></div>
+  <!-- Floating shapes -->
+  <div class="inner-hero__shape inner-hero__shape--dot-teal" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-pink" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-green" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--dot-amber" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--diamond" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--ring" aria-hidden="true"></div>
+  <div class="inner-hero__shape inner-hero__shape--squiggle" aria-hidden="true">
+    <svg width="52" height="28" viewBox="0 0 52 28" fill="none"><path d="M2 14 Q13 2 24 14 Q35 26 46 14" stroke="#6C63FF" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+  </div>
+  <div class="inner-hero__shape inner-hero__shape--star" aria-hidden="true">
+    <svg width="32" height="32" viewBox="0 0 36 36" fill="none"><path d="M18 2L22 14H34L24 21L28 33L18 26L8 33L12 21L2 14H14Z" fill="#F59E0B" opacity="0.65"/></svg>
+  </div>
+
+  <div class="container inner-hero__inner">
+    <a href="/events.html" class="ed-back-link" id="backToEvents">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Events
     </a>
-    <div class="event-detail-layout">
+    <span class="inner-hero__eyebrow" id="eventCategory">Event Details</span>
+    <h1 class="inner-hero__title" id="eventTitle" style="max-width:700px;margin-inline:auto">Loading event…</h1>
 
-      <!-- ── LEFT: Event Info ──────────────────────────────── -->
-      <div>
-        <div class="event-detail__image" id="eventImage"></div>
+    <!-- Meta pills row -->
+    <div class="ed-meta-row" id="eventMetaRow" role="list" aria-label="Event details">
+      <span class="ed-meta-pill" role="listitem" id="metaDate">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="eventDate">Loading…</span>
+      </span>
+      <span class="ed-meta-pill" role="listitem" id="metaTime">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="eventTime">—</span>
+      </span>
+      <span class="ed-meta-pill" role="listitem" id="metaVenue">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="eventVenue">Loading…</span>
+      </span>
+      <span class="ed-meta-pill" role="listitem" id="metaCount">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span id="regCount">—</span>
+      </span>
+    </div>
+  </div>
+</section>
 
-        <div class="event-detail__meta" role="list" aria-label="Event details">
-          <span class="meta-item" role="listitem">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span id="eventDate">Loading…</span>
-          </span>
-          <span class="meta-item" role="listitem">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span id="eventTime">—</span>
-          </span>
-          <span class="meta-item" role="listitem">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span id="eventVenue">Loading…</span>
-          </span>
-          <span class="meta-item" role="listitem">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            <span id="regCount">—</span>
-          </span>
+<!-- ── EVENT CONTENT + REGISTRATION ──────────────────────────── -->
+<section class="ed-content-section" id="eventContent">
+  <div class="container">
+    <div class="ed-layout">
+
+      <!-- ── LEFT: Event Image + Description ──────────────── -->
+      <div class="ed-info">
+        <div class="ed-image-wrap">
+          <div class="event-detail__image" id="eventImage"></div>
         </div>
 
-        <h1 id="eventTitle" style="margin-bottom:1.25rem">Loading event…</h1>
-        <p id="eventDesc" style="font-size:1rem;line-height:1.8;color:var(--clr-text-muted)"></p>
+        <div class="ed-description">
+          <h2 class="ed-description__heading">About This Event</h2>
+          <p id="eventDesc" class="ed-description__text"></p>
+        </div>
       </div>
 
-      <!-- ── RIGHT: Registration Card ──────────────────────── -->
-      <aside>
+      <!-- ── RIGHT: Registration Card ─────────────────────── -->
+      <aside class="ed-sidebar">
 
         <!-- ─ INDIVIDUAL REGISTRATION (default; hidden for team events) ─ -->
-        <div class="register-card" id="individualForm">
-          <div class="register-card__price">
-            <span id="registerPrice">—</span>
-            <span> / person</span>
+        <div class="register-card ed-register-card" id="individualForm">
+          <div class="ed-register-card__header">
+            <span class="ed-register-card__label">Registration</span>
+            <div class="ed-register-card__price">
+              <span id="registerPrice">—</span>
+              <span class="ed-register-card__per"> / person</span>
+            </div>
           </div>
 
           <div class="form-group">
@@ -116,18 +156,21 @@
             Register Now →
           </button>
 
-          <p style="font-size:.78rem;color:var(--clr-text-subtle);margin-top:1rem;text-align:center;line-height:1.5">
+          <p class="ed-register-card__note">
             🔒 Secure registration via Yuvaverse. Your College ID will be verified at the event.
           </p>
         </div>
 
         <!-- ─ TEAM REGISTRATION (shown only for team events) ─ -->
-        <div class="register-card" id="teamForm" style="display:none;">
-          <div class="register-card__price">
-            <span id="teamRegisterPrice">—</span>
-            <span> / team</span>
+        <div class="register-card ed-register-card" id="teamForm" style="display:none;">
+          <div class="ed-register-card__header">
+            <span class="ed-register-card__label">Team Registration</span>
+            <div class="ed-register-card__price">
+              <span id="teamRegisterPrice">—</span>
+              <span class="ed-register-card__per"> / team</span>
+            </div>
           </div>
-          <p id="teamSizeHint" style="font-size:0.82rem;color:var(--clr-text-muted);margin-bottom:1.25rem;"></p>
+          <p id="teamSizeHint" class="ed-team-hint"></p>
 
           <!-- Team Name -->
           <div class="form-group">
@@ -137,7 +180,7 @@
           </div>
 
           <!-- Leader section -->
-          <p style="font-size:0.8rem;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">👑 Team Leader (you)</p>
+          <p class="ed-section-label">👑 Team Leader (you)</p>
 
           <div class="form-group">
             <label class="form-label" for="leaderName">Leader Name <span aria-hidden="true">*</span></label>
@@ -156,8 +199,8 @@
           </div>
 
           <!-- Dynamic member rows -->
-          <div style="display:flex;align-items:center;justify-content:space-between;margin:1rem 0 .5rem;">
-            <p style="font-size:0.8rem;font-weight:600;color:var(--clr-accent);text-transform:uppercase;letter-spacing:.06em;margin:0;">👥 Additional Members</p>
+          <div class="ed-members-header">
+            <p class="ed-section-label" style="margin:0">👥 Additional Members</p>
             <button type="button" class="btn btn--ghost btn--sm" id="addMemberBtn" style="padding:.3rem .75rem;font-size:.8rem;">+ Add</button>
           </div>
           <div id="teamMembersContainer">
@@ -168,23 +211,23 @@
             Register Team →
           </button>
 
-          <p style="font-size:.78rem;color:var(--clr-text-subtle);margin-top:1rem;text-align:center;line-height:1.5">
+          <p class="ed-register-card__note">
             🔒 Confirmation email will be sent to the team leader only.
           </p>
         </div>
 
       </aside>
 
-    </div><!-- /event-detail-layout -->
+    </div><!-- /ed-layout -->
   </div>
-</main>
+</section>
 
 </main>
 
 <footer class="footer" role="contentinfo">
   <div class="container">
     <div class="footer__bottom" style="border-top:none;padding-top:0">
-      <p>© <span id="footerYear"></span> Yuvaverse.</p>
+      <p>© <span id="footerYear"></span> Yuvaverse. All rights reserved.</p>
       <a href="/events.html" style="color:rgba(255,255,255,0.6);font-size:.85rem">← All Events</a>
     </div>
   </div>

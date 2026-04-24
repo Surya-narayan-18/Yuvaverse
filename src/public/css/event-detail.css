@@ -1,0 +1,220 @@
+/* ================================================================
+   YUVAVERSE — EVENT DETAIL PAGE STYLES
+   Consistent with the inner-pages aesthetic.
+   ================================================================ */
+
+/* ── HERO OVERRIDES ──────────────────────────────────────────── */
+.ed-hero {
+  padding-bottom: 2.5rem;
+}
+
+/* Back link */
+.ed-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--ff-heading);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  padding: 0.4rem 0.875rem 0.4rem 0.625rem;
+  border-radius: var(--r-full);
+  border: 1.5px solid var(--clr-border-strong);
+  background: var(--clr-bg);
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  box-shadow: var(--shadow-sm);
+}
+.ed-back-link:hover {
+  border-color: var(--clr-accent);
+  color: var(--clr-accent);
+  background: var(--clr-accent-glow);
+}
+
+/* Meta pills row */
+.ed-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+.ed-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.875rem;
+  border-radius: var(--r-full);
+  background: var(--clr-card);
+  border: 1.5px solid var(--clr-border-strong);
+  font-family: var(--ff-heading);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  box-shadow: var(--shadow-sm);
+}
+.ed-meta-pill svg { color: var(--clr-accent); flex-shrink: 0; }
+
+/* ── CONTENT SECTION ─────────────────────────────────────────── */
+.ed-content-section {
+  padding-top: 3rem;
+  padding-bottom: 5rem;
+}
+
+/* ── TWO-COLUMN LAYOUT ───────────────────────────────────────── */
+.ed-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* ── LEFT: Event Info ────────────────────────────────────────── */
+.ed-info {}
+
+.ed-image-wrap {
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 2rem;
+}
+
+.event-detail__image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+.ed-description {
+  background: var(--clr-card);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--r-xl);
+  padding: 2rem;
+  box-shadow: var(--shadow-card);
+}
+.ed-description__heading {
+  font-family: var(--ff-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--clr-text);
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--clr-border);
+}
+.ed-description__text {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--clr-text-muted);
+  margin: 0;
+}
+
+/* ── RIGHT: Sticky Sidebar ───────────────────────────────────── */
+.ed-sidebar {
+  position: sticky;
+  top: calc(var(--navbar-h) + 1.5rem);
+}
+
+/* ── REGISTER CARD ───────────────────────────────────────────── */
+.ed-register-card {
+  background: var(--clr-card);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--r-xl);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-md);
+}
+
+.ed-register-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--clr-border);
+}
+.ed-register-card__label {
+  font-family: var(--ff-heading);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--clr-text-subtle);
+}
+.ed-register-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-family: var(--ff-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--clr-accent);
+}
+.ed-register-card__per {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--clr-text-muted);
+}
+.ed-register-card__note {
+  font-size: 0.76rem;
+  color: var(--clr-text-subtle);
+  margin-top: 1rem;
+  text-align: center;
+  line-height: 1.55;
+}
+
+/* Team hint */
+.ed-team-hint {
+  font-size: 0.82rem;
+  color: var(--clr-text-muted);
+  margin-bottom: 1.25rem;
+  background: var(--clr-accent-glow);
+  border: 1px solid rgba(108,99,255,0.2);
+  border-radius: var(--r-md);
+  padding: 0.625rem 0.875rem;
+}
+
+/* Section labels inside card */
+.ed-section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--clr-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+}
+
+/* Members header row */
+.ed-members-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1rem 0 0.5rem;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .ed-layout {
+    grid-template-columns: 1fr 340px;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .ed-hero { padding-bottom: 2rem; }
+  .ed-layout {
+    grid-template-columns: 1fr;
+  }
+  .ed-sidebar {
+    position: static;
+  }
+  .ed-meta-row { justify-content: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .ed-register-card { padding: 1.25rem; }
+  .ed-meta-pill { font-size: 0.72rem; padding: 0.35rem 0.65rem; }
+}
