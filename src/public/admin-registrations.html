@@ -21,6 +21,12 @@
     .badge-pending { background: #fef3c7; color: #92400e; }
     .refund-btn { background: #ef4444; color: white; padding: 0.25rem 0.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
 
+    /* ── Tab switcher ─────────────────────────────────────────────── */
+    .reg-tabs { display:flex; gap:0; margin-bottom:1.25rem; border:1px solid var(--border-color); border-radius:8px; overflow:hidden; width:fit-content; }
+    .reg-tab { padding:0.55rem 1.25rem; border:none; background:transparent; font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-secondary,#6b7280); transition:background .15s,color .15s; }
+    .reg-tab.active { background:#7c3aed; color:#fff; }
+    .reg-tab:not(.active):hover { background:#f3f4f6; }
+
     /* ── Modal ───────────────────────────────────────────────────────── */
     .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:50; padding:1rem; }
     .modal.active { display:flex; }
@@ -119,39 +125,84 @@
         </div>
       </header>
 
-      <div style="margin-bottom: 1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
-        <input type="text" id="search-filter" placeholder="Search by name or email..."
-          style="padding:0.5rem; width: 260px; border:1px solid var(--border-color); border-radius:4px;">
-        <select id="event-filter"
-          style="padding:0.5rem 0.75rem; border:1px solid var(--border-color); border-radius:4px; min-width:220px; font-size:0.9rem; background:var(--card-bg); color:inherit;">
-          <option value="">All Events</option>
-        </select>
-        <select id="status-filter"
-          style="padding:0.5rem 0.75rem; border:1px solid var(--border-color); border-radius:4px; min-width:150px; font-size:0.9rem; background:var(--card-bg); color:inherit;">
-          <option value="">All Statuses</option>
-          <option value="SUCCESS">Success</option>
-          <option value="PENDING">Pending</option>
-          <option value="FAILED">Failed</option>
-        </select>
+      <!-- Tab switcher -->
+      <div class="reg-tabs" id="reg-tabs">
+        <button class="reg-tab active" id="tab-individual" data-tab="individual">👤 Individual</button>
+        <button class="reg-tab" id="tab-teams" data-tab="teams">👥 Teams</button>
       </div>
 
-      <div style="overflow-x: auto;">
-        <table id="registrations-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Participant</th>
-              <th>College ID</th>
-              <th>Event</th>
-              <th>Status</th>
-              <th>Custom Answers</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="regs-tbody">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
+      <!-- ── INDIVIDUAL REGISTRATIONS PANEL ──────────────────────── -->
+      <div id="panel-individual">
+        <div style="margin-bottom: 1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+          <input type="text" id="search-filter" placeholder="Search by name or email..."
+            style="padding:0.5rem; width: 260px; border:1px solid var(--border-color); border-radius:4px;">
+          <select id="event-filter"
+            style="padding:0.5rem 0.75rem; border:1px solid var(--border-color); border-radius:4px; min-width:220px; font-size:0.9rem; background:var(--card-bg); color:inherit;">
+            <option value="">All Events</option>
+          </select>
+          <select id="status-filter"
+            style="padding:0.5rem 0.75rem; border:1px solid var(--border-color); border-radius:4px; min-width:150px; font-size:0.9rem; background:var(--card-bg); color:inherit;">
+            <option value="">All Statuses</option>
+            <option value="SUCCESS">Success</option>
+            <option value="PENDING">Pending</option>
+            <option value="FAILED">Failed</option>
+          </select>
+        </div>
+        <div style="overflow-x: auto;">
+          <table id="registrations-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Participant</th>
+                <th>College ID</th>
+                <th>Event</th>
+                <th>Status</th>
+                <th>Custom Answers</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="regs-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── TEAM REGISTRATIONS PANEL ────────────────────────────── -->
+      <div id="panel-teams" style="display:none;">
+        <div style="margin-bottom: 1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+          <input type="text" id="team-search-filter" placeholder="Search by team name or leader..."
+            style="padding:0.5rem; width: 260px; border:1px solid var(--border-color); border-radius:4px;">
+          <select id="team-event-filter"
+            style="padding:0.5rem 0.75rem; border:1px solid var(--border-color); border-radius:4px; min-width:220px; font-size:0.9rem; background:var(--card-bg); color:inherit;">
+            <option value="">All Events</option>
+          </select>
+          <select id="team-status-filter"
+            style="padding:0.5rem 0.75rem; border:1px solid var(--border-color); border-radius:4px; min-width:150px; font-size:0.9rem; background:var(--card-bg); color:inherit;">
+            <option value="">All Statuses</option>
+            <option value="SUCCESS">Success</option>
+            <option value="PENDING">Pending</option>
+            <option value="FAILED">Failed</option>
+          </select>
+        </div>
+        <div style="overflow-x: auto;">
+          <table id="teams-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Team Name</th>
+                <th>Leader</th>
+                <th>Members</th>
+                <th>Event</th>
+                <th>Status</th>
+                <th>Payment ID</th>
+              </tr>
+            </thead>
+            <tbody id="teams-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   </div>

@@ -813,16 +813,21 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
   color: var(--clr-text-subtle);
   margin-bottom: 0.625rem;
 }
-.event-card__desc {
-  font-size: 0.875rem;
-  color: var(--clr-text-muted);
+.event-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
   margin-bottom: 1.25rem;
   flex: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.6;
+}
+.event-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.775rem;
+  color: var(--clr-text-muted);
+  font-weight: 500;
 }
 .event-card__footer {
   display: flex;

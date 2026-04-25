@@ -405,6 +405,8 @@
   color: #fff;
   backdrop-filter: blur(6px);
 }
+
+
 .ev-card__bookmark {
   position: absolute;
   top: 0.75rem;

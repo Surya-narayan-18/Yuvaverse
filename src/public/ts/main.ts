@@ -150,12 +150,14 @@ const ApiClient = (() => {
 
 function renderSkeletonCards(container: HTMLElement, count = 3): void {
   container.innerHTML = Array.from({ length: count }, () => `
-    <div class="event-card event-card--skeleton" aria-hidden="true">
-      <div class="skeleton skeleton--image"></div>
-      <div class="skeleton skeleton--title"></div>
-      <div class="skeleton skeleton--text"></div>
-      <div class="skeleton skeleton--text skeleton--text--short"></div>
-      <div class="skeleton skeleton--btn"></div>
+    <div class="ev-card ev-card--skeleton" aria-hidden="true">
+      <div class="ev-card__image" style="aspect-ratio:16/9"></div>
+      <div class="ev-card__body" style="gap:0.6rem">
+        <div class="skel" style="height:18px;width:75%;border-radius:6px"></div>
+        <div class="skel" style="height:13px;width:50%;border-radius:4px"></div>
+        <div class="skel" style="height:13px;width:60%;border-radius:4px"></div>
+        <div class="skel" style="height:32px;width:120px;margin-top:0.5rem;border-radius:999px"></div>
+      </div>
     </div>`).join('');
 }
 
@@ -172,46 +174,118 @@ const CARD_GRADIENTS = [
   'linear-gradient(135deg,#2176ff,#33bdd8)',
 ];
 
+function pickGradient(str: string): string {
+  let n = 0;
+  for (let i = 0; i < (str || '').length; i++) n += str.charCodeAt(i);
+  return CARD_GRADIENTS[n % CARD_GRADIENTS.length];
+}
+
+const AVATAR_COLORS = ['#6C63FF','#a78bfa','#22d3ee','#f472b6','#4ade80'];
+
+function buildAvatarStrip(count: number): string {
+  const num = Math.min(count, 3);
+  if (num === 0) return '';
+  let html = '<div class="ev-card__avatars">';
+  for (let i = 0; i < num; i++) {
+    html += `<div class="ev-card__avatar" style="background:${AVATAR_COLORS[i]}"></div>`;
+  }
+  return html + '</div>';
+}
+
 function buildEventCard(event: EventData, index: number): string {
-  const date = new Date(event.date);
-  const day   = date.getDate().toString().padStart(2,'0');
-  const month = date.toLocaleString('en-IN',{ month:'short' }).toUpperCase();
-  const gradient = CARD_GRADIENTS[index % CARD_GRADIENTS.length];
-  const priceLabel = event.price === 0 ? 'Free' : `₹${event.price.toLocaleString('en-IN')}`;
-  const badgeClass = event.price === 0 ? 'badge--free' : 'badge--price';
-  const regCount = event._count?.registrations ?? 0;
-  const seatsLabel = regCount > 50 ? `<span class="badge badge--live"><span class="live-dot"></span>Filling Fast</span>` : '';
-  const bannerSrc = event.bannerUrl ?? event.imageUrl;
-  const imgHtml = bannerSrc
-    ? `<img src="${bannerSrc}" alt="${event.title}" loading="lazy"/>`
+  const isFree  = event.price === 0 || event.price === 0 || event.price == null;
+  const price   = isFree ? 'Free' : `₹${event.price}`;
+  const d       = new Date(event.date);
+  const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+  const timeStr = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const going   = event._count?.registrations ?? 0;
+  const imgSrc  = event.bannerUrl || event.imageUrl || '';
+  const grad    = pickGradient(event.title);
+  const isTeam  = (event as any).maxTeamSize > 1;
+
+  // Type info
+  const typeInfo = (event as any).eventType
+    ? `<div class="ev-card__meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z"/></svg>
+        <span>${(event as any).eventType}</span>
+       </div>`
     : '';
 
+  // Team info
+  const teamInfo = isTeam
+    ? `<div class="ev-card__meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Team ≤${(event as any).maxTeamSize}</span>
+       </div>`
+    : '';
+
+  // Deadline info
+  let deadlineInfo = '';
+  if ((event as any).registrationDeadline) {
+      const dl     = new Date((event as any).registrationDeadline);
+      const closed = dl < new Date();
+      const dlStr  = dl.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+      deadlineInfo = `<div class="ev-card__meta-item" ${closed ? 'style="color:var(--clr-error,#dc2626)"' : ''}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>${closed ? 'Reg. Closed' : `Closes ${dlStr}`}</span>
+      </div>`;
+  }
+
+  // Slots info
+  let slotsInfo = '';
+  if ((event as any).maxRegistrations != null) {
+      const filled    = (event as any).currentRegistrations ?? event._count?.registrations ?? 0;
+      const remaining = (event as any).maxRegistrations - filled;
+      const full      = remaining <= 0;
+      slotsInfo = `<div class="ev-card__meta-item" ${full ? 'style="color:var(--clr-error,#dc2626)"' : ''}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+        <span>${full ? 'Seats Full' : `${filled}/${(event as any).maxRegistrations} seats`}</span>
+      </div>`;
+  }
+
   return `
-  <article class="event-card fade-up" style="animation-delay:${index * 80}ms">
-    <div class="event-card__image" style="--card-gradient:${gradient}">
-      ${imgHtml}
-      <div class="event-card__badges">
-        <span class="badge ${badgeClass}">${priceLabel}</span>
-        ${seatsLabel}
-      </div>
-      <div class="event-card__date-chip">
-        <span class="date-chip__day">${day}</span>
-        <span class="date-chip__month">${month}</span>
-      </div>
+<div class="ev-card" role="listitem" style="animation-delay:${index * 80}ms">
+  <div class="ev-card__image" style="background:${grad}">
+    ${imgSrc ? `<img src="${imgSrc}" alt="${event.title}" loading="lazy"/>` : ''}
+    <div class="ev-card__badges">
+      <span class="ev-card__badge ${isFree ? 'ev-card__badge--free' : 'ev-card__badge--paid'}">${price}</span>
     </div>
-    <div class="event-card__body">
-      <h3 class="event-card__title">${event.title}</h3>
-      <p class="event-card__venue">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        ${event.venue}
-      </p>
-      <p class="event-card__desc">${event.description}</p>
-      <div class="event-card__footer">
-        <span class="event-card__registrations">${regCount} registered</span>
-        <a href="/event-detail.html?id=${event.id}" class="btn btn--accent btn--sm">Register Now</a>
-      </div>
+    <button class="ev-card__bookmark" aria-label="Bookmark event">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    </button>
+  </div>
+  <div class="ev-card__body">
+    <h3 class="ev-card__title">${event.title || 'Untitled Event'}</h3>
+    <div class="ev-card__venue">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>${event.venue || 'TBA'}</span>
     </div>
-  </article>`;
+    <div class="ev-card__meta">
+      ${event.date ? `
+      <div class="ev-card__meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>${dateStr}</span>
+      </div>
+      <div class="ev-card__meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>${timeStr}</span>
+      </div>` : ''}
+      ${typeInfo}
+      ${teamInfo}
+      ${deadlineInfo}
+      ${slotsInfo}
+    </div>
+    <div class="ev-card__footer">
+      <div class="ev-card__attendees">
+        ${buildAvatarStrip(going)}
+        <span class="ev-card__going">${going > 0 ? `${going}+ going` : 'Be the first!'}</span>
+      </div>
+      <a href="/event-detail.html?id=${event.id}" class="ev-card__register" id="registerBtn-${event.id}">
+        ${isTeam ? 'Register Team →' : 'Register Now →'}
+      </a>
+    </div>
+  </div>
+</div>`;
 }
 
 function renderEmptyState(container: HTMLElement, message = 'No events found.'): void {

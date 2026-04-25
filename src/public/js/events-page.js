@@ -86,16 +86,46 @@
     const grad      = pickGradient(ev.title);
     const isTeam    = ev.maxTeamSize > 1;
 
-    // Event type badge
-    const tc = ev.eventType && TYPE_COLORS[ev.eventType];
-    const typeBadge = ev.eventType
-      ? `<span class="ev-card__badge ev-card__badge--type" style="background:${tc?.bg ?? '#f3f4f6'};color:${tc?.color ?? '#374151'};">${ev.eventType}</span>`
+    // Event type info
+    const typeInfo = ev.eventType
+      ? `<div class="ev-card__meta-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z"/></svg>
+          <span>${ev.eventType}</span>
+         </div>`
       : '';
 
-    // Team badge
-    const teamBadge = isTeam
-      ? `<span class="ev-card__badge ev-card__badge--team" style="background:#6d28d9;color:#fff;">👥 Team ≤${ev.maxTeamSize}</span>`
+    // Team info
+    const teamInfo = isTeam
+      ? `<div class="ev-card__meta-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Team ≤${ev.maxTeamSize}</span>
+         </div>`
       : '';
+
+    // Registration deadline info
+    let deadlineInfo = '';
+    if (ev.registrationDeadline) {
+      const dl = new Date(ev.registrationDeadline);
+      const now = new Date();
+      const closed = dl < now;
+      const dlStr = dl.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+      deadlineInfo = `<div class="ev-card__meta-item" ${closed ? 'style="color:var(--clr-error, #dc2626)"' : ''}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>${closed ? 'Reg. Closed' : `Closes ${dlStr}`}</span>
+      </div>`;
+    }
+
+    // Slots info
+    let slotsInfo = '';
+    if (ev.maxRegistrations != null) {
+      const filled    = ev.currentRegistrations ?? ev._count?.registrations ?? 0;
+      const remaining = ev.maxRegistrations - filled;
+      const full      = remaining <= 0;
+      slotsInfo = `<div class="ev-card__meta-item" ${full ? 'style="color:var(--clr-error, #dc2626)"' : ''}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+        <span>${full ? 'Seats Full' : `${filled}/${ev.maxRegistrations} seats`}</span>
+      </div>`;
+    }
 
     return `
 <div class="ev-card" role="listitem">
@@ -103,8 +133,6 @@
     ${imgSrc ? `<img src="${imgSrc}" alt="${ev.title}" loading="lazy"/>` : ''}
     <div class="ev-card__badges">
       <span class="ev-card__badge ${isFree ? 'ev-card__badge--free' : 'ev-card__badge--paid'}">${price}</span>
-      ${typeBadge}
-      ${teamBadge}
     </div>
     <button class="ev-card__bookmark" aria-label="Bookmark event">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
@@ -116,8 +144,8 @@
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span>${ev.venue || 'TBA'}</span>
     </div>
-    ${ev.date ? `
     <div class="ev-card__meta">
+      ${ev.date ? `
       <div class="ev-card__meta-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>${dateStr}</span>
@@ -125,8 +153,12 @@
       <div class="ev-card__meta-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span>${timeStr}</span>
-      </div>
-    </div>` : ''}
+      </div>` : ''}
+      ${typeInfo}
+      ${teamInfo}
+      ${deadlineInfo}
+      ${slotsInfo}
+    </div>
     <div class="ev-card__footer">
       <div class="ev-card__attendees">
         ${buildAvatars(going)}

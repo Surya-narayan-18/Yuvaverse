@@ -37,7 +37,28 @@
         set('eventPrice', event.price === 0 ? 'Free' : `₹${event.price.toLocaleString('en-IN')}`);
         set('registerPrice', event.price === 0 ? 'Free' : `₹${event.price.toLocaleString('en-IN')}`);
         set('teamRegisterPrice', event.price === 0 ? 'Free' : `₹${event.price.toLocaleString('en-IN')}`);
-        set('regCount', `${event._count?.registrations ?? 0} registered`);
+        // Max registrations logic
+        const currentRegs = event.currentRegistrations ?? event._count?.registrations ?? 0;
+        if (event.maxRegistrations != null) {
+            const remaining = event.maxRegistrations - currentRegs;
+            set('regCount', remaining <= 0 ? 'Seats Full' : `${currentRegs} / ${event.maxRegistrations} seats`);
+        } else {
+            set('regCount', `${currentRegs} registered`);
+        }
+
+        // Registration deadline logic
+        if (event.registrationDeadline) {
+            const dl = new Date(event.registrationDeadline);
+            const now = new Date();
+            const closed = dl < now;
+            set('eventDeadline', closed ? 'Reg. Closed' : `Registration Closes ${dl.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}`);
+            const dlPill = document.getElementById('metaDeadline');
+            if (dlPill) {
+                dlPill.style.display = 'inline-flex';
+                if (closed) dlPill.style.color = 'var(--clr-error, #dc2626)';
+            }
+        }
+
         document.title = `${event.title} — Yuvaverse`;
 
         // ── Show correct form based on event type ─────────────────
