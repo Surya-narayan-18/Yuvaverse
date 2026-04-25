@@ -324,16 +324,18 @@ function initNavbar(): void {
     }
   });
 
-  // Logo scroll to top on home page
-  const logo = document.querySelector('.navbar__logo');
-  if (logo) {
-    logo.addEventListener('click', (e) => {
-      if (currentPath === '/' || currentPath === '/index.html') {
+  // Logo and Home link scroll to top on home page
+  const homeLinks = document.querySelectorAll('.navbar__logo, #navHome');
+  homeLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      const currentPath = window.location.pathname;
+      // Support local dev server paths (e.g., /src/public/index.html)
+      if (currentPath === '/' || currentPath.endsWith('index.html') || currentPath.endsWith('/public/')) {
         e.preventDefault();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
-  }
+  });
 }
 
 // ─── Init on DOM Ready ────────────────────────────────────────────

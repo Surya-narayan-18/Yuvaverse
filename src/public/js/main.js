@@ -253,6 +253,19 @@ function initNavbar() {
             link.classList.add('nav-link--active');
         }
     });
+
+    // Logo and Home link scroll to top on home page
+    const homeLinks = document.querySelectorAll('.navbar__logo, #navHome');
+    homeLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            const path = window.location.pathname;
+            // Support local dev server paths (e.g., /src/public/index.html)
+            if (path === '/' || path.endsWith('index.html') || path.endsWith('/public/')) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
 }
 // ─── Init on DOM Ready ────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
