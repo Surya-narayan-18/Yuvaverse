@@ -323,6 +323,17 @@ function initNavbar(): void {
       link.classList.add('nav-link--active');
     }
   });
+
+  // Logo scroll to top on home page
+  const logo = document.querySelector('.navbar__logo');
+  if (logo) {
+    logo.addEventListener('click', (e) => {
+      if (currentPath === '/' || currentPath === '/index.html') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  }
 }
 
 // ─── Init on DOM Ready ────────────────────────────────────────────
