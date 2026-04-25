@@ -18,50 +18,9 @@
   <meta name="description" content="Relive the magic of Yuvaverse events. Browse our gallery of unforgettable campus moments."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="stylesheet" href="/css/global.css"/>
+  <link rel="stylesheet" href="/css/inner-pages.css"/>
   <style>
-    /* ── Gallery Hero ── */
-    .gallery-hero {
-      padding-block: 5rem 4rem;
-      background: linear-gradient(135deg, var(--clr-primary) 0%, #1e1b4b 100%);
-      position: relative;
-      overflow: hidden;
-      text-align: center;
-    }
-    .gallery-hero::before {
-      content: '';
-      position: absolute;
-      top: -20%; right: -10%;
-      width: 450px; height: 450px;
-      background: radial-gradient(circle, rgba(108,99,255,0.25) 0%, transparent 65%);
-      pointer-events: none;
-    }
-    .gallery-hero::after {
-      content: '';
-      position: absolute;
-      bottom: -15%; left: -5%;
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(168,139,255,0.18) 0%, transparent 65%);
-      pointer-events: none;
-    }
-    .gallery-hero__inner {
-      position: relative;
-      z-index: 1;
-    }
-    .gallery-hero__eyebrow {
-      display: inline-block;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #a78bfa;
-      background: rgba(108,99,255,0.2);
-      border: 1px solid rgba(108,99,255,0.4);
-      padding: 0.3rem 0.875rem;
-      border-radius: 9999px;
-      margin-bottom: 1rem;
-    }
-    .gallery-hero h1 { color: #fff; margin-bottom: 0.75rem; }
-    .gallery-hero p  { color: rgba(255,255,255,0.68); max-width: 480px; margin-inline: auto; }
+
 
     /* ── Lightbox ── */
     .lightbox {
@@ -150,11 +109,26 @@
 <main class="main-content">
 
   <!-- Hero Banner -->
-  <section class="gallery-hero">
-    <div class="container gallery-hero__inner">
-      <span class="gallery-hero__eyebrow">📸 Our Moments</span>
-      <h1>Event Gallery</h1>
-      <p>Snapshots of laughter, learning, and legacy — every event told in pixels.</p>
+  <section class="inner-hero" aria-labelledby="galleryHeroTitle">
+    <!-- Background blobs -->
+    <div class="inner-hero__blob inner-hero__blob--tl" aria-hidden="true"></div>
+    <div class="inner-hero__blob inner-hero__blob--br" aria-hidden="true"></div>
+    <div class="inner-hero__blob inner-hero__blob--center" aria-hidden="true"></div>
+    <!-- Grid overlay -->
+    <div class="inner-hero__grid" aria-hidden="true"></div>
+    <!-- Floating shapes -->
+    <div class="inner-hero__shape inner-hero__shape--dot-teal" aria-hidden="true"></div>
+    <div class="inner-hero__shape inner-hero__shape--dot-pink" aria-hidden="true"></div>
+    <div class="inner-hero__shape inner-hero__shape--diamond" aria-hidden="true"></div>
+    <div class="inner-hero__shape inner-hero__shape--ring" aria-hidden="true"></div>
+    <div class="inner-hero__shape inner-hero__shape--squiggle" aria-hidden="true">
+      <svg width="52" height="28" viewBox="0 0 52 28" fill="none"><path d="M2 14 Q13 2 24 14 Q35 26 46 14" stroke="#6C63FF" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+    </div>
+    
+    <div class="container inner-hero__inner">
+      <span class="inner-hero__eyebrow">📸 Our Moments</span>
+      <h1 class="inner-hero__title" id="galleryHeroTitle">Event <span class="inner-hero__title-accent">Gallery</span></h1>
+      <p class="inner-hero__subtitle">Snapshots of laughter, learning, and legacy — every event told in pixels.</p>
     </div>
   </section>
 
