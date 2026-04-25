@@ -177,6 +177,10 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
   box-shadow: var(--shadow-md);
   border-bottom-color: var(--clr-border-strong);
 }
+.navbar .container {
+  max-width: 100%;
+  padding-inline: 3rem;
+}
 .navbar__inner {
   display: flex;
   align-items: center;
@@ -194,7 +198,7 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
   flex-shrink: 0;
 }
 .navbar__logo img {
-  height: 34px;
+  height: 48px;
   width: auto;
   display: block;
 }
