@@ -7,6 +7,7 @@
     "dev": "nodemon --watch src --ext ts --ignore src/public --exec ts-node src/server.ts",
     "build": "tsc --project tsconfig.json",
     "build:frontend": "tsc --project src/public/ts/tsconfig.json",
+    "build:prod": "prisma generate && prisma migrate deploy && npm run build && npm run build:frontend",
     "dev:frontend": "tsc --project src/public/ts/tsconfig.json --watch",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",

@@ -96,8 +96,8 @@ async function bootstrap(): Promise<void> {
     console.log('✅  Database connected successfully.');
 
     app.listen(PORT, () => {
-      console.log(`🚀  Yuvaverse API running at http://localhost:${PORT}`);
-      console.log(`🔍  Health check → http://localhost:${PORT}/api/health`);
+      console.log(`🚀  Yuvaverse API running on port ${PORT}`);
+      console.log(`🔍  Health check → /api/health`);
       console.log(`🌐  Environment  → ${process.env.NODE_ENV ?? 'development'}`);
     });
   } catch (error) {

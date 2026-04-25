@@ -101,7 +101,7 @@ function renderSkeletonCards(container, count = 3) {
       </div>
     </div>`).join('');
 }
-// ─── Event Card Builder (matches events-page.js ev-card design) ───────────────
+// ─── Event Card Builder ───────────────────────────────────────────
 const CARD_GRADIENTS = [
     'linear-gradient(135deg,#667eea,#764ba2)',
     'linear-gradient(135deg,#f093fb,#f5576c)',
@@ -114,13 +114,15 @@ const CARD_GRADIENTS = [
 ];
 function pickGradient(str) {
     let n = 0;
-    for (let i = 0; i < (str || '').length; i++) n += str.charCodeAt(i);
+    for (let i = 0; i < (str || '').length; i++)
+        n += str.charCodeAt(i);
     return CARD_GRADIENTS[n % CARD_GRADIENTS.length];
 }
-const AVATAR_COLORS = ['#6C63FF','#a78bfa','#22d3ee','#f472b6','#4ade80'];
+const AVATAR_COLORS = ['#6C63FF', '#a78bfa', '#22d3ee', '#f472b6', '#4ade80'];
 function buildAvatarStrip(count) {
     const num = Math.min(count, 3);
-    if (num === 0) return '';
+    if (num === 0)
+        return '';
     let html = '<div class="ev-card__avatars">';
     for (let i = 0; i < num; i++) {
         html += `<div class="ev-card__avatar" style="background:${AVATAR_COLORS[i]}"></div>`;
@@ -128,56 +130,51 @@ function buildAvatarStrip(count) {
     return html + '</div>';
 }
 function buildEventCard(event, index) {
-    const isFree  = event.price === 0 || event.price === '0' || event.price == null;
-    const price   = isFree ? 'Free' : `₹${event.price}`;
-    const d       = new Date(event.date);
+    const isFree = event.price === 0 || event.price === 0 || event.price == null;
+    const price = isFree ? 'Free' : `₹${event.price}`;
+    const d = new Date(event.date);
     const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
     const timeStr = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    const going   = event._count?.registrations ?? 0;
-    const imgSrc  = event.bannerUrl || event.imageUrl || '';
-    const grad    = pickGradient(event.title);
-    const isTeam  = event.maxTeamSize > 1;
-
+    const going = event._count?.registrations ?? 0;
+    const imgSrc = event.bannerUrl || event.imageUrl || '';
+    const grad = pickGradient(event.title);
+    const isTeam = event.maxTeamSize > 1;
     // Type info
     const typeInfo = event.eventType
-      ? `<div class="ev-card__meta-item">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z"/></svg>
-          <span>${event.eventType}</span>
-         </div>`
-      : '';
-
+        ? `<div class="ev-card__meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z"/></svg>
+        <span>${event.eventType}</span>
+       </div>`
+        : '';
     // Team info
     const teamInfo = isTeam
-      ? `<div class="ev-card__meta-item">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Team ≤${event.maxTeamSize}</span>
-         </div>`
-      : '';
-
+        ? `<div class="ev-card__meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Team ≤${event.maxTeamSize}</span>
+       </div>`
+        : '';
     // Deadline info
     let deadlineInfo = '';
     if (event.registrationDeadline) {
-        const dl     = new Date(event.registrationDeadline);
+        const dl = new Date(event.registrationDeadline);
         const closed = dl < new Date();
-        const dlStr  = dl.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+        const dlStr = dl.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
         deadlineInfo = `<div class="ev-card__meta-item" ${closed ? 'style="color:var(--clr-error,#dc2626)"' : ''}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span>${closed ? 'Reg. Closed' : `Closes ${dlStr}`}</span>
-        </div>`;
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>${closed ? 'Reg. Closed' : `Closes ${dlStr}`}</span>
+      </div>`;
     }
-
     // Slots info
     let slotsInfo = '';
     if (event.maxRegistrations != null) {
-        const filled    = event.currentRegistrations ?? event._count?.registrations ?? 0;
+        const filled = event.currentRegistrations ?? event._count?.registrations ?? 0;
         const remaining = event.maxRegistrations - filled;
-        const full      = remaining <= 0;
+        const full = remaining <= 0;
         slotsInfo = `<div class="ev-card__meta-item" ${full ? 'style="color:var(--clr-error,#dc2626)"' : ''}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
-          <span>${full ? 'Seats Full' : `${filled}/${event.maxRegistrations} seats`}</span>
-        </div>`;
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+        <span>${full ? 'Seats Full' : `${filled}/${event.maxRegistrations} seats`}</span>
+      </div>`;
     }
-
     return `
 <div class="ev-card" role="listitem" style="animation-delay:${index * 80}ms">
   <div class="ev-card__image" style="background:${grad}">
@@ -253,14 +250,13 @@ function initNavbar() {
             link.classList.add('nav-link--active');
         }
     });
-
     // Logo and Home link scroll to top on home page
     const homeLinks = document.querySelectorAll('.navbar__logo, #navHome');
     homeLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            const path = window.location.pathname;
+            const currentPath = window.location.pathname;
             // Support local dev server paths (e.g., /src/public/index.html)
-            if (path === '/' || path.endsWith('index.html') || path.endsWith('/public/')) {
+            if (currentPath === '/' || currentPath.endsWith('index.html') || currentPath.endsWith('/public/')) {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
