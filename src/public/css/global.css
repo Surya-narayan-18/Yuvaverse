@@ -198,11 +198,16 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
   flex-shrink: 0;
 }
 .navbar__logo img {
-  height: 48px;
   width: auto;
   display: block;
 }
-.navbar__logo .logo-img-dark { display: none; }
+.navbar__logo .logo-img-light {
+  height: 64px;
+}
+.navbar__logo .logo-img-dark { 
+  display: none; 
+  height: 64px;
+}
 [data-theme="dark"] .navbar__logo .logo-img-dark { display: block; }
 [data-theme="dark"] .navbar__logo .logo-img-light { display: none; }
 
