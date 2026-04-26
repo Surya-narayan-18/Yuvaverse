@@ -190,11 +190,12 @@ async function loadEvents() {
                 : `<div class="no-banner">No banner</div>`;
             const typeStr = ev.eventType || '-';
             const teamStr = (ev.maxTeamSize && ev.maxTeamSize > 1) ? `${ev.maxTeamSize} max` : 'Solo';
-            const slotsStr = ev.maxRegistrations ? `${ev.currentRegistrations || 0}/${ev.maxRegistrations}` : '∞';
+            const totalRegistrations = (ev._count?.registrations || 0) + (ev._count?.teams || 0);
+            const slotsStr = ev.maxRegistrations ? `${totalRegistrations}/${ev.maxRegistrations}` : `${totalRegistrations} / ∞`;
             let isClosed = false;
             if (ev.registrationDeadline && new Date() > new Date(ev.registrationDeadline))
                 isClosed = true;
-            if (ev.maxRegistrations && (ev.currentRegistrations || 0) >= ev.maxRegistrations)
+            if (ev.maxRegistrations && totalRegistrations >= ev.maxRegistrations)
                 isClosed = true;
             const statusHtml = isClosed
                 ? `<span style="color:#ef4444;font-size:0.8rem;font-weight:600;">Closed</span>`
