@@ -5,6 +5,7 @@ dist/
 
 # Environment Variables
 .env
+.env.example
 
 # Logs and Debugging
 *.log
@@ -20,8 +21,6 @@ src/public/uploads/
 .DS_Store
 Thumbs.db
 
-# Database (Local Prototyping)
-prisma/migrations/
 
 # Scripts (contain hardcoded credentials — never commit)
 scripts/

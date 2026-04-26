@@ -1,8 +1,28 @@
 import 'dotenv/config';
+import 'express-async-errors'; // Must be imported BEFORE express — patches async error handling
 import express, { Application, Request, Response } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import path from 'path';
+
+// ─── Startup Validation — fail fast if critical env vars are absent ───────────
+const REQUIRED_ENV_VARS = [
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'RAZORPAY_KEY_ID',
+  'RAZORPAY_KEY_SECRET',
+  'CLOUDINARY_CLOUD_NAME',
+  'CLOUDINARY_API_KEY',
+  'CLOUDINARY_API_SECRET',
+];
+
+const missingVars = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
+if (missingVars.length > 0) {
+  console.error('❌  Missing required environment variables:');
+  missingVars.forEach((key) => console.error(`   - ${key}`));
+  console.error('   Set these in your .env file (local) or Render dashboard (production).');
+  process.exit(1);
+}
 
 import prisma from './config/prisma';
 import { notFoundHandler, globalErrorHandler, sendSuccess } from './utils/response';
@@ -27,8 +47,28 @@ const PORT = Number(process.env.PORT ?? 3000);
 
 app.use(
   helmet({
-    // Allow serving local frontend assets without CSP blocking scripts/styles
-    contentSecurityPolicy: process.env.NODE_ENV === 'production',
+    contentSecurityPolicy:
+      process.env.NODE_ENV === 'production'
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",                    // inline <script> blocks in HTML
+                'https://checkout.razorpay.com',       // Razorpay payment modal
+              ],
+              styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                'https://fonts.googleapis.com',
+              ],
+              fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+              imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
+              connectSrc: ["'self'", 'https://api.razorpay.com', 'https://lumberjack.razorpay.com'],
+              frameSrc: ['https://api.razorpay.com'],
+            },
+          }
+        : false,
   }),
 );
 
@@ -57,9 +97,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ─── Static Assets (Vanilla HTML/CSS/TS-compiled-JS frontend) ────────────────
+// Use process.cwd() (project root) instead of __dirname (dist/) so the paths
+// remain correct regardless of how many directory levels deep the compiled
+// server.js ends up at runtime.
 
-app.use(express.static(path.join(__dirname, '..', 'src', 'public')));
-app.use('/gallery', express.static(path.join(__dirname, '..', 'gallery')));
+app.use(express.static(path.join(process.cwd(), 'src', 'public')));
+app.use('/gallery', express.static(path.join(process.cwd(), 'gallery')));
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 

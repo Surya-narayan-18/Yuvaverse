@@ -7,11 +7,12 @@
     "dev": "nodemon --watch src --ext ts --ignore src/public --exec ts-node src/server.ts",
     "build": "tsc --project tsconfig.json",
     "build:frontend": "tsc --project src/public/ts/tsconfig.json",
-    "build:prod": "prisma generate && prisma migrate deploy && npm run build && npm run build:frontend",
+    "build:prod": "prisma generate && npm run build && npm run build:frontend",
     "dev:frontend": "tsc --project src/public/ts/tsconfig.json --watch",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "express-async-errors": "^3.1.1",
     "express-validator": "^7.2.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
