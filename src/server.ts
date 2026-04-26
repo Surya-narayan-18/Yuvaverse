@@ -65,7 +65,7 @@ app.use(
               ],
               fontSrc: ["'self'", 'https://fonts.gstatic.com'],
               imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
-              connectSrc: ["'self'", 'https://api.razorpay.com', 'https://lumberjack.razorpay.com'],
+              connectSrc: ["'self'", 'https://api.razorpay.com', 'https://lumberjack.razorpay.com', 'https://cdn.jsdelivr.net'],
               frameSrc: ['https://api.razorpay.com'],
             },
           }

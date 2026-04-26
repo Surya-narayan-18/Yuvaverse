@@ -12,9 +12,8 @@ async function loadApplications() {
         // Clear existing
         document.querySelectorAll('.kanban-items').forEach(e => (e.innerHTML = ''));
         // Distribute
-        const counts = { NEW: 0, SHORTLISTED: 0, INTERVIEWED: 0, RECRUITED: 0 };
+        const counts = { NEW: 0, SHORTLISTED: 0, INTERVIEWED: 0, RECRUITED: 0, REJECTED: 0 };
         apps.forEach((app) => {
-            // Ignored if REJECTED is added later
             if (counts[app.status] !== undefined) {
                 counts[app.status]++;
                 const card = document.createElement('div');
@@ -25,6 +24,7 @@ async function loadApplications() {
           <h4>${app.name}</h4>
           <p>${app.email}</p>
           <span class="role">${app.roleAppliedFor}</span>
+          ${app.status !== 'REJECTED' ? `<button class="reject-btn" data-id="${app.id}">Reject</button>` : ''}
         `;
                 card.addEventListener('dragstart', (e) => {
                     e.dataTransfer?.setData('text/plain', app.id);
@@ -33,6 +33,15 @@ async function loadApplications() {
                 card.addEventListener('dragend', () => {
                     card.style.opacity = '1';
                 });
+                // Reject button logic
+                const rejectBtn = card.querySelector('.reject-btn');
+                if (rejectBtn) {
+                    rejectBtn.addEventListener('click', async () => {
+                        if (confirm(`Are you sure you want to reject ${app.name}?`)) {
+                            await updateApplicationStatus(app.id, 'REJECTED');
+                        }
+                    });
+                }
                 const container = document.querySelector(`.kanban-items[data-status="${app.status}"]`);
                 container?.appendChild(card);
             }
@@ -71,25 +80,28 @@ function setupDragAndDrop() {
             if (card)
                 targetCol.appendChild(card);
             // Async Update DB
-            try {
-                const res = await fetch(`/api/admin/applications/${appId}/status`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                });
-                if (!res.ok) {
-                    throw new Error('Update failed');
-                }
-                // Update counts
-                loadApplications();
-            }
-            catch (error) {
-                alert('Failed to update status on server');
-                loadApplications(); // revert UI via reload
-            }
+            await updateApplicationStatus(appId, newStatus);
         });
     });
+}
+async function updateApplicationStatus(appId, newStatus) {
+    try {
+        const res = await fetch(`/api/admin/applications/${appId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        if (!res.ok) {
+            throw new Error('Update failed');
+        }
+        // Update UI
+        loadApplications();
+    }
+    catch (error) {
+        alert('Failed to update status on server');
+        loadApplications(); // revert UI via reload
+    }
 }
