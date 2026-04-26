@@ -188,6 +188,17 @@ async function loadEvents() {
             const thumbHtml = thumbSrc
                 ? `<img class="event-banner-thumb" src="${thumbSrc}" alt="Banner">`
                 : `<div class="no-banner">No banner</div>`;
+            const typeStr = ev.eventType || '-';
+            const teamStr = (ev.maxTeamSize && ev.maxTeamSize > 1) ? `${ev.maxTeamSize} max` : 'Solo';
+            const slotsStr = ev.maxRegistrations ? `${ev.currentRegistrations || 0}/${ev.maxRegistrations}` : '∞';
+            let isClosed = false;
+            if (ev.registrationDeadline && new Date() > new Date(ev.registrationDeadline))
+                isClosed = true;
+            if (ev.maxRegistrations && (ev.currentRegistrations || 0) >= ev.maxRegistrations)
+                isClosed = true;
+            const statusHtml = isClosed
+                ? `<span style="color:#ef4444;font-size:0.8rem;font-weight:600;">Closed</span>`
+                : `<span style="color:#10b981;font-size:0.8rem;font-weight:600;">Active</span>`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
         <td>${thumbHtml}</td>
@@ -195,8 +206,16 @@ async function loadEvents() {
         <td><strong>${ev.title}</strong></td>
         <td>${ev.venue}</td>
         <td>${priceLabel}</td>
+        <td style="font-size:0.85rem;color:#4b5563;">${typeStr}</td>
+        <td style="font-size:0.85rem;color:#4b5563;">${teamStr}</td>
+        <td style="font-size:0.85rem;color:#4b5563;">${slotsStr}</td>
+        <td>${statusHtml}</td>
         <td><span style="background:#e5e7eb;padding:2px 8px;border-radius:12px;font-size:0.75rem;">${fieldsCount} Q</span></td>
         <td style="white-space:nowrap;">
+          <button class="btn btn-notify" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
+            style="background:#8b5cf6;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
+            Email
+          </button>
           <button class="btn btn-edit" data-id="${ev.id}"
             style="background:#3b82f6;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
             Edit
@@ -207,6 +226,10 @@ async function loadEvents() {
           </button>
         </td>
       `;
+            tr.querySelector('.btn-notify')?.addEventListener('click', (e) => {
+                const btn = e.target;
+                openNotifyModal(btn.dataset.id, btn.dataset.title);
+            });
             tr.querySelector('.btn-edit')?.addEventListener('click', () => openEditModal(ev));
             tr.querySelector('.btn-delete')?.addEventListener('click', () => {
                 if (confirm(`Delete "${ev.title}"? All its registrations will also be removed.`)) {
@@ -239,5 +262,60 @@ async function deleteEvent(id) {
         alert('Error deleting event.');
     }
 }
+// ── Notify Modal Logic ────────────────────────────────────────────────────────
+const notifyModal = document.getElementById('notify-modal');
+let notifyEventId = null;
+function openNotifyModal(eventId, eventTitle) {
+    notifyEventId = eventId;
+    const titleEl = document.getElementById('notify-event-name');
+    if (titleEl)
+        titleEl.textContent = eventTitle;
+    document.getElementById('notify-subject').value = '';
+    document.getElementById('notify-message').value = '';
+    notifyModal.classList.add('active');
+}
+document.getElementById('close-notify-modal')?.addEventListener('click', () => {
+    notifyModal.classList.remove('active');
+    notifyEventId = null;
+});
+document.getElementById('send-notify-btn')?.addEventListener('click', async () => {
+    if (!notifyEventId)
+        return;
+    const subject = document.getElementById('notify-subject').value.trim();
+    const message = document.getElementById('notify-message').value.trim();
+    const btn = document.getElementById('send-notify-btn');
+    if (!subject || !message) {
+        alert('Please enter both subject and message.');
+        return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    try {
+        const res = await fetch(`/api/admin/events/${notifyEventId}/notify`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ subject, message })
+        });
+        const json = await res.json();
+        if (json.success) {
+            alert('Emails successfully sent to all registrants!');
+            notifyModal.classList.remove('active');
+        }
+        else {
+            alert(`Failed to send emails: ${json.error || 'Unknown error'}`);
+        }
+    }
+    catch (error) {
+        console.error('Notify error:', error);
+        alert('Network error while sending emails.');
+    }
+    finally {
+        btn.disabled = false;
+        btn.textContent = '📨 Send to All Registrants';
+    }
+});
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => loadEvents());
