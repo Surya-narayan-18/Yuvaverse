@@ -56,6 +56,7 @@ app.use(
                 "'self'",
                 "'unsafe-inline'",                    // inline <script> blocks in HTML
                 'https://checkout.razorpay.com',       // Razorpay payment modal
+                'https://cdn.jsdelivr.net',            // Chart.js for Admin Dashboard
               ],
               styleSrc: [
                 "'self'",
@@ -63,7 +64,7 @@ app.use(
                 'https://fonts.googleapis.com',
               ],
               fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-              imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
+              imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
               connectSrc: ["'self'", 'https://api.razorpay.com', 'https://lumberjack.razorpay.com'],
               frameSrc: ['https://api.razorpay.com'],
             },

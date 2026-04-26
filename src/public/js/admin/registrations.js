@@ -2,6 +2,8 @@ import { checkAuth } from './authGuard.js';
 const token = checkAuth();
 let allRegistrations = [];
 let filteredRegistrations = [];
+let allTeams = [];
+let filteredTeams = [];
 document.addEventListener('DOMContentLoaded', () => {
     loadEventsDropdown();
     loadRegistrations();
@@ -17,6 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('event-filter')?.addEventListener('change', (e) => {
         const selectedEventId = e.target.value;
         applyEventFilter(selectedEventId);
+    });
+    // Teams logic
+    setupTabs();
+    loadTeamsDropdown();
+    loadTeams();
+    // Client-side search for teams
+    document.getElementById('team-search-filter')?.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const searched = filteredTeams.filter(t => t.teamName.toLowerCase().includes(term) ||
+            t.leaderName.toLowerCase().includes(term) ||
+            t.leaderEmail.toLowerCase().includes(term));
+        renderTeamsTable(searched);
+    });
+    // Event filter for teams
+    document.getElementById('team-event-filter')?.addEventListener('change', (e) => {
+        applyTeamEventFilter(e.target.value);
     });
     // CSV export — uses currently filtered data
     document.getElementById('export-csv-btn')?.addEventListener('click', () => {
@@ -173,4 +191,105 @@ async function triggerRefund(id) {
     catch (error) {
         alert('Error connecting to refund endpoint');
     }
+}
+// ── Tab Switching ─────────────────────────────────────────────────────────────
+function setupTabs() {
+    const tabInd = document.getElementById('tab-individual');
+    const tabTeam = document.getElementById('tab-teams');
+    const pnlInd = document.getElementById('panel-individual');
+    const pnlTeam = document.getElementById('panel-teams');
+    if (!tabInd || !tabTeam || !pnlInd || !pnlTeam)
+        return;
+    tabInd.addEventListener('click', () => {
+        tabInd.classList.add('active');
+        tabTeam.classList.remove('active');
+        pnlInd.style.display = 'block';
+        pnlTeam.style.display = 'none';
+    });
+    tabTeam.addEventListener('click', () => {
+        tabTeam.classList.add('active');
+        tabInd.classList.remove('active');
+        pnlTeam.style.display = 'block';
+        pnlInd.style.display = 'none';
+    });
+}
+// ── Load teams into dropdown ──────────────────────────────────────────────────
+async function loadTeamsDropdown() {
+    try {
+        const res = await fetch('/api/admin/events', { headers: { Authorization: `Bearer ${token}` } });
+        const json = await res.json();
+        const select = document.getElementById('team-event-filter');
+        if (!select || !json.data)
+            return;
+        select.innerHTML = '<option value="">All Events</option>';
+        json.data.forEach(ev => {
+            const opt = document.createElement('option');
+            opt.value = ev.id;
+            opt.textContent = ev.title;
+            select.appendChild(opt);
+        });
+    }
+    catch (err) {
+        console.error('Failed to load teams dropdown:', err);
+    }
+}
+// ── Load all teams ────────────────────────────────────────────────────────────
+async function loadTeams() {
+    try {
+        const res = await fetch('/api/admin/teams', { headers: { Authorization: `Bearer ${token}` } });
+        const json = await res.json();
+        allTeams = json.data || [];
+        filteredTeams = [...allTeams];
+        renderTeamsTable(filteredTeams);
+    }
+    catch (error) {
+        console.error('Error loading teams:', error);
+    }
+}
+// ── Apply team event filter ───────────────────────────────────────────────────
+function applyTeamEventFilter(eventId) {
+    filteredTeams = eventId
+        ? allTeams.filter(t => t.eventId === eventId || t.event?.id === eventId)
+        : [...allTeams];
+    const searchEl = document.getElementById('team-search-filter');
+    if (searchEl)
+        searchEl.value = '';
+    renderTeamsTable(filteredTeams);
+}
+// ── Render teams table ────────────────────────────────────────────────────────
+function renderTeamsTable(data) {
+    const tbody = document.getElementById('teams-tbody');
+    if (!tbody)
+        return;
+    tbody.innerHTML = '';
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:2rem;">No team registrations found.</td></tr>`;
+        return;
+    }
+    data.forEach((t) => {
+        const date = new Date(t.createdAt).toLocaleDateString();
+        let membersHtml = '<span style="color:#9ca3af; font-size:0.8em;">No extra members</span>';
+        if (t.members && t.members.length > 0) {
+            membersHtml = t.members.map(m => `<div>${m.name} <span style="color:#6b7280;font-size:0.85em;">(${m.email})</span></div>`).join('');
+        }
+        let badgeClass = 'badge-pending';
+        if (t.status === 'SUCCESS')
+            badgeClass = 'badge-success';
+        else if (t.status === 'FAILED')
+            badgeClass = 'badge-failed';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+      <td>${date}</td>
+      <td><strong>${t.teamName}</strong><br><span style="font-size:0.8rem;color:#6b7280">${t.memberCount} members</span></td>
+      <td>
+        <strong>${t.leaderName}</strong><br/>
+        <span style="font-size:0.8rem; color:var(--text-secondary)">${t.leaderEmail}</span>
+      </td>
+      <td style="font-size:0.85rem;">${membersHtml}</td>
+      <td>${t.event?.title || '-'}</td>
+      <td><span class="badge ${badgeClass}">${t.status}</span></td>
+      <td><span style="font-size:0.85rem;color:#4b5563;">${t.razorpayPaymentId || '-'}</span></td>
+    `;
+        tbody.appendChild(tr);
+    });
 }
