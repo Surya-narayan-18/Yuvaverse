@@ -177,7 +177,8 @@ function renderTable(data) {
       <td>
         <div style="display:flex;gap:0.5rem;align-items:center;">
           <select class="status-select" data-id="${r.id}" data-type="individual"
-            style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;">
+            style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;"
+            ${r.status === 'SUCCESS' ? 'disabled title="Successful registrations cannot be changed"' : ''}>
             <option value="PENDING" ${r.status === 'PENDING' ? 'selected' : ''}>Pending</option>
             <option value="SUCCESS" ${r.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
             <option value="FAILED" ${r.status === 'FAILED' ? 'selected' : ''}>Failed</option>
@@ -209,9 +210,10 @@ function renderTable(data) {
     document.querySelectorAll('.btn-delete-reg').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const id = e.currentTarget.dataset.id;
-            if (confirm('Are you sure you want to permanently delete this registration?')) {
+            showConfirmModal('Delete Registration?', 'Are you sure you want to permanently delete this registration? This action cannot be undone.', () => {
                 deleteIndividualRegistration(id);
-            }
+            }, () => { } // Do nothing on cancel
+            );
         });
     });
 }
@@ -387,7 +389,8 @@ function renderTeamsTable(data) {
       <td>
         <div style="display:flex;gap:0.5rem;align-items:center;">
           <select class="status-select" data-id="${t.id}" data-type="team"
-            style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;">
+            style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;"
+            ${t.status === 'SUCCESS' ? 'disabled title="Successful team registrations cannot be changed"' : ''}>
             <option value="PENDING" ${t.status === 'PENDING' ? 'selected' : ''}>Pending</option>
             <option value="SUCCESS" ${t.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
             <option value="FAILED" ${t.status === 'FAILED' ? 'selected' : ''}>Failed</option>
@@ -417,9 +420,10 @@ function renderTeamsTable(data) {
     document.querySelectorAll('.btn-delete-team').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const id = e.currentTarget.dataset.id;
-            if (confirm('Are you sure you want to permanently delete this team?')) {
+            showConfirmModal('Delete Team Registration?', 'Are you sure you want to permanently delete this team? This action cannot be undone.', () => {
                 deleteTeamRegistration(id);
-            }
+            }, () => { } // Do nothing on cancel
+            );
         });
     });
 }
