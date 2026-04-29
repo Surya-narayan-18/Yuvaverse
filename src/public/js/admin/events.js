@@ -343,13 +343,14 @@ function openRevenueModal(eventId, eventTitle) {
     fetch(`/api/admin/events/${eventId}/revenue`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.json())
         .then(json => {
-        if (!json.success) throw new Error(json.error || 'Failed');
+        if (!json.success)
+            throw new Error(json.error || 'Failed');
         const d = json.data;
         document.getElementById('rev-total').textContent = `₹${Number(d.revenue).toLocaleString('en-IN')}`;
         document.getElementById('rev-price').textContent = `₹${Number(d.price).toLocaleString('en-IN')}`;
-        document.getElementById('rev-regs').textContent = d.successRegs;
-        document.getElementById('rev-teams').textContent = d.successTeams;
-        document.getElementById('rev-paid').textContent = d.successRegs + d.successTeams;
+        document.getElementById('rev-regs').textContent = String(d.successRegs);
+        document.getElementById('rev-teams').textContent = String(d.successTeams);
+        document.getElementById('rev-paid').textContent = String(d.successRegs + d.successTeams);
         if (loadingEl)
             loadingEl.style.display = 'none';
         if (dataEl)

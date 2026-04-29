@@ -239,6 +239,10 @@ async function loadEvents(): Promise<void> {
         <td>${statusHtml}</td>
         <td><span style="background:#e5e7eb;padding:2px 8px;border-radius:12px;font-size:0.75rem;">${fieldsCount} Q</span></td>
         <td style="white-space:nowrap;">
+          <button class="btn btn-revenue" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
+            style="background:#059669;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
+            💰 Revenue
+          </button>
           <button class="btn btn-notify" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
             style="background:#8b5cf6;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
             Email
@@ -254,6 +258,10 @@ async function loadEvents(): Promise<void> {
         </td>
       `;
 
+      tr.querySelector('.btn-revenue')?.addEventListener('click', (e) => {
+        const btn = e.target as HTMLButtonElement;
+        openRevenueModal(btn.dataset.id!, btn.dataset.title!);
+      });
       tr.querySelector('.btn-notify')?.addEventListener('click', (e) => {
         const btn = e.target as HTMLButtonElement;
         openNotifyModal(btn.dataset.id!, btn.dataset.title!);
@@ -369,6 +377,48 @@ document.getElementById('send-notify-btn')?.addEventListener('click', async () =
     btn.textContent = '📨 Send to All Registrants';
   }
 });
+
+// ── Revenue Modal Logic ───────────────────────────────────────────────────────
+const revenueModal = document.getElementById('revenue-modal') as HTMLDivElement;
+
+function openRevenueModal(eventId: string, eventTitle: string) {
+  const labelEl = document.getElementById('revenue-event-label');
+  if (labelEl) labelEl.textContent = eventTitle;
+
+  const loadingEl = document.getElementById('revenue-loading');
+  const dataEl = document.getElementById('revenue-data');
+
+  if (loadingEl) loadingEl.style.display = 'block';
+  if (dataEl) dataEl.style.display = 'none';
+
+  revenueModal.classList.add('active');
+
+  // Fetch revenue from API
+  fetch(`/api/admin/events/${eventId}/revenue`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(r => r.json())
+    .then(json => {
+      if (!json.success) throw new Error(json.error || 'Failed');
+      const d = json.data as { revenue: number, price: number, successRegs: number, successTeams: number };
+      
+      (document.getElementById('rev-total') as HTMLDivElement).textContent = `₹${Number(d.revenue).toLocaleString('en-IN')}`;
+      (document.getElementById('rev-price') as HTMLDivElement).textContent = `₹${Number(d.price).toLocaleString('en-IN')}`;
+      (document.getElementById('rev-regs') as HTMLDivElement).textContent = String(d.successRegs);
+      (document.getElementById('rev-teams') as HTMLDivElement).textContent = String(d.successTeams);
+      (document.getElementById('rev-paid') as HTMLDivElement).textContent = String(d.successRegs + d.successTeams);
+
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (dataEl) dataEl.style.display = 'block';
+    })
+    .catch(err => {
+      console.error('Revenue fetch error:', err);
+      if (loadingEl) loadingEl.textContent = 'Failed to load revenue data.';
+    });
+}
+
+document.getElementById('close-revenue-modal')?.addEventListener('click', () => {
+  revenueModal.classList.remove('active');
+});
+
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => loadEvents());
