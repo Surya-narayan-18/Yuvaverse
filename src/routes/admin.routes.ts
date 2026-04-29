@@ -3,7 +3,8 @@ import {
   getDashboardAnalytics, getAdminEvents, createAdminEvent, updateAdminEvent,
   getAdminRegistrations, updateRegistrationStatus, updateTeamStatus,
   getAdminApplications, updateApplicationStatus,
-  deleteAdminEvent, sendEventAnnouncement, broadcastEmail, getEventRevenue
+  deleteAdminEvent, sendEventAnnouncement, broadcastEmail, getEventRevenue,
+  deleteRegistration, deleteTeam
 } from '../controllers/admin.controller';
 import { getAdminTeams } from '../controllers/team.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
@@ -24,10 +25,12 @@ router.get('/events/:id/revenue', authenticate, authorize(Role.ADMIN), getEventR
 
 router.get('/registrations', authenticate, authorize(Role.ADMIN), getAdminRegistrations);
 router.patch('/registrations/:id/status', authenticate, authorize(Role.ADMIN), updateRegistrationStatus);
+router.delete('/registrations/:id', authenticate, authorize(Role.ADMIN), deleteRegistration);
 router.post('/registrations/broadcast', authenticate, authorize(Role.ADMIN), broadcastEmail);
 
 router.get('/teams', authenticate, authorize(Role.ADMIN), getAdminTeams);
 router.patch('/teams/:id/status', authenticate, authorize(Role.ADMIN), updateTeamStatus);
+router.delete('/teams/:id', authenticate, authorize(Role.ADMIN), deleteTeam);
 
 router.get('/applications', authenticate, authorize(Role.ADMIN), getAdminApplications);
 router.patch('/applications/:id/status', authenticate, authorize(Role.ADMIN), updateApplicationStatus);

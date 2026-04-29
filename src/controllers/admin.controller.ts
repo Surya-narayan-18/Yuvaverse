@@ -276,6 +276,20 @@ export const updateRegistrationStatus = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteRegistration = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const existing = await prisma.registration.findUnique({ where: { id } });
+    if (!existing) return sendError(res, 'Registration not found', 404);
+
+    await prisma.registration.delete({ where: { id } });
+    return sendSuccess(res, null, 'Registration deleted successfully');
+  } catch (error) {
+    console.error('Delete registration error:', error);
+    return sendError(res, 'Error deleting registration', 500);
+  }
+};
+
 export const updateTeamStatus = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
@@ -293,6 +307,20 @@ export const updateTeamStatus = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Update team status error:', error);
     return sendError(res, 'Error updating team status', 500);
+  }
+};
+
+export const deleteTeam = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const existing = await prisma.team.findUnique({ where: { id } });
+    if (!existing) return sendError(res, 'Team not found', 404);
+
+    await prisma.team.delete({ where: { id } });
+    return sendSuccess(res, null, 'Team deleted successfully');
+  } catch (error) {
+    console.error('Delete team error:', error);
+    return sendError(res, 'Error deleting team', 500);
   }
 };
 

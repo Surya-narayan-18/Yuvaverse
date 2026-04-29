@@ -239,10 +239,10 @@ async function loadEvents(): Promise<void> {
         <td>${statusHtml}</td>
         <td><span style="background:#e5e7eb;padding:2px 8px;border-radius:12px;font-size:0.75rem;">${fieldsCount} Q</span></td>
         <td style="white-space:nowrap;">
-          <button class="btn btn-revenue" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
+          ${ev.price > 0 ? `<button class="btn btn-revenue" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
             style="background:#059669;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
             💰 Revenue
-          </button>
+          </button>` : ''}
           <button class="btn btn-notify" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
             style="background:#8b5cf6;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
             Email

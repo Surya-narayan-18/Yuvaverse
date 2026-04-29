@@ -226,12 +226,15 @@ function renderTable(data: RegistrationRow[]): void {
       <td><span class="badge ${badgeClass}">${r.status}</span></td>
       <td style="font-size:0.8rem;">${answersHtml}</td>
       <td>
-        <select class="status-select" data-id="${r.id}" data-type="individual"
-          style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;">
-          <option value="PENDING" ${r.status === 'PENDING' ? 'selected' : ''}>Pending</option>
-          <option value="SUCCESS" ${r.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
-          <option value="FAILED" ${r.status === 'FAILED' ? 'selected' : ''}>Failed</option>
-        </select>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <select class="status-select" data-id="${r.id}" data-type="individual"
+            style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;">
+            <option value="PENDING" ${r.status === 'PENDING' ? 'selected' : ''}>Pending</option>
+            <option value="SUCCESS" ${r.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
+            <option value="FAILED" ${r.status === 'FAILED' ? 'selected' : ''}>Failed</option>
+          </select>
+          <button class="btn-delete-reg" data-id="${r.id}" style="background:#ef4444;color:white;padding:0.3rem 0.5rem;border:none;border-radius:5px;font-size:0.8rem;cursor:pointer;" title="Delete Registration">🗑️</button>
+        </div>
       </td>
     `;
         tbody.appendChild(tr);
@@ -259,6 +262,35 @@ function renderTable(data: RegistrationRow[]): void {
             );
         });
     });
+
+    // Attach delete listeners
+    document.querySelectorAll('.btn-delete-reg').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = (e.currentTarget as HTMLButtonElement).dataset.id as string;
+            if (confirm('Are you sure you want to permanently delete this registration?')) {
+                deleteIndividualRegistration(id);
+            }
+        });
+    });
+}
+
+// ── Delete individual registration ────────────────────────────────────────────
+async function deleteIndividualRegistration(id: string): Promise<void> {
+    try {
+        const res = await fetch(`/api/admin/registrations/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const json = await res.json() as { success: boolean, error?: string };
+        if (json.success) {
+            showToast('Registration deleted successfully', 'success');
+            loadRegistrations(); // Reload the table
+        } else {
+            showToast('Failed to delete registration: ' + (json.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        showToast('Network error while deleting registration', 'error');
+    }
 }
 
 // ── Update individual registration status ─────────────────────────────────────
@@ -416,12 +448,15 @@ function renderTeamsTable(data: TeamRow[]): void {
       <td><span class="badge ${badgeClass}">${t.status}</span></td>
       <td><span style="font-size:0.85rem;color:#4b5563;">${t.razorpayPaymentId || '-'}</span></td>
       <td>
-        <select class="status-select" data-id="${t.id}" data-type="team"
-          style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;">
-          <option value="PENDING" ${t.status === 'PENDING' ? 'selected' : ''}>Pending</option>
-          <option value="SUCCESS" ${t.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
-          <option value="FAILED" ${t.status === 'FAILED' ? 'selected' : ''}>Failed</option>
-        </select>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <select class="status-select" data-id="${t.id}" data-type="team"
+            style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;">
+            <option value="PENDING" ${t.status === 'PENDING' ? 'selected' : ''}>Pending</option>
+            <option value="SUCCESS" ${t.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
+            <option value="FAILED" ${t.status === 'FAILED' ? 'selected' : ''}>Failed</option>
+          </select>
+          <button class="btn-delete-team" data-id="${t.id}" style="background:#ef4444;color:white;padding:0.3rem 0.5rem;border:none;border-radius:5px;font-size:0.8rem;cursor:pointer;" title="Delete Team">🗑️</button>
+        </div>
       </td>
     `;
         tbody.appendChild(tr);
@@ -447,6 +482,35 @@ function renderTeamsTable(data: TeamRow[]): void {
             );
         });
     });
+
+    // Attach delete listeners
+    document.querySelectorAll('.btn-delete-team').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = (e.currentTarget as HTMLButtonElement).dataset.id as string;
+            if (confirm('Are you sure you want to permanently delete this team?')) {
+                deleteTeamRegistration(id);
+            }
+        });
+    });
+}
+
+// ── Delete team registration ──────────────────────────────────────────────────
+async function deleteTeamRegistration(id: string): Promise<void> {
+    try {
+        const res = await fetch(`/api/admin/teams/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const json = await res.json() as { success: boolean, error?: string };
+        if (json.success) {
+            showToast('Team deleted successfully', 'success');
+            loadTeams(); // Reload the table
+        } else {
+            showToast('Failed to delete team: ' + (json.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        showToast('Network error while deleting team', 'error');
+    }
 }
 
 // ── Update team status ────────────────────────────────────────────────────────
