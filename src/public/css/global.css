@@ -1176,12 +1176,19 @@ p  { color: var(--clr-text-muted); line-height: 1.7; }
 /* ---- Outer filmstrip viewport ---- */
 .filmstrip {
   position: relative;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   /* Soft fade edges so images bleed past the container beautifully */
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
   padding-block: 1.25rem;
+  cursor: grab;
+  /* Hide scrollbar visually but keep functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
 }
+.filmstrip::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+.filmstrip:active { cursor: grabbing; }
 
 /* ---- Scrolling track ---- */
 .filmstrip__track {

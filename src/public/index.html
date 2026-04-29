@@ -273,7 +273,7 @@
   function makeCard(c, eager) {
     return `
       <div class="fstrip-card">
-        <img src="${c.img}" alt="${c.title}" loading="${eager ? 'eager' : 'lazy'}" />
+        <img src="${c.img}" alt="${c.title}" loading="${eager ? 'eager' : 'lazy'}" draggable="false" />
         <div class="fstrip-card__overlay"></div>
         <div class="fstrip-card__caption">
           <span class="fstrip-card__tag">${c.tag}</span>
@@ -285,15 +285,71 @@
   // Double the set for a seamless infinite loop
   track.innerHTML = [...CARDS, ...CARDS].map((c, i) => makeCard(c, i < 2)).join('');
 
-  // Slow continuous CSS animation is handled by the stylesheet.
-  // Pause on hover via JS so we can restore the exact position.
   const filmstrip = document.getElementById('filmstrip');
-  filmstrip?.addEventListener('mouseenter', () => {
-    track.style.animationPlayState = 'paused';
+  if (!filmstrip) return;
+
+  // ── Helper: pause/resume CSS animation ──────────────────────────
+  function pauseAnim() { track.style.animationPlayState = 'paused'; }
+  function resumeAnim() { track.style.animationPlayState = 'running'; }
+
+  let resumeTimer = null;
+  function scheduleResume(delay) {
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(resumeAnim, delay);
+  }
+
+  // ── Hover: pause while hovering ─────────────────────────────────
+  filmstrip.addEventListener('mouseenter', pauseAnim);
+  filmstrip.addEventListener('mouseleave', () => {
+    if (!isDragging) resumeAnim();
   });
-  filmstrip?.addEventListener('mouseleave', () => {
-    track.style.animationPlayState = 'running';
+
+  // ── Mouse Wheel: scroll horizontally ────────────────────────────
+  filmstrip.addEventListener('wheel', (e) => {
+    // If the user scrolls vertically on the strip, redirect to horizontal
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+      filmstrip.scrollLeft += e.deltaY * 1.5;
+    }
+    pauseAnim();
+    scheduleResume(1500);
+  }, { passive: false });
+
+  // ── Mouse Drag: click-and-drag to scroll ─────────────────────────
+  let isDragging = false;
+  let dragStartX = 0;
+  let scrollStartLeft = 0;
+
+  filmstrip.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    dragStartX = e.pageX - filmstrip.offsetLeft;
+    scrollStartLeft = filmstrip.scrollLeft;
+    pauseAnim();
+    e.preventDefault(); // prevent text selection
   });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const x = e.pageX - filmstrip.offsetLeft;
+    filmstrip.scrollLeft = scrollStartLeft - (x - dragStartX);
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    scheduleResume(1200);
+  });
+
+  // ── Touch: swipe to scroll (native, but pause/resume anim) ───────
+  let touchStartX = 0;
+  filmstrip.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    pauseAnim();
+  }, { passive: true });
+
+  filmstrip.addEventListener('touchend', () => {
+    scheduleResume(1200);
+  }, { passive: true });
 })();
 </script>
 
