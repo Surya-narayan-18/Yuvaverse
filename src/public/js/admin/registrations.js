@@ -4,9 +4,11 @@ let allRegistrations = [];
 let filteredRegistrations = [];
 let allTeams = [];
 let filteredTeams = [];
+
 document.addEventListener('DOMContentLoaded', () => {
     loadEventsDropdown();
     loadRegistrations();
+
     // Client-side search (applies within current event filter)
     document.getElementById('search-filter')?.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
@@ -15,15 +17,24 @@ document.addEventListener('DOMContentLoaded', () => {
             r.studentEmail.toLowerCase().includes(term));
         renderTable(searched);
     });
+
     // Event filter dropdown
     document.getElementById('event-filter')?.addEventListener('change', (e) => {
         const selectedEventId = e.target.value;
         applyEventFilter(selectedEventId);
     });
+
+    // Status filter dropdown
+    document.getElementById('status-filter')?.addEventListener('change', (e) => {
+        const selectedStatus = e.target.value;
+        applyStatusFilter(selectedStatus);
+    });
+
     // Teams logic
     setupTabs();
     loadTeamsDropdown();
     loadTeams();
+
     // Client-side search for teams
     document.getElementById('team-search-filter')?.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
@@ -32,10 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
             t.leaderEmail.toLowerCase().includes(term));
         renderTeamsTable(searched);
     });
+
     // Event filter for teams
     document.getElementById('team-event-filter')?.addEventListener('change', (e) => {
         applyTeamEventFilter(e.target.value);
     });
+
+    // Status filter for teams
+    document.getElementById('team-status-filter')?.addEventListener('change', (e) => {
+        applyTeamStatusFilter(e.target.value);
+    });
+
     // CSV export — uses currently filtered data
     document.getElementById('export-csv-btn')?.addEventListener('click', () => {
         if (!filteredRegistrations.length)
@@ -70,7 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
         window.URL.revokeObjectURL(url);
     });
+
+    // Broadcast modal
+    setupBroadcastModal();
 });
+
 // ── Load events into dropdown ─────────────────────────────────────────────────
 async function loadEventsDropdown() {
     try {
@@ -79,7 +101,6 @@ async function loadEventsDropdown() {
         const select = document.getElementById('event-filter');
         if (!select || !json.data)
             return;
-        // Clear existing options except "All Events"
         select.innerHTML = '<option value="">All Events</option>';
         json.data.forEach(ev => {
             const opt = document.createElement('option');
@@ -92,6 +113,7 @@ async function loadEventsDropdown() {
         console.error('Failed to load events dropdown:', err);
     }
 }
+
 // ── Load all registrations ────────────────────────────────────────────────────
 async function loadRegistrations() {
     try {
@@ -105,22 +127,34 @@ async function loadRegistrations() {
         console.error('Error loading registrations:', error);
     }
 }
+
 // ── Apply event filter ────────────────────────────────────────────────────────
 function applyEventFilter(eventId) {
     filteredRegistrations = eventId
         ? allRegistrations.filter(r => r.eventId === eventId || r.event?.id === eventId)
         : [...allRegistrations];
-    // Clear search box when changing event filter
     const searchEl = document.getElementById('search-filter');
     if (searchEl)
         searchEl.value = '';
     renderTable(filteredRegistrations);
 }
+
+// ── Apply status filter ───────────────────────────────────────────────────────
+function applyStatusFilter(status) {
+    const eventId = document.getElementById('event-filter')?.value || '';
+    let base = eventId
+        ? allRegistrations.filter(r => r.eventId === eventId || r.event?.id === eventId)
+        : [...allRegistrations];
+    filteredRegistrations = status ? base.filter(r => r.status === status) : base;
+    renderTable(filteredRegistrations);
+}
+
 function getSelectedEventName() {
     const select = document.getElementById('event-filter');
     return select?.options[select.selectedIndex]?.text?.replace('All Events', '') ?? '';
 }
-// ── Render table ──────────────────────────────────────────────────────────────
+
+// ── Render individual registrations table ─────────────────────────────────────
 function renderTable(data) {
     const tbody = document.getElementById('regs-tbody');
     if (!tbody)
@@ -145,6 +179,7 @@ function renderTable(data) {
             badgeClass = 'badge-success';
         else if (r.status === 'FAILED')
             badgeClass = 'badge-failed';
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
       <td>${date}</td>
@@ -157,41 +192,82 @@ function renderTable(data) {
       <td><span class="badge ${badgeClass}">${r.status}</span></td>
       <td style="font-size:0.8rem;">${answersHtml}</td>
       <td>
-        ${r.status === 'SUCCESS' ? `<button class="refund-btn" data-id="${r.id}">Refund</button>` : ''}
+        <select class="status-select" data-id="${r.id}" data-type="individual"
+          style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;">
+          <option value="PENDING" ${r.status === 'PENDING' ? 'selected' : ''}>Pending</option>
+          <option value="SUCCESS" ${r.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
+          <option value="FAILED" ${r.status === 'FAILED' ? 'selected' : ''}>Failed</option>
+        </select>
       </td>
     `;
         tbody.appendChild(tr);
     });
-    // Attach refund listeners
-    document.querySelectorAll('.refund-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const id = e.target.dataset.id;
-            if (confirm('Are you sure you want to trigger a refund via Razorpay?')) {
-                await triggerRefund(id);
-            }
+
+    // Attach status change listeners
+    document.querySelectorAll('.status-select[data-type="individual"]').forEach(sel => {
+        sel.addEventListener('change', async (e) => {
+            const select = e.target;
+            const id = select.dataset.id;
+            const newStatus = select.value;
+            const oldStatus = select.querySelector(`option[value="${newStatus}"]`);
+            // Find previous value
+            const prevValue = [...select.options].find(o => o.value !== newStatus && o.defaultSelected)?.value
+                || [...select.options].find(o => o.value !== newStatus)?.value;
+            showConfirmModal(
+                `Change Status to "${newStatus}"?`,
+                `This will update the registration status to <strong>${newStatus}</strong>. Do you want to continue?`,
+                async () => {
+                    await updateIndividualStatus(id, newStatus, select);
+                },
+                () => {
+                    // Revert to previous selection
+                    select.value = prevValue || 'PENDING';
+                }
+            );
         });
     });
 }
-// ── Refund ────────────────────────────────────────────────────────────────────
-async function triggerRefund(id) {
+
+// ── Update individual registration status ─────────────────────────────────────
+async function updateIndividualStatus(id, status, selectEl) {
     try {
-        const res = await fetch(`/api/admin/registrations/${id}/refund`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` }
+        const res = await fetch(`/api/admin/registrations/${id}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ status })
         });
         const json = await res.json();
         if (json.success) {
-            alert('Refund successful!');
-            loadRegistrations();
+            showToast(`Status updated to ${status}`, 'success');
+            // Update the registration in local data
+            const idx = allRegistrations.findIndex(r => r.id === id);
+            if (idx !== -1) allRegistrations[idx].status = status;
+            const fidx = filteredRegistrations.findIndex(r => r.id === id);
+            if (fidx !== -1) filteredRegistrations[fidx].status = status;
+            // Update badge in the same row
+            const row = selectEl?.closest('tr');
+            if (row) {
+                const badge = row.querySelector('.badge');
+                if (badge) {
+                    badge.className = `badge ${status === 'SUCCESS' ? 'badge-success' : status === 'FAILED' ? 'badge-failed' : 'badge-pending'}`;
+                    badge.textContent = status;
+                }
+            }
         }
         else {
-            alert('Refund failed: ' + json.error);
+            showToast('Failed to update status: ' + (json.error || 'Unknown error'), 'error');
+            loadRegistrations();
         }
     }
     catch (error) {
-        alert('Error connecting to refund endpoint');
+        showToast('Network error while updating status', 'error');
+        loadRegistrations();
     }
 }
+
 // ── Tab Switching ─────────────────────────────────────────────────────────────
 function setupTabs() {
     const tabInd = document.getElementById('tab-individual');
@@ -213,6 +289,7 @@ function setupTabs() {
         pnlInd.style.display = 'none';
     });
 }
+
 // ── Load teams into dropdown ──────────────────────────────────────────────────
 async function loadTeamsDropdown() {
     try {
@@ -233,6 +310,7 @@ async function loadTeamsDropdown() {
         console.error('Failed to load teams dropdown:', err);
     }
 }
+
 // ── Load all teams ────────────────────────────────────────────────────────────
 async function loadTeams() {
     try {
@@ -246,16 +324,30 @@ async function loadTeams() {
         console.error('Error loading teams:', error);
     }
 }
+
 // ── Apply team event filter ───────────────────────────────────────────────────
 function applyTeamEventFilter(eventId) {
-    filteredTeams = eventId
+    const statusId = document.getElementById('team-status-filter')?.value || '';
+    let base = eventId
         ? allTeams.filter(t => t.eventId === eventId || t.event?.id === eventId)
         : [...allTeams];
+    filteredTeams = statusId ? base.filter(t => t.status === statusId) : base;
     const searchEl = document.getElementById('team-search-filter');
     if (searchEl)
         searchEl.value = '';
     renderTeamsTable(filteredTeams);
 }
+
+// ── Apply team status filter ──────────────────────────────────────────────────
+function applyTeamStatusFilter(status) {
+    const eventId = document.getElementById('team-event-filter')?.value || '';
+    let base = eventId
+        ? allTeams.filter(t => t.eventId === eventId || t.event?.id === eventId)
+        : [...allTeams];
+    filteredTeams = status ? base.filter(t => t.status === status) : base;
+    renderTeamsTable(filteredTeams);
+}
+
 // ── Render teams table ────────────────────────────────────────────────────────
 function renderTeamsTable(data) {
     const tbody = document.getElementById('teams-tbody');
@@ -263,7 +355,7 @@ function renderTeamsTable(data) {
         return;
     tbody.innerHTML = '';
     if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:2rem;">No team registrations found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:2rem;">No team registrations found.</td></tr>`;
         return;
     }
     data.forEach((t) => {
@@ -277,6 +369,7 @@ function renderTeamsTable(data) {
             badgeClass = 'badge-success';
         else if (t.status === 'FAILED')
             badgeClass = 'badge-failed';
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
       <td>${date}</td>
@@ -289,7 +382,192 @@ function renderTeamsTable(data) {
       <td>${t.event?.title || '-'}</td>
       <td><span class="badge ${badgeClass}">${t.status}</span></td>
       <td><span style="font-size:0.85rem;color:#4b5563;">${t.razorpayPaymentId || '-'}</span></td>
+      <td>
+        <select class="status-select" data-id="${t.id}" data-type="team"
+          style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;">
+          <option value="PENDING" ${t.status === 'PENDING' ? 'selected' : ''}>Pending</option>
+          <option value="SUCCESS" ${t.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
+          <option value="FAILED" ${t.status === 'FAILED' ? 'selected' : ''}>Failed</option>
+        </select>
+      </td>
     `;
         tbody.appendChild(tr);
+    });
+
+    // Attach status change listeners for teams
+    document.querySelectorAll('.status-select[data-type="team"]').forEach(sel => {
+        sel.addEventListener('change', async (e) => {
+            const select = e.target;
+            const id = select.dataset.id;
+            const newStatus = select.value;
+            const prevValue = [...select.options].find(o => o.value !== newStatus && o.defaultSelected)?.value
+                || [...select.options].find(o => o.value !== newStatus)?.value;
+            showConfirmModal(
+                `Change Team Status to "${newStatus}"?`,
+                `This will update the team registration status to <strong>${newStatus}</strong>. Do you want to continue?`,
+                async () => {
+                    await updateTeamStatus(id, newStatus, select);
+                },
+                () => {
+                    select.value = prevValue || 'PENDING';
+                }
+            );
+        });
+    });
+}
+
+// ── Update team status ────────────────────────────────────────────────────────
+async function updateTeamStatus(id, status, selectEl) {
+    try {
+        const res = await fetch(`/api/admin/teams/${id}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ status })
+        });
+        const json = await res.json();
+        if (json.success) {
+            showToast(`Team status updated to ${status}`, 'success');
+            const idx = allTeams.findIndex(t => t.id === id);
+            if (idx !== -1) allTeams[idx].status = status;
+            const fidx = filteredTeams.findIndex(t => t.id === id);
+            if (fidx !== -1) filteredTeams[fidx].status = status;
+            const row = selectEl?.closest('tr');
+            if (row) {
+                const badge = row.querySelector('.badge');
+                if (badge) {
+                    badge.className = `badge ${status === 'SUCCESS' ? 'badge-success' : status === 'FAILED' ? 'badge-failed' : 'badge-pending'}`;
+                    badge.textContent = status;
+                }
+            }
+        }
+        else {
+            showToast('Failed to update team status: ' + (json.error || 'Unknown error'), 'error');
+            loadTeams();
+        }
+    }
+    catch (error) {
+        showToast('Network error while updating team status', 'error');
+        loadTeams();
+    }
+}
+
+// ── Confirmation Modal ────────────────────────────────────────────────────────
+let _confirmYesCb = null;
+let _confirmNoCb = null;
+
+function showConfirmModal(title, message, onYes, onNo) {
+    let modal = document.getElementById('status-confirm-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'status-confirm-modal';
+        modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);align-items:center;justify-content:center;z-index:999;padding:1rem;';
+        modal.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:2rem;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3);text-align:center;">
+        <div style="font-size:2rem;margin-bottom:0.75rem;">⚠️</div>
+        <h3 id="scm-title" style="margin:0 0 0.5rem;font-size:1.1rem;color:#111827;"></h3>
+        <p id="scm-msg" style="margin:0 0 1.5rem;font-size:0.875rem;color:#6b7280;line-height:1.5;"></p>
+        <div style="display:flex;gap:0.75rem;">
+          <button id="scm-no" style="flex:1;padding:0.65rem 1rem;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.9rem;background:#f3f4f6;color:#374151;">Cancel</button>
+          <button id="scm-yes" style="flex:1;padding:0.65rem 1rem;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.9rem;background:#7c3aed;color:white;">Confirm</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(modal);
+        document.getElementById('scm-yes').addEventListener('click', () => {
+            modal.style.display = 'none';
+            if (_confirmYesCb) _confirmYesCb();
+        });
+        document.getElementById('scm-no').addEventListener('click', () => {
+            modal.style.display = 'none';
+            if (_confirmNoCb) _confirmNoCb();
+        });
+    }
+    document.getElementById('scm-title').textContent = title;
+    document.getElementById('scm-msg').innerHTML = message;
+    _confirmYesCb = onYes;
+    _confirmNoCb = onNo;
+    modal.style.display = 'flex';
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.className = `show ${type}`;
+    setTimeout(() => { toast.className = ''; }, 3500);
+}
+
+// ── Broadcast Modal ───────────────────────────────────────────────────────────
+function setupBroadcastModal() {
+    const openBtn = document.getElementById('open-broadcast-btn');
+    const closeBtn = document.getElementById('close-broadcast-btn');
+    const modal = document.getElementById('broadcast-modal');
+    const sendBtn = document.getElementById('broadcast-send-btn');
+
+    openBtn?.addEventListener('click', async () => {
+        modal.classList.add('active');
+        // Load stats
+        try {
+            const res = await fetch('/api/admin/registrations', { headers: { Authorization: `Bearer ${token}` } });
+            const json = await res.json();
+            const regs = json.data || [];
+            const successRegs = regs.filter(r => r.status === 'SUCCESS');
+            const uniqueEmails = new Set(successRegs.map(r => r.studentEmail));
+            document.getElementById('stat-unique').textContent = uniqueEmails.size;
+            document.getElementById('stat-total').textContent = successRegs.length;
+            document.getElementById('stat-dupes').textContent = successRegs.length - uniqueEmails.size;
+        }
+        catch (err) {
+            console.error('Failed to load broadcast stats:', err);
+        }
+    });
+
+    closeBtn?.addEventListener('click', () => {
+        modal.classList.remove('active');
+        document.getElementById('broadcast-form').style.display = 'block';
+        document.getElementById('result-card').style.display = 'none';
+    });
+
+    sendBtn?.addEventListener('click', async () => {
+        const subject = document.getElementById('broadcast-subject').value.trim();
+        const message = document.getElementById('broadcast-message').value.trim();
+        if (!subject || !message) {
+            showToast('Please enter both subject and message', 'error');
+            return;
+        }
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending…';
+        try {
+            const res = await fetch('/api/admin/registrations/broadcast', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ subject, message })
+            });
+            const json = await res.json();
+            if (json.success) {
+                document.getElementById('broadcast-form').style.display = 'none';
+                const rc = document.getElementById('result-card');
+                rc.style.display = 'block';
+                document.getElementById('res-sent').textContent = json.data.emailsSent;
+                document.getElementById('res-failed').textContent = json.data.failed;
+            }
+            else {
+                showToast('Failed: ' + (json.error || 'Unknown error'), 'error');
+            }
+        }
+        catch (err) {
+            showToast('Network error while sending broadcast', 'error');
+        }
+        finally {
+            sendBtn.disabled = false;
+            sendBtn.textContent = '📨 Send Broadcast';
+        }
     });
 }

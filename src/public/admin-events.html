@@ -132,6 +132,23 @@
     #send-notify-btn:hover { background:#6d28d9; }
     #send-notify-btn:disabled { opacity:.6; cursor:not-allowed; }
 
+    /* ── Revenue Modal specifics ─────────────────────────────────────── */
+    #revenue-modal .modal-content { max-width:440px; }
+    .revenue-stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.25rem 0; }
+    .rev-stat-box {
+      background:#f9fafb; border:1px solid #e5e7eb;
+      border-radius:10px; padding:1rem; text-align:center;
+    }
+    .rev-stat-box .rsb-num { font-size:1.6rem; font-weight:700; color:#111827; }
+    .rev-stat-box .rsb-lbl { font-size:0.72rem; color:#6b7280; text-transform:uppercase; letter-spacing:.04em; margin-top:0.2rem; }
+    .revenue-total-box {
+      background:linear-gradient(135deg,#ecfdf5,#d1fae5);
+      border:1px solid #6ee7b7; border-radius:10px;
+      padding:1.25rem; text-align:center; margin-bottom:1rem;
+    }
+    .revenue-total-box .rt-label { font-size:0.8rem; color:#065f46; text-transform:uppercase; letter-spacing:.06em; margin-bottom:0.25rem; }
+    .revenue-total-box .rt-amount { font-size:2.2rem; font-weight:800; color:#047857; }
+
     /* ── Toast notification ──────────────────────────────────────────── */
     #toast {
       position:fixed; bottom:1.5rem; right:1.5rem; z-index:200;
@@ -361,7 +378,43 @@
     </div>
   </div>
 
-  <!-- Delete confirmation modal -->
+  <!-- ── Revenue Modal ──────────────────────────────────────────────────── -->
+  <div class="modal" id="revenue-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>💰 Event Revenue</h2>
+        <button type="button" class="modal-close-x" id="close-revenue-modal" title="Close">✕</button>
+      </div>
+      <div id="revenue-event-label" style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:0.6rem 1rem;font-size:0.9rem;color:#5b21b6;font-weight:600;margin-bottom:1.25rem;"></div>
+      <div id="revenue-loading" style="text-align:center;color:#6b7280;padding:1rem;">Loading…</div>
+      <div id="revenue-data" style="display:none;">
+        <div class="revenue-total-box">
+          <div class="rt-label">Total Revenue Generated</div>
+          <div class="rt-amount" id="rev-total">₹0</div>
+        </div>
+        <div class="revenue-stat-grid">
+          <div class="rev-stat-box">
+            <div class="rsb-num" id="rev-price">₹0</div>
+            <div class="rsb-lbl">Price / Slot</div>
+          </div>
+          <div class="rev-stat-box">
+            <div class="rsb-num" id="rev-regs">0</div>
+            <div class="rsb-lbl">Successful Registrations</div>
+          </div>
+          <div class="rev-stat-box">
+            <div class="rsb-num" id="rev-teams">0</div>
+            <div class="rsb-lbl">Successful Teams</div>
+          </div>
+          <div class="rev-stat-box">
+            <div class="rsb-num" id="rev-paid">0</div>
+            <div class="rsb-lbl">Total Paid Entries</div>
+          </div>
+        </div>
+        <p style="font-size:0.78rem;color:#9ca3af;text-align:center;">Revenue = (Successful Registrations + Successful Teams) × Price per Slot</p>
+      </div>
+    </div>
+  </div>
+
   <div class="confirm-modal" id="confirm-modal">
     <div class="confirm-box">
       <div class="confirm-icon">🗑️</div>

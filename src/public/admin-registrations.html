@@ -19,7 +19,6 @@
     .badge-success { background: #d1fae5; color: #065f46; }
     .badge-failed  { background: #fee2e2; color: #991b1b; }
     .badge-pending { background: #fef3c7; color: #92400e; }
-    .refund-btn { background: #ef4444; color: white; padding: 0.25rem 0.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
 
     /* ── Tab switcher ─────────────────────────────────────────────── */
     .reg-tabs { display:flex; gap:0; margin-bottom:1.25rem; border:1px solid var(--border-color); border-radius:8px; overflow:hidden; width:fit-content; }
@@ -120,7 +119,7 @@
       <header class="dashboard-header" style="display:flex; justify-content: space-between; align-items: center;">
         <div>
           <h1>Registrations &amp; Payments</h1>
-          <p>View participants and manage refunds.</p>
+          <p>View participants and manage registration status.</p>
         </div>
         <div style="display:flex; gap:0.75rem;">
           <button class="btn btn-broadcast" id="open-broadcast-btn">📢 Broadcast Email</button>
@@ -161,7 +160,7 @@
                 <th>Event</th>
                 <th>Status</th>
                 <th>Custom Answers</th>
-                <th>Actions</th>
+                <th>Change Status</th>
               </tr>
             </thead>
             <tbody id="regs-tbody">
@@ -199,6 +198,7 @@
                 <th>Event</th>
                 <th>Status</th>
                 <th>Payment ID</th>
+                <th>Change Status</th>
               </tr>
             </thead>
             <tbody id="teams-tbody">

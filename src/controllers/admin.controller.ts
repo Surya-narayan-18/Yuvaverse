@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma';
 import { sendSuccess, sendError } from '../utils/response';
-import Razorpay from 'razorpay';
 import { ApplicationStatus, Prisma } from '@prisma/client';
 import { sendAnnouncementEmail } from '../mailers/announcement.mailer';
 
@@ -17,18 +16,28 @@ interface UpdateEventBody {
 
 export const getDashboardAnalytics = async (_req: Request, res: Response) => {
   try {
-    // 1. Total Revenue from successful registrations
+    // 1. Total Revenue — sum from individual successful registrations + team registrations
     const successfulRegistrations = await prisma.registration.findMany({
       where: { status: 'SUCCESS' },
       include: { event: true },
     });
+    const successfulTeams = await prisma.team.findMany({
+      where: { status: 'SUCCESS' },
+      include: { event: true },
+    });
 
-    const totalRevenue = successfulRegistrations.reduce((acc, curr) => {
+    const individualRevenue = successfulRegistrations.reduce((acc, curr) => {
       return acc + (curr.event.price || 0);
     }, 0);
+    const teamRevenue = successfulTeams.reduce((acc, curr) => {
+      return acc + (curr.event.price || 0);
+    }, 0);
+    const totalRevenue = individualRevenue + teamRevenue;
 
-    // 2. Total Registrations
-    const totalRegistrations = await prisma.registration.count();
+    // 2. Total Registrations — individuals + teams
+    const individualCount = await prisma.registration.count();
+    const teamCount = await prisma.team.count();
+    const totalRegistrations = individualCount + teamCount;
 
     // 3. Active Events (Date is in the future)
     const activeEvents = await prisma.event.count({
@@ -39,14 +48,32 @@ export const getDashboardAnalytics = async (_req: Request, res: Response) => {
       }
     });
 
-    // 4. Mock Monthly Revenue for Chart (Can be derived from real data, using mock for visual)
-    const monthlyRevenue = [
-      { month: 'Jan', revenue: 12000 },
-      { month: 'Feb', revenue: 15000 },
-      { month: 'Mar', revenue: 22000 },
-      { month: 'Apr', revenue: totalRevenue > 0 ? totalRevenue : 33500 }, // Plug in real revenue loosely
-      { month: 'May', revenue: 35000 },
-    ];
+    // 4. Real Monthly Revenue derived from DB — last 6 months
+    // Build a month → revenue map from actual successful registrations and teams
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const revenueByMonth: Record<string, number> = {};
+
+    // Individual registrations
+    for (const reg of successfulRegistrations) {
+      const d = new Date(reg.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+      revenueByMonth[key] = (revenueByMonth[key] || 0) + (reg.event.price || 0);
+    }
+    // Team registrations
+    for (const team of successfulTeams) {
+      const d = new Date(team.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+      revenueByMonth[key] = (revenueByMonth[key] || 0) + (team.event.price || 0);
+    }
+
+    // Produce the last 6 calendar months in order
+    const now = new Date();
+    const monthlyRevenue: { month: string; revenue: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+      monthlyRevenue.push({ month: monthNames[d.getMonth()], revenue: revenueByMonth[key] || 0 });
+    }
 
     return sendSuccess(res, {
       totalRevenue,
@@ -56,6 +83,26 @@ export const getDashboardAnalytics = async (_req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);
+    return sendError(res, 'Internal Server Error', 500);
+  }
+};
+
+// --- EVENT REVENUE ---
+export const getEventRevenue = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const event = await prisma.event.findUnique({ where: { id } });
+    if (!event) return sendError(res, 'Event not found', 404);
+
+    const [successRegs, successTeams] = await Promise.all([
+      prisma.registration.count({ where: { eventId: id, status: 'SUCCESS' } }),
+      prisma.team.count({ where: { eventId: id, status: 'SUCCESS' } }),
+    ]);
+
+    const revenue = (successRegs + successTeams) * (event.price || 0);
+    return sendSuccess(res, { eventId: id, eventTitle: event.title, price: event.price, successRegs, successTeams, revenue });
+  } catch (error) {
+    console.error('Error fetching event revenue:', error);
     return sendError(res, 'Internal Server Error', 500);
   }
 };
@@ -196,7 +243,7 @@ export const deleteAdminEvent = async (req: Request, res: Response) => {
   }
 };
 
-// --- REGISTRATIONS & REFUNDS ---
+// --- REGISTRATIONS ---
 export const getAdminRegistrations = async (_req: Request, res: Response) => {
   try {
     const registrations = await prisma.registration.findMany({
@@ -209,40 +256,43 @@ export const getAdminRegistrations = async (_req: Request, res: Response) => {
   }
 };
 
-export const refundRegistration = async (req: Request, res: Response) => {
+export const updateRegistrationStatus = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const registration = await prisma.registration.findUnique({ where: { id } });
-
-    if (!registration || !registration.razorpayPaymentId) {
-       return sendError(res, 'Invalid registration or no payment ID found', 400);
+    const { status } = req.body as { status: string };
+    const validStatuses = ['PENDING', 'SUCCESS', 'FAILED'];
+    if (!validStatuses.includes(status)) {
+      return sendError(res, 'Invalid status value', 400);
     }
-
-    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-      return sendError(res, 'Razorpay keys missing in environment variables', 500);
-    }
-
-    const instance = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET,
-    });
-
-    const event = await prisma.event.findUnique({ where: { id: registration.eventId } });
-    const refundAmount = event?.price ? event.price * 100 : 0; 
-
-    if (refundAmount > 0) {
-      await instance.payments.refund(registration.razorpayPaymentId, { amount: refundAmount });
-    }
-
     const updated = await prisma.registration.update({
       where: { id },
-      data: { status: 'FAILED' } // Using FAILED to represent refunded/cancelled
+      data: { status: status as 'PENDING' | 'SUCCESS' | 'FAILED' },
+      include: { event: true },
     });
+    return sendSuccess(res, updated, 'Registration status updated');
+  } catch (error) {
+    console.error('Update registration status error:', error);
+    return sendError(res, 'Error updating status', 500);
+  }
+};
 
-    return sendSuccess(res, updated, 'Refund processed successfully');
-  } catch (error: any) {
-    console.error('Refund Error:', error);
-    return sendError(res, error.description || 'Error processing refund', 500);
+export const updateTeamStatus = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { status } = req.body as { status: string };
+    const validStatuses = ['PENDING', 'SUCCESS', 'FAILED'];
+    if (!validStatuses.includes(status)) {
+      return sendError(res, 'Invalid status value', 400);
+    }
+    const updated = await prisma.team.update({
+      where: { id },
+      data: { status },
+      include: { event: true, members: true },
+    });
+    return sendSuccess(res, updated, 'Team status updated');
+  } catch (error) {
+    console.error('Update team status error:', error);
+    return sendError(res, 'Error updating team status', 500);
   }
 };
 
