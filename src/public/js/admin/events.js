@@ -5,6 +5,8 @@
 // ================================================================
 import { checkAuth } from './authGuard.js';
 const token = checkAuth();
+let fpDate;
+let fpDeadline;
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const modal = document.getElementById('create-modal');
 const modalTitle = document.getElementById('modal-title');
@@ -41,6 +43,10 @@ function openCreateModal() {
     form.reset();
     fieldsWrapper.innerHTML = '';
     clearPreview();
+    // Reset pickers and remove deadline constraint from a previous edit
+    fpDate?.clear();
+    fpDeadline?.clear();
+    fpDeadline?.set('maxDate', undefined);
     modal.classList.add('active');
 }
 function openEditModal(ev) {
@@ -52,12 +58,32 @@ function openEditModal(ev) {
     document.getElementById('ev-desc').value = ev.description ?? '';
     document.getElementById('ev-venue').value = ev.venue;
     document.getElementById('ev-price').value = String(ev.price);
-    // Convert ISO date → datetime-local format  (YYYY-MM-DDTHH:MM)
+    // Convert ISO date → Flatpickr format (uses same YYYY-MM-DDTHH:MM)
     if (ev.date) {
-        const d = new Date(ev.date);
-        const pad = (n) => String(n).padStart(2, '0');
-        const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        document.getElementById('ev-date').value = local;
+        fpDate?.setDate(new Date(ev.date), false);
+    }
+    else {
+        fpDate?.clear();
+    }
+    // Pre-fill Event Settings fields
+    const typeSelect = document.getElementById('ev-type');
+    if (typeSelect)
+        typeSelect.value = ev.eventType ?? '';
+    const maxTeamInput = document.getElementById('ev-max-team');
+    if (maxTeamInput)
+        maxTeamInput.value = String(ev.maxTeamSize ?? 1);
+    const maxRegsInput = document.getElementById('ev-max-regs');
+    if (maxRegsInput)
+        maxRegsInput.value = ev.maxRegistrations != null ? String(ev.maxRegistrations) : '';
+    // Set deadline picker value and maxDate = event date
+    if (ev.registrationDeadline) {
+        fpDeadline?.set('maxDate', new Date(ev.date));
+        fpDeadline?.setDate(new Date(ev.registrationDeadline), false);
+    }
+    else {
+        fpDeadline?.clear();
+        if (ev.date)
+            fpDeadline?.set('maxDate', new Date(ev.date));
     }
     // Show existing banner as preview (if any)
     const existingBanner = ev.bannerUrl ?? ev.imageUrl;
@@ -83,6 +109,9 @@ function closeModal() {
     form.reset();
     fieldsWrapper.innerHTML = '';
     clearPreview();
+    fpDate?.clear();
+    fpDeadline?.clear();
+    fpDeadline?.set('maxDate', undefined);
     modalTitle.textContent = 'Create New Event';
     saveBtn.textContent = 'Save Event';
 }
@@ -366,4 +395,90 @@ document.getElementById('close-revenue-modal')?.addEventListener('click', () => 
     revenueModal.classList.remove('active');
 });
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => loadEvents());
+document.addEventListener('DOMContentLoaded', () => {
+    loadEvents();
+    // Helper: format a Date to 'Y-m-d H:i' for Flatpickr
+    const toFpStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    // ── Event Date picker ─────────────────────────────────────────────
+    fpDate = flatpickr('#ev-date', {
+        enableTime: true,
+        dateFormat: 'Y-m-d H:i', // sent to server
+        altInput: true,
+        altFormat: 'D, d M Y  h:i K', // human-readable display
+        minDate: 'today',
+        minuteIncrement: 15,
+        disableMobile: true,
+        onChange: (selectedDates) => {
+            if (!selectedDates[0]) {
+                fpDeadline?.set('maxDate', undefined);
+                return;
+            }
+            // Deadline must be ≤ event date
+            fpDeadline?.set('maxDate', selectedDates[0]);
+            // If current deadline is after new event date, clear it
+            const dlInput = document.getElementById('ev-reg-deadline');
+            if (dlInput.value) {
+                const dlDate = new Date(dlInput.value.replace(' ', 'T'));
+                if (dlDate > selectedDates[0]) {
+                    fpDeadline?.clear();
+                    showValidationHint('reg-deadline-hint', '⚠️ Deadline cleared — it was after the new event date.');
+                }
+                else {
+                    clearValidationHint('reg-deadline-hint');
+                }
+            }
+        },
+    });
+    // ── Reg Deadline picker ───────────────────────────────────────────
+    fpDeadline = flatpickr('#ev-reg-deadline', {
+        enableTime: true,
+        dateFormat: 'Y-m-d H:i',
+        altInput: true,
+        altFormat: 'D, d M Y  h:i K',
+        minDate: 'today',
+        // maxDate will be set dynamically when event date is picked
+        minuteIncrement: 15,
+        disableMobile: true,
+        onReady: (_d, _s, fp) => {
+            // Inject helper text below the deadline field
+            const wrap = fp.input?.closest('.form-group');
+            if (wrap && !wrap.querySelector('#reg-deadline-hint')) {
+                const hint = document.createElement('p');
+                hint.id = 'reg-deadline-hint';
+                hint.style.cssText = 'font-size:0.75rem;color:#6b7280;margin:0.35rem 0 0;';
+                hint.textContent = 'Must be before the event date.';
+                wrap.appendChild(hint);
+            }
+        },
+        onChange: (selectedDates) => {
+            // Validate against event date
+            const evInput = document.getElementById('ev-date');
+            if (!evInput.value || !selectedDates[0])
+                return;
+            const evDate = new Date(evInput.value.replace(' ', 'T'));
+            if (selectedDates[0] >= evDate) {
+                fpDeadline?.clear();
+                showValidationHint('reg-deadline-hint', '❌ Deadline must be before the event date.');
+            }
+            else {
+                showValidationHint('reg-deadline-hint', '✅ Valid registration deadline set.');
+            }
+        },
+    });
+});
+function showValidationHint(id, msg) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = msg;
+        el.style.color = msg.startsWith('❌') ? '#dc2626'
+            : msg.startsWith('⚠️') ? '#d97706'
+                : msg.startsWith('✅') ? '#059669' : '#6b7280';
+    }
+}
+function clearValidationHint(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = 'Must be before the event date.';
+        el.style.color = '#6b7280';
+    }
+}

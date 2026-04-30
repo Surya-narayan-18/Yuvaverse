@@ -6,6 +6,9 @@
   <title>Manage Events - Yuvaverse Admin</title>
   <link rel="stylesheet" href="/css/global.css">
   <link rel="stylesheet" href="/css/admin-dashboard.css">
+  <!-- Flatpickr date/time picker -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
   <style>
     /* ── Table ───────────────────────────────────────────────────────── */
     table { width:100%; border-collapse:collapse; margin-top:1rem; background:var(--card-bg); border-radius:8px; overflow:hidden; }
@@ -184,6 +187,34 @@
     #confirm-yes { background:#111827; color:white; }
     #confirm-no  { background:#fff; color:#374151; border:1px solid #d1d5db; }
     #confirm-no:hover { background:#f3f4f6; }
+
+    /* ── Flatpickr overrides ──────────────────────────────────────────── */
+    .flatpickr-calendar {
+      border-radius: 12px !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18) !important;
+      border: 1px solid #e5e7eb !important;
+      font-family: inherit !important;
+    }
+    .flatpickr-months { background: #111827; border-radius: 12px 12px 0 0; }
+    .flatpickr-month, .flatpickr-current-month, .flatpickr-prev-month, .flatpickr-next-month { color:#fff !important; fill:#fff !important; }
+    .flatpickr-current-month input.cur-year { color:#fff !important; }
+    .flatpickr-current-month .flatpickr-monthDropdown-months { color:#fff; background:#111827; }
+    .flatpickr-weekday { color:#6b7280 !important; font-weight:600; font-size:0.78rem; }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover {
+      background: #111827 !important; border-color: #111827 !important; color:#fff !important;
+    }
+    .flatpickr-day:hover { background:#f3f4f6; }
+    .flatpickr-day.today { border-color:#6366f1 !important; color:#6366f1 !important; font-weight:700; }
+    .flatpickr-day.today.selected { color:#fff !important; }
+    .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
+      color:#d1d5db !important; cursor:not-allowed !important;
+    }
+    .flatpickr-time input { font-family:inherit; font-size:0.95rem; }
+    .flatpickr-time .flatpickr-time-separator, .flatpickr-time .flatpickr-am-pm { color:#374151; }
+    .flatpickr-calendar.hasTime .flatpickr-time { border-top:1px solid #e5e7eb; }
+    /* Input field styling when Flatpickr is active */
+    .flatpickr-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:32px !important; cursor:pointer !important; }
+    .flatpickr-input.active { border-color:#6366f1 !important; box-shadow:0 0 0 3px rgba(99,102,241,.15) !important; }
   </style>
 </head>
 <body class="admin-body">
@@ -265,7 +296,7 @@
         <div class="form-group" style="display:flex; gap:1rem;">
           <div style="flex:1">
             <label for="ev-date">Date &amp; Time *</label>
-            <input type="datetime-local" id="ev-date" name="date" required>
+            <input type="text" id="ev-date" name="date" placeholder="Select event date &amp; time" readonly required>
           </div>
           <div style="flex:1">
             <label for="ev-venue">Venue *</label>
@@ -313,7 +344,7 @@
               Registration Closing Date &amp; Time
               <span style="font-size:0.78rem;color:#9ca3af;font-weight:400;">(leave blank = closes when event starts)</span>
             </label>
-            <input type="datetime-local" id="ev-reg-deadline" name="registrationDeadline">
+            <input type="text" id="ev-reg-deadline" name="registrationDeadline" placeholder="Select reg. closing date &amp; time" readonly>
           </div>
         </div>
 
@@ -449,6 +480,8 @@
   <!-- Toast notification -->
   <div id="toast"></div>
 
+  <!-- Flatpickr -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script type="module" src="/js/admin/events.js"></script>
 </body>
 </html>

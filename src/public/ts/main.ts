@@ -226,8 +226,8 @@ function buildEventCard(event: EventData, index: number): string {
       const closed = dl < new Date();
       const dlStr  = dl.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
       deadlineInfo = `<div class="ev-card__meta-item" ${closed ? 'style="color:var(--clr-error,#dc2626)"' : ''}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>${closed ? 'Reg. Closed' : `Closes ${dlStr}`}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>${closed ? 'Reg. Closed' : `Reg. Closes: ${dlStr}`}</span>
       </div>`;
   }
 
@@ -250,9 +250,6 @@ function buildEventCard(event: EventData, index: number): string {
     <div class="ev-card__badges">
       <span class="ev-card__badge ${isFree ? 'ev-card__badge--free' : 'ev-card__badge--paid'}">${price}</span>
     </div>
-    <button class="ev-card__bookmark" aria-label="Bookmark event">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-    </button>
   </div>
   <div class="ev-card__body">
     <h3 class="ev-card__title">${event.title || 'Untitled Event'}</h3>

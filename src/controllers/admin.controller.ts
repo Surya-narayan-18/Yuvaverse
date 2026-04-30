@@ -244,13 +244,31 @@ export const deleteAdminEvent = async (req: Request, res: Response) => {
 };
 
 // --- REGISTRATIONS ---
-export const getAdminRegistrations = async (_req: Request, res: Response) => {
+export const getAdminRegistrations = async (req: Request, res: Response) => {
   try {
-    const registrations = await prisma.registration.findMany({
-      include: { event: true },
-      orderBy: { createdAt: 'desc' }
+    const page  = Math.max(1, parseInt((req.query.page  as string) || '1',  10));
+    const limit = Math.min(100, Math.max(1, parseInt((req.query.limit as string) || '20', 10)));
+    const skip  = (page - 1) * limit;
+
+    const [registrations, total] = await Promise.all([
+      prisma.registration.findMany({
+        include: { event: true },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.registration.count(),
+    ]);
+
+    return sendSuccess(res, {
+      registrations,
+      pagination: {
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        limit,
+      },
     });
-    return sendSuccess(res, registrations);
   } catch (error) {
     return sendError(res, 'Internal Server Error', 500);
   }

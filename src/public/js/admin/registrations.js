@@ -4,27 +4,34 @@ let allRegistrations = [];
 let filteredRegistrations = [];
 let allTeams = [];
 let filteredTeams = [];
+// Pagination state for individual registrations
+let currentPage = 1;
+let totalPages = 1;
+const PAGE_LIMIT = 20;
+// Active filters (applied server-side for pagination)
+let filterEventId = '';
+let filterStatus = '';
+let filterSearch = '';
 document.addEventListener('DOMContentLoaded', () => {
     loadEventsDropdown();
     loadRegistrations();
-    // Client-side search (applies within current event filter)
+    // Client-side search → reset to page 1, reload
     document.getElementById('search-filter')?.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const base = filteredRegistrations;
-        const searched = base.filter(r => r.studentName.toLowerCase().includes(term) ||
-            r.studentEmail.toLowerCase().includes(term) ||
-            (r.collegeId && r.collegeId.toLowerCase().includes(term)));
-        renderTable(searched);
+        filterSearch = e.target.value.toLowerCase();
+        currentPage = 1;
+        loadRegistrations();
     });
     // Event filter dropdown
     document.getElementById('event-filter')?.addEventListener('change', (e) => {
-        const selectedEventId = e.target.value;
-        applyEventFilter(selectedEventId);
+        filterEventId = e.target.value;
+        currentPage = 1;
+        loadRegistrations();
     });
     // Status filter dropdown
     document.getElementById('status-filter')?.addEventListener('change', (e) => {
-        const selectedStatus = e.target.value;
-        applyStatusFilter(selectedStatus);
+        filterStatus = e.target.value;
+        currentPage = 1;
+        loadRegistrations();
     });
     // Teams logic
     setupTabs();
@@ -46,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('team-status-filter')?.addEventListener('change', (e) => {
         applyTeamStatusFilter(e.target.value);
     });
-    // CSV export — uses currently filtered data
+    // CSV export — uses currently displayed data
     document.getElementById('export-csv-btn')?.addEventListener('click', () => {
         if (!filteredRegistrations.length)
             return alert('No data to export');
@@ -103,37 +110,70 @@ async function loadEventsDropdown() {
         console.error('Failed to load events dropdown:', err);
     }
 }
-// ── Load all registrations ────────────────────────────────────────────────────
+// ── Load registrations (paginated) ────────────────────────────────────────────
 async function loadRegistrations() {
     try {
-        const res = await fetch('/api/admin/registrations', { headers: { Authorization: `Bearer ${token}` } });
+        const params = new URLSearchParams({
+            page: String(currentPage),
+            limit: String(PAGE_LIMIT),
+        });
+        const res = await fetch(`/api/admin/registrations?${params}`, { headers: { Authorization: `Bearer ${token}` } });
         const json = await res.json();
-        allRegistrations = json.data || [];
-        filteredRegistrations = [...allRegistrations];
+        let rows = json.data?.registrations || [];
+        // Client-side filtering (on top of server pagination)
+        if (filterEventId)
+            rows = rows.filter(r => r.eventId === filterEventId || r.event?.id === filterEventId);
+        if (filterStatus)
+            rows = rows.filter(r => r.status === filterStatus);
+        if (filterSearch)
+            rows = rows.filter(r => r.studentName.toLowerCase().includes(filterSearch) ||
+                r.studentEmail.toLowerCase().includes(filterSearch) ||
+                (r.collegeId && r.collegeId.toLowerCase().includes(filterSearch)));
+        allRegistrations = rows;
+        filteredRegistrations = rows;
+        totalPages = json.data?.pagination?.totalPages ?? 1;
+        currentPage = json.data?.pagination?.currentPage ?? 1;
         renderTable(filteredRegistrations);
+        renderPagination();
     }
     catch (error) {
         console.error('Error loading registrations:', error);
     }
 }
-// ── Apply event filter ────────────────────────────────────────────────────────
-function applyEventFilter(eventId) {
-    filteredRegistrations = eventId
-        ? allRegistrations.filter(r => r.eventId === eventId || r.event?.id === eventId)
-        : [...allRegistrations];
-    const searchEl = document.getElementById('search-filter');
-    if (searchEl)
-        searchEl.value = '';
-    renderTable(filteredRegistrations);
-}
-// ── Apply status filter ───────────────────────────────────────────────────────
-function applyStatusFilter(status) {
-    const eventId = document.getElementById('event-filter')?.value || '';
-    let base = eventId
-        ? allRegistrations.filter(r => r.eventId === eventId || r.event?.id === eventId)
-        : [...allRegistrations];
-    filteredRegistrations = status ? base.filter(r => r.status === status) : base;
-    renderTable(filteredRegistrations);
+// ── Pagination Controls ───────────────────────────────────────────────────────
+function renderPagination() {
+    let bar = document.getElementById('regs-pagination');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'regs-pagination';
+        bar.style.cssText = 'display:flex;align-items:center;gap:0.75rem;margin:1rem 0 0.5rem;flex-wrap:wrap;';
+        const tbody = document.getElementById('regs-tbody');
+        tbody?.closest('table')?.before(bar);
+    }
+    const from = totalPages === 0 ? 0 : (currentPage - 1) * PAGE_LIMIT + 1;
+    const to = Math.min(currentPage * PAGE_LIMIT, (currentPage - 1) * PAGE_LIMIT + filteredRegistrations.length);
+    bar.innerHTML = `
+      <span style="font-size:0.85rem;color:#6b7280;flex:1;">
+        Showing <strong>${from}–${to}</strong> of page <strong>${currentPage}</strong> / ${totalPages}
+        &nbsp;(${PAGE_LIMIT} per page)
+      </span>
+      <button id="reg-prev" style="padding:0.35rem 0.85rem;border:1px solid #d1d5db;border-radius:6px;background:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;"
+        ${currentPage <= 1 ? 'disabled style="opacity:.4;cursor:default;"' : ''}>← Prev</button>
+      <button id="reg-next" style="padding:0.35rem 0.85rem;border:1px solid #d1d5db;border-radius:6px;background:#111827;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;"
+        ${currentPage >= totalPages ? 'disabled style="opacity:.4;cursor:default;background:#d1d5db;"' : ''}>Next →</button>
+    `;
+    document.getElementById('reg-prev')?.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadRegistrations();
+        }
+    });
+    document.getElementById('reg-next')?.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadRegistrations();
+        }
+    });
 }
 function getSelectedEventName() {
     const select = document.getElementById('event-filter');
@@ -551,11 +591,16 @@ function setupBroadcastModal() {
     openBtn?.addEventListener('click', async () => {
         if (modal)
             modal.classList.add('active');
-        // Load stats
+        // Load stats — fetch page 1 with large limit just to get total count
         try {
-            const res = await fetch('/api/admin/registrations', { headers: { Authorization: `Bearer ${token}` } });
+            const res = await fetch('/api/admin/registrations?page=1&limit=1', { headers: { Authorization: `Bearer ${token}` } });
             const json = await res.json();
-            const regs = json.data || [];
+            const total = json.data?.pagination?.total ?? 0;
+            // For simplicity show total successful from a dedicated endpoint isn't available,
+            // so fetch all with high limit for stats (only runs when admin opens modal)
+            const statsRes = await fetch('/api/admin/registrations?page=1&limit=9999', { headers: { Authorization: `Bearer ${token}` } });
+            const statsJson = await statsRes.json();
+            const regs = statsJson.data?.registrations || [];
             const successRegs = regs.filter(r => r.status === 'SUCCESS');
             const uniqueEmails = new Set(successRegs.map(r => r.studentEmail));
             const statUnique = document.getElementById('stat-unique');

@@ -56,7 +56,7 @@ interface OrderResponseData {
     if (imgEl) {
       imgEl.style.cssText += `background:${gradient}`;
       const bannerSrc = event.bannerUrl ?? event.imageUrl;
-      if (bannerSrc) imgEl.innerHTML = `<img src="${bannerSrc}" alt="${event.title}" style="width:100%;height:100%;object-fit:cover;"/>`;
+      if (bannerSrc) imgEl.innerHTML = `<img src="${bannerSrc}" alt="${event.title}"/>`;
     }
 
     // Text fields
@@ -68,7 +68,20 @@ interface OrderResponseData {
     set('eventTime',     date.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' }));
     set('eventPrice',    event.price === 0 ? 'Free' : `₹${event.price.toLocaleString('en-IN')}`);
     set('registerPrice', event.price === 0 ? 'Free' : `₹${event.price.toLocaleString('en-IN')}`);
+    set('teamRegisterPrice', event.price === 0 ? 'Free' : `₹${event.price.toLocaleString('en-IN')}`);
     set('regCount',      `${event._count?.registrations ?? 0} registered`);
+
+    // Registration deadline pill
+    const deadlinePill = document.getElementById('metaDeadline');
+    const deadlineSpan = document.getElementById('eventDeadline');
+    if (deadlinePill && deadlineSpan && (event as unknown as { registrationDeadline?: string }).registrationDeadline) {
+      const dl = new Date((event as unknown as { registrationDeadline: string }).registrationDeadline);
+      const isClosed = dl < new Date();
+      const dlStr = dl.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      deadlineSpan.textContent = isClosed ? 'Registration Closed' : dlStr;
+      if (isClosed) deadlinePill.style.color = 'var(--clr-error, #dc2626)';
+      deadlinePill.style.display = '';
+    }
 
     document.title = `${event.title} — Yuvaverse`;
   }
