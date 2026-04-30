@@ -395,7 +395,7 @@ document.getElementById('close-revenue-modal')?.addEventListener('click', () => 
     revenueModal.classList.remove('active');
 });
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
     loadEvents();
     // Helper: format a Date to 'Y-m-d H:i' for Flatpickr
     const toFpStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -465,7 +465,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
     });
-});
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+}
+else {
+    init();
+}
 function showValidationHint(id, msg) {
     const el = document.getElementById(id);
     if (el) {

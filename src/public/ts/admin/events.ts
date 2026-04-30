@@ -461,7 +461,7 @@ document.getElementById('close-revenue-modal')?.addEventListener('click', () => 
 
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
   loadEvents();
 
   // Helper: format a Date to 'Y-m-d H:i' for Flatpickr
@@ -533,7 +533,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
   });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 function showValidationHint(id: string, msg: string): void {
   const el = document.getElementById(id);
