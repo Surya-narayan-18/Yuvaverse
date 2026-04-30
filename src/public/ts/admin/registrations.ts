@@ -47,8 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('search-filter')?.addEventListener('input', (e) => {
         const term = (e.target as HTMLInputElement).value.toLowerCase();
         const base = filteredRegistrations;
-        const searched = base.filter(r => r.studentName.toLowerCase().includes(term) ||
-            r.studentEmail.toLowerCase().includes(term));
+        const searched = base.filter(r => 
+            r.studentName.toLowerCase().includes(term) ||
+            r.studentEmail.toLowerCase().includes(term) ||
+            (r.collegeId && r.collegeId.toLowerCase().includes(term))
+        );
         renderTable(searched);
     });
 
@@ -234,7 +237,7 @@ function renderTable(data: RegistrationRow[]): void {
             <option value="SUCCESS" ${r.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
             <option value="FAILED" ${r.status === 'FAILED' ? 'selected' : ''}>Failed</option>
           </select>
-          <button class="btn-delete-reg" data-id="${r.id}" style="background:#ef4444;color:white;padding:0.3rem 0.5rem;border:none;border-radius:5px;font-size:0.8rem;cursor:pointer;" title="Delete Registration">🗑️</button>
+          <button class="btn-delete-reg" data-id="${r.id}" style="background:#fff;color:#dc2626;padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;" title="Delete Registration"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
         </div>
       </td>
     `;
@@ -462,7 +465,7 @@ function renderTeamsTable(data: TeamRow[]): void {
             <option value="SUCCESS" ${t.status === 'SUCCESS' ? 'selected' : ''}>Success</option>
             <option value="FAILED" ${t.status === 'FAILED' ? 'selected' : ''}>Failed</option>
           </select>
-          <button class="btn-delete-team" data-id="${t.id}" style="background:#ef4444;color:white;padding:0.3rem 0.5rem;border:none;border-radius:5px;font-size:0.8rem;cursor:pointer;" title="Delete Team">🗑️</button>
+          <button class="btn-delete-team" data-id="${t.id}" style="background:#fff;color:#dc2626;padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.8rem;cursor:pointer;" title="Delete Team"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
         </div>
       </td>
     `;
@@ -575,12 +578,14 @@ function showConfirmModal(title: string, message: string, onYes: () => void, onN
         modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);align-items:center;justify-content:center;z-index:999;padding:1rem;';
         modal.innerHTML = `
       <div style="background:#fff;border-radius:12px;padding:2rem;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3);text-align:center;">
-        <div style="font-size:2rem;margin-bottom:0.75rem;">⚠️</div>
+        <div style="margin-bottom:0.75rem;display:flex;justify-content:center;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
         <h3 id="scm-title" style="margin:0 0 0.5rem;font-size:1.1rem;color:#111827;"></h3>
         <p id="scm-msg" style="margin:0 0 1.5rem;font-size:0.875rem;color:#6b7280;line-height:1.5;"></p>
         <div style="display:flex;gap:0.75rem;">
-          <button id="scm-no" style="flex:1;padding:0.65rem 1rem;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.9rem;background:#f3f4f6;color:#374151;">Cancel</button>
-          <button id="scm-yes" style="flex:1;padding:0.65rem 1rem;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.9rem;background:#7c3aed;color:white;">Confirm</button>
+          <button id="scm-no" style="flex:1;padding:0.65rem 1rem;border:1px solid #d1d5db;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.9rem;background:#fff;color:#374151;">Cancel</button>
+          <button id="scm-yes" style="flex:1;padding:0.65rem 1rem;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.9rem;background:#111827;color:white;">Confirm</button>
         </div>
       </div>
     `;
@@ -686,7 +691,7 @@ function setupBroadcastModal(): void {
         }
         finally {
             sendBtn.disabled = false;
-            sendBtn.textContent = '📨 Send Broadcast';
+            sendBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Send Broadcast';
         }
     });
 }

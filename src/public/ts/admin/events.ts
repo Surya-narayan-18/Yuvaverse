@@ -240,19 +240,19 @@ async function loadEvents(): Promise<void> {
         <td><span style="background:#e5e7eb;padding:2px 8px;border-radius:12px;font-size:0.75rem;">${fieldsCount} Q</span></td>
         <td style="white-space:nowrap;">
           ${ev.price > 0 ? `<button class="btn btn-revenue" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
-            style="background:#059669;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
-            💰 Revenue
+            style="background:#fff;color:#111827;border:1px solid #d1d5db;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Revenue
           </button>` : ''}
           <button class="btn btn-notify" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
-            style="background:#8b5cf6;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
-            Email
+            style="background:#fff;color:#111827;border:1px solid #d1d5db;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><path d="M11 10.5 7 10.5 7 13.5 11 13.5 16 17 16 7 11 10.5z"></path></svg> Email
           </button>
           <button class="btn btn-edit" data-id="${ev.id}"
-            style="background:#3b82f6;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
+            style="background:#111827;color:white;border:1px solid #111827;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
             Edit
           </button>
           <button class="btn btn-delete" data-id="${ev.id}"
-            style="background:#ef4444;color:white;padding:0.25rem 0.6rem;font-size:0.8rem;">
+            style="background:#fff;color:#dc2626;border:1px solid #d1d5db;padding:0.25rem 0.6rem;font-size:0.8rem;">
             Delete
           </button>
         </td>
@@ -374,7 +374,7 @@ document.getElementById('send-notify-btn')?.addEventListener('click', async () =
     alert('Network error while sending emails.');
   } finally {
     btn.disabled = false;
-    btn.textContent = '📨 Send to All Registrants';
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Send to All Registrants';
   }
 });
 
