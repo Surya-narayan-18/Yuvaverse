@@ -312,10 +312,10 @@ async function loadEvents() {
         <td>${statusHtml}</td>
         <td><span style="background:#e5e7eb;padding:2px 8px;border-radius:12px;font-size:0.75rem;">${fieldsCount} Q</span></td>
         <td style="white-space:nowrap;">
-          ${ev.price > 0 ? `<button class="btn btn-revenue" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
+          <button class="btn btn-revenue" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
             style="background:#fff;color:#111827;border:1px solid #d1d5db;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Revenue
-          </button>` : ''}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> Stats
+          </button>
           <button class="btn btn-notify" data-id="${ev.id}" data-title="${ev.title.replace(/"/g, '&quot;')}"
             style="background:#fff;color:#111827;border:1px solid #d1d5db;padding:0.25rem 0.6rem;font-size:0.8rem;margin-right:0.35rem;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><path d="M11 10.5 7 10.5 7 13.5 11 13.5 16 17 16 7 11 10.5z"></path></svg> Email
@@ -450,6 +450,13 @@ function openRevenueModal(eventId, eventTitle) {
         document.getElementById('rev-regs').textContent = String(d.successRegs);
         document.getElementById('rev-teams').textContent = String(d.successTeams);
         document.getElementById('rev-paid').textContent = String(d.successRegs + d.successTeams);
+        
+        const revPending = document.getElementById('rev-pending');
+        if (revPending) revPending.textContent = String(d.pendingRegs + d.pendingTeams);
+        
+        const revFailed = document.getElementById('rev-failed');
+        if (revFailed) revFailed.textContent = String(d.failedRegs + d.failedTeams);
+
         if (loadingEl)
             loadingEl.style.display = 'none';
         if (dataEl)

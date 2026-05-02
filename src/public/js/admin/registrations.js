@@ -53,39 +53,69 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('team-status-filter')?.addEventListener('change', (e) => {
         applyTeamStatusFilter(e.target.value);
     });
-    // CSV export — uses currently displayed data
-    document.getElementById('export-csv-btn')?.addEventListener('click', () => {
-        if (!filteredRegistrations.length)
-            return alert('No data to export');
-        const eventName = getSelectedEventName();
-        const headers = ['Date', 'Student Name', 'Student Email', 'College ID', 'Event', 'Status', 'Payment ID', 'Custom Answers'];
-        const csvRows = [headers.join(',')];
-        filteredRegistrations.forEach(r => {
-            const date = new Date(r.createdAt).toLocaleDateString();
-            const customStr = r.customAnswers ? JSON.stringify(r.customAnswers).replace(/"/g, '""') : '';
-            const row = [
-                date,
-                `"${r.studentName}"`,
-                `"${r.studentEmail}"`,
-                `"${r.collegeId || ''}"`,
-                `"${r.event?.title || 'Unknown'}"`,
-                r.status,
-                r.razorpayPaymentId || '',
-                `"${customStr}"`
-            ];
-            csvRows.push(row.join(','));
-        });
-        const csvData = csvRows.join('\n');
-        const blob = new Blob([csvData], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const filename = eventName
-            ? `registrations_${eventName.replace(/\s+/g, '_')}_${Date.now()}.csv`
-            : `registrations_all_${Date.now()}.csv`;
-        a.download = filename;
-        a.click();
-        window.URL.revokeObjectURL(url);
+    // CSV export — fetch all matching registrations across all pages
+    document.getElementById('export-csv-btn')?.addEventListener('click', async () => {
+        try {
+            // Provide visual feedback
+            const btn = document.getElementById('export-csv-btn');
+            if (btn) btn.textContent = 'Exporting...';
+
+            // Fetch all registrations
+            const res = await fetch('/api/admin/registrations?page=1&limit=99999', { headers: { Authorization: `Bearer ${token}` } });
+            const json = await res.json();
+            let rows = json.data?.registrations || [];
+
+            // Apply current filters client-side
+            if (filterEventId) rows = rows.filter(r => r.eventId === filterEventId || r.event?.id === filterEventId);
+            if (filterStatus)  rows = rows.filter(r => r.status === filterStatus);
+            if (filterSearch)  rows = rows.filter(r =>
+                r.studentName.toLowerCase().includes(filterSearch) ||
+                r.studentEmail.toLowerCase().includes(filterSearch) ||
+                (r.collegeId && r.collegeId.toLowerCase().includes(filterSearch))
+            );
+
+            if (!rows.length) {
+                if (btn) btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Export to CSV';
+                return alert('No data to export matching current filters.');
+            }
+
+            const eventName = getSelectedEventName();
+            const headers = ['Date', 'Student Name', 'Student Email', 'College ID', 'Event', 'Status', 'Payment ID', 'Custom Answers'];
+            const csvRows = [headers.join(',')];
+            rows.forEach(r => {
+                const date = new Date(r.createdAt).toLocaleDateString();
+                const customStr = r.customAnswers ? JSON.stringify(r.customAnswers).replace(/"/g, '""') : '';
+                const row = [
+                    date,
+                    `"${r.studentName}"`,
+                    `"${r.studentEmail}"`,
+                    `"${r.collegeId || ''}"`,
+                    `"${r.event?.title || 'Unknown'}"`,
+                    r.status,
+                    r.razorpayPaymentId || '',
+                    `"${customStr}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+            const csvData = csvRows.join('\n');
+            const blob = new Blob([csvData], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const filename = eventName && eventName !== 'All Events'
+                ? `registrations_${eventName.replace(/\s+/g, '_')}_${Date.now()}.csv`
+                : `registrations_all_${Date.now()}.csv`;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            if (btn) btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Export to CSV';
+        } catch (error) {
+            console.error('Export error:', error);
+            alert('Failed to export CSV due to a network error.');
+            const btn = document.getElementById('export-csv-btn');
+            if (btn) btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top:-2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Export to CSV';
+        }
     });
     // Broadcast modal
     setupBroadcastModal();

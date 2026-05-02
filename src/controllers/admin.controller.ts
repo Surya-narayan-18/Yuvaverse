@@ -95,13 +95,28 @@ export const getEventRevenue = async (req: Request, res: Response) => {
     const event = await prisma.event.findUnique({ where: { id } });
     if (!event) return sendError(res, 'Event not found', 404);
 
-    const [successRegs, successTeams] = await Promise.all([
+    const [successRegs, successTeams, pendingRegs, failedRegs, pendingTeams, failedTeams] = await Promise.all([
       prisma.registration.count({ where: { eventId: id, status: 'SUCCESS' } }),
       prisma.team.count({ where: { eventId: id, status: 'SUCCESS' } }),
+      prisma.registration.count({ where: { eventId: id, status: 'PENDING' } }),
+      prisma.registration.count({ where: { eventId: id, status: 'FAILED' } }),
+      prisma.team.count({ where: { eventId: id, status: 'PENDING' } }),
+      prisma.team.count({ where: { eventId: id, status: 'FAILED' } }),
     ]);
 
     const revenue = (successRegs + successTeams) * (event.price || 0);
-    return sendSuccess(res, { eventId: id, eventTitle: event.title, price: event.price, successRegs, successTeams, revenue });
+    return sendSuccess(res, { 
+      eventId: id, 
+      eventTitle: event.title, 
+      price: event.price, 
+      successRegs, 
+      successTeams, 
+      pendingRegs,
+      failedRegs,
+      pendingTeams,
+      failedTeams,
+      revenue 
+    });
   } catch (error) {
     console.error('Error fetching event revenue:', error);
     return sendError(res, 'Internal Server Error', 500);
