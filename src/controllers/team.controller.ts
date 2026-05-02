@@ -6,6 +6,15 @@ import { sendSuccess, sendError } from '../utils/response';
 import { sendTeamRegistrationEmail } from '../mailers/team.mailer';
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Helper: Minimum team members for a given maxTeamSize.
+// Events with maxTeamSize == 1 are individual-only (blocked elsewhere).
+// For team events (maxTeamSize > 1) we require at least 1 member (the leader).
+// ─────────────────────────────────────────────────────────────────────────────
+function minTeamMembers(_maxTeamSize: number): number {
+  return 1; // leader alone is valid; UI hints encourage more members
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -68,8 +77,9 @@ export async function createTeamOrder(req: Request, res: Response): Promise<void
 
   // 5. Team size check
   const totalMembers = Array.isArray(members) ? members.length : 0;
-  if (totalMembers < 1) {
-    sendError(res, 'At least one team member is required.', 400);
+  const minMembers = minTeamMembers(event.maxTeamSize);
+  if (totalMembers < minMembers) {
+    sendError(res, `A team must have at least ${minMembers} member (the leader).`, 400);
     return;
   }
   if (totalMembers > event.maxTeamSize) {
@@ -81,7 +91,7 @@ export async function createTeamOrder(req: Request, res: Response): Promise<void
     return;
   }
 
-  // 6. Duplicate team leader check (one registration per email per event)
+  // 6. Duplicate team leader check (block only if a SUCCESS team already exists)
   const duplicateTeam = await prisma.team.findFirst({
     where: { eventId, leaderEmail, status: 'SUCCESS' },
   });
@@ -89,6 +99,15 @@ export async function createTeamOrder(req: Request, res: Response): Promise<void
     sendError(res, 'A team with this leader email is already registered for this event.', 409);
     return;
   }
+
+  // 7. Clean up any stale PENDING / FAILED teams for this leader so they can retry
+  await prisma.team.deleteMany({
+    where: {
+      eventId,
+      leaderEmail,
+      status: { in: ['PENDING', 'FAILED'] },
+    },
+  });
 
   // ── FREE EVENT ─────────────────────────────────────────────────────────────
   if (event.price === 0) {
@@ -259,6 +278,36 @@ export async function verifyTeamPayment(req: Request, res: Response): Promise<vo
   );
 
   sendSuccess(res, { team: updated }, 'Payment verified successfully. Confirmation email sent to team leader.');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/teams/cancel
+// Called by the frontend when the Razorpay modal is dismissed without payment.
+// Marks the PENDING team registration as FAILED so DB status stays accurate.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function cancelTeam(req: Request, res: Response): Promise<void> {
+  const { teamId } = req.body as { teamId?: string };
+
+  if (!teamId) {
+    sendError(res, 'teamId is required.', 400);
+    return;
+  }
+
+  const existing = await prisma.team.findUnique({ where: { id: teamId } });
+
+  // Silently succeed if already finalised — prevents race-condition errors
+  if (!existing || existing.status !== 'PENDING') {
+    sendSuccess(res, null, 'No action needed.');
+    return;
+  }
+
+  await prisma.team.update({
+    where: { id: teamId },
+    data: { status: 'FAILED' },
+  });
+
+  sendSuccess(res, null, 'Team registration marked as failed.');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

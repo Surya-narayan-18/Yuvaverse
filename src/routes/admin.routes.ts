@@ -4,7 +4,7 @@ import {
   getAdminRegistrations, updateRegistrationStatus, updateTeamStatus,
   getAdminApplications, updateApplicationStatus,
   deleteAdminEvent, sendEventAnnouncement, broadcastEmail, getEventRevenue,
-  deleteRegistration, deleteTeam
+  deleteRegistration, deleteTeam, notifyPendingFailed
 } from '../controllers/admin.controller';
 import { getAdminTeams } from '../controllers/team.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
@@ -21,6 +21,7 @@ router.post('/events', authenticate, authorize(Role.ADMIN), uploadBanner, create
 router.patch('/events/:id', authenticate, authorize(Role.ADMIN), uploadBanner, updateAdminEvent);
 router.delete('/events/:id', authenticate, authorize(Role.ADMIN), deleteAdminEvent);
 router.post('/events/:id/notify', authenticate, authorize(Role.ADMIN), sendEventAnnouncement);
+router.post('/events/:id/notify-pending', authenticate, authorize(Role.ADMIN), notifyPendingFailed);
 router.get('/events/:id/revenue', authenticate, authorize(Role.ADMIN), getEventRevenue);
 
 router.get('/registrations', authenticate, authorize(Role.ADMIN), getAdminRegistrations);

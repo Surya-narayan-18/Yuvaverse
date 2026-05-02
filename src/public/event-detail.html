@@ -150,6 +150,12 @@
           </div>
 
           <div class="form-group">
+            <label class="form-label" for="studentPhone">Phone Number <span aria-hidden="true">*</span></label>
+            <input class="form-input" id="studentPhone" type="tel" placeholder="Enter your phone number" autocomplete="tel" required/>
+            <span class="form-error" role="alert"></span>
+          </div>
+
+          <div class="form-group">
             <label class="form-label" for="collegeId">College ID Number <span aria-hidden="true">*</span></label>
             <input class="form-input" id="collegeId" type="text" placeholder="e.g. 21CS1045" autocomplete="off" required/>
             <span class="form-error" role="alert"></span>
@@ -203,19 +209,19 @@
 
           <!-- Dynamic member rows -->
           <div class="ed-members-header">
-            <p class="ed-section-label" style="margin:0">👥 Additional Members</p>
-            <button type="button" class="btn btn--ghost btn--sm" id="addMemberBtn" style="padding:.3rem .75rem;font-size:.8rem;">+ Add</button>
+            <p class="ed-section-label" style="margin:0">👥 Additional Members <span style="font-size:.75rem;font-weight:400;opacity:.6;">(optional)</span></p>
+            <button type="button" class="btn btn--ghost btn--sm" id="addMemberBtn" style="padding:.3rem .75rem;font-size:.8rem;">+ Add Member</button>
           </div>
           <div id="teamMembersContainer">
             <!-- member rows injected by JS -->
           </div>
 
           <button class="btn btn--accent btn--full" id="teamRegisterBtn" style="margin-top:1rem">
-            Register Team →
+            Register →
           </button>
 
           <p class="ed-register-card__note">
-            🔒 Confirmation email will be sent to the team leader only.
+            🔒 You can register solo or bring a team. Confirmation email sent to the leader.
           </p>
         </div>
 

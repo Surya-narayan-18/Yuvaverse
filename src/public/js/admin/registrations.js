@@ -210,6 +210,7 @@ function renderTable(data) {
       <td>
         <strong>${r.studentName}</strong><br/>
         <span style="font-size:0.8rem; color:var(--text-secondary)">${r.studentEmail}</span>
+        ${r.studentPhone ? `<br/><span style="font-size:0.8rem; color:var(--text-secondary)">📞 ${r.studentPhone}</span>` : ''}
       </td>
       <td style="font-size:0.85rem;">${r.collegeId || '<span style="color:#9ca3af">—</span>'}</td>
       <td>${r.event?.title || '-'}</td>

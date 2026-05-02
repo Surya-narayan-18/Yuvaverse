@@ -84,6 +84,7 @@ model Registration {
   id                String             @id @default(cuid())
   studentName       String
   studentEmail      String
+  studentPhone      String?            // Student's contact number
   collegeId         String             // Student's college/university ID number
   razorpayOrderId   String?            @unique
   razorpayPaymentId String?            @unique

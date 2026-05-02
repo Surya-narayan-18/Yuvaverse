@@ -73,6 +73,7 @@
     Competition: { bg: '#fce7f3', color: '#be185d' },
     Seminar:     { bg: '#d1fae5', color: '#065f46' },
     Meetup:      { bg: '#fef3c7', color: '#92400e' },
+    Cultural:    { bg: '#ffe4e6', color: '#be123c' },
   };
 
   // ── Build a single card ─────────────────────────────────────────
@@ -134,9 +135,6 @@
     <div class="ev-card__badges">
       <span class="ev-card__badge ${isFree ? 'ev-card__badge--free' : 'ev-card__badge--paid'}">${price}</span>
     </div>
-    <button class="ev-card__bookmark" aria-label="Bookmark event">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-    </button>
   </div>
   <div class="ev-card__body">
     <h3 class="ev-card__title">${ev.title || 'Untitled Event'}</h3>

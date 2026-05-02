@@ -13,6 +13,7 @@ import { sendRegistrationConfirmationEmail } from '../mailers/registration.maile
 interface CreateOrderBody {
   studentName: string;
   studentEmail: string;
+  studentPhone: string;
   eventId: string;
   collegeId: string;
 }
@@ -36,7 +37,7 @@ interface ListRegistrationsQuery {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function createOrder(req: Request, res: Response): Promise<void> {
-  const { studentName, studentEmail, eventId, collegeId } = req.body as CreateOrderBody;
+  const { studentName, studentEmail, studentPhone, eventId, collegeId } = req.body as CreateOrderBody;
 
   // 1. Fetch the event
   const event = await prisma.event.findUnique({ where: { id: eventId } });
@@ -45,42 +46,66 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // 2. Check for duplicate email registration for this event
-  const alreadyRegistered = await prisma.registration.findFirst({
-    where: {
-      eventId,
-      studentEmail,
-      status: RegistrationStatus.SUCCESS,
-    },
-  });
-  if (alreadyRegistered) {
-    sendError(res, 'This email is already registered for this event.', 409);
+  // 1b. Block individual registration for team events
+  if (event.maxTeamSize > 1) {
+    sendError(
+      res,
+      'This is a team event. Please use the team registration form.',
+      400,
+    );
     return;
   }
 
-  // 3. Check for duplicate college ID for this event
-  const collegeIdTaken = await prisma.registration.findFirst({
+  // 2. Block if already successfully registered (by email OR collegeId)
+  const alreadySuccess = await prisma.registration.findFirst({
     where: {
       eventId,
-      collegeId,
       status: RegistrationStatus.SUCCESS,
+      OR: [{ studentEmail }, { collegeId }],
     },
   });
-  if (collegeIdTaken) {
-    sendError(res, 'This college ID is already registered for this event.', 409);
+  if (alreadySuccess) {
+    // Distinguish which field caused the conflict for a better UX message
+    const byEmail = alreadySuccess.studentEmail === studentEmail;
+    sendError(
+      res,
+      byEmail
+        ? 'This email is already registered for this event.'
+        : 'This college ID is already registered for this event.',
+      409,
+    );
     return;
   }
 
-  // ── FREE EVENT ─────────────────────────────────────────────────────────────
+  // 3. Upsert: delete any stale PENDING or FAILED record for this email/collegeId
+  //    so users can cleanly re-attempt after a failed/cancelled payment.
+  await prisma.registration.deleteMany({
+    where: {
+      eventId,
+      status: { in: [RegistrationStatus.PENDING, RegistrationStatus.FAILED] },
+      OR: [{ studentEmail }, { collegeId }],
+    },
+  });
+
+  // ── FREE EVENT ─────────────────────────────────────────────────────
   if (event.price === 0) {
-    const registration = await prisma.registration.create({
-      data: {
-        studentName,
-        studentEmail,
-        collegeId,
-        eventId,
-        status: RegistrationStatus.SUCCESS,
-      },
+    // Atomically create registration + increment event counter
+    const registration = await prisma.$transaction(async (tx) => {
+      const reg = await tx.registration.create({
+        data: {
+          studentName,
+          studentEmail,
+          studentPhone,
+          collegeId,
+          eventId,
+          status: RegistrationStatus.SUCCESS,
+        },
+      });
+      await tx.event.update({
+        where: { id: eventId },
+        data: { currentRegistrations: { increment: 1 } },
+      });
+      return reg;
     });
 
     // Send confirmation email asynchronously (don't await to keep response fast)
@@ -108,7 +133,6 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   }
 
   // ── PAID EVENT ─────────────────────────────────────────────────────────────
-  // 3. Create Razorpay order (amount in paise)
   const amountInPaise = Math.round(event.price * 100);
 
   const razorpayOrder = await razorpay.orders.create({
@@ -122,11 +146,12 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     },
   });
 
-  // 4. Persist a PENDING registration tied to this order
+  // Persist a PENDING registration tied to this order
   const registration = await prisma.registration.create({
     data: {
       studentName,
       studentEmail,
+      studentPhone,
       collegeId,
       eventId,
       razorpayOrderId: razorpayOrder.id,
@@ -150,6 +175,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     201,
   );
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/registrations/verify
@@ -187,14 +213,21 @@ export async function verifyPayment(req: Request, res: Response): Promise<void> 
     return;
   }
 
-  // 3. Update registration to SUCCESS
-  const updated = await prisma.registration.update({
-    where: { id: registration.id },
-    data: {
-      razorpayPaymentId: razorpay_payment_id,
-      status: RegistrationStatus.SUCCESS,
-    },
-    include: { event: true },
+  // 3. Update registration to SUCCESS + increment event counter atomically
+  const updated = await prisma.$transaction(async (tx) => {
+    const updatedReg = await tx.registration.update({
+      where: { id: registration.id },
+      data: {
+        razorpayPaymentId: razorpay_payment_id,
+        status: RegistrationStatus.SUCCESS,
+      },
+      include: { event: true },
+    });
+    await tx.event.update({
+      where: { id: registration.eventId },
+      data: { currentRegistrations: { increment: 1 } },
+    });
+    return updatedReg;
   });
 
   // 4. Send confirmation email asynchronously
@@ -332,4 +365,35 @@ export async function updateRegistrationStatus(
   });
 
   sendSuccess(res, updated, `Registration status updated to ${status}.`);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/registrations/cancel
+// Called by the frontend when the Razorpay modal is dismissed without payment.
+// Marks the PENDING registration as FAILED so DB status stays accurate.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function cancelRegistration(req: Request, res: Response): Promise<void> {
+  const { registrationId } = req.body as { registrationId?: string };
+
+  if (!registrationId) {
+    sendError(res, 'registrationId is required.', 400);
+    return;
+  }
+
+  const existing = await prisma.registration.findUnique({ where: { id: registrationId } });
+
+  // Silently succeed if the record doesn't exist or is already finalised —
+  // this avoids errors if the user calls cancel after a successful payment race.
+  if (!existing || existing.status !== RegistrationStatus.PENDING) {
+    sendSuccess(res, null, 'No action needed.');
+    return;
+  }
+
+  await prisma.registration.update({
+    where: { id: registrationId },
+    data: { status: RegistrationStatus.FAILED },
+  });
+
+  sendSuccess(res, null, 'Registration marked as failed.');
 }

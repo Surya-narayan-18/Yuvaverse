@@ -411,24 +411,6 @@
 }
 
 
-.ev-card__bookmark {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  z-index: 2;
-  width: 30px; height: 30px;
-  background: rgba(255,255,255,0.9);
-  border-radius: var(--r-sm);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--clr-text-muted);
-  cursor: pointer;
-  border: none;
-  transition: background var(--t-fast), color var(--t-fast);
-}
-.ev-card__bookmark:hover { background: #fff; color: var(--clr-accent); }
-
 /* Card body */
 .ev-card__body {
   padding: 1.125rem 1.25rem;

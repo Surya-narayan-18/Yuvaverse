@@ -3,6 +3,7 @@ import prisma from '../config/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import { ApplicationStatus, Prisma } from '@prisma/client';
 import { sendAnnouncementEmail } from '../mailers/announcement.mailer';
+import { sendReRegisterEmail } from '../mailers/reregister.mailer';
 
 interface UpdateEventBody {
   title?: string;
@@ -34,9 +35,9 @@ export const getDashboardAnalytics = async (_req: Request, res: Response) => {
     }, 0);
     const totalRevenue = individualRevenue + teamRevenue;
 
-    // 2. Total Registrations — individuals + teams
-    const individualCount = await prisma.registration.count();
-    const teamCount = await prisma.team.count();
+    // 2. Total Registrations — only SUCCESS records (not PENDING or FAILED)
+    const individualCount = await prisma.registration.count({ where: { status: 'SUCCESS' } });
+    const teamCount = await prisma.team.count({ where: { status: 'SUCCESS' } });
     const totalRegistrations = individualCount + teamCount;
 
     // 3. Active Events (Date is in the future)
@@ -113,7 +114,12 @@ export const getAdminEvents = async (_req: Request, res: Response) => {
     const events = await prisma.event.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
-        _count: { select: { registrations: true, teams: true } },
+        _count: { 
+          select: { 
+            registrations: { where: { status: 'SUCCESS' } }, 
+            teams: { where: { status: 'SUCCESS' } } 
+          } 
+        },
       },
     });
     return sendSuccess(res, events);
@@ -138,6 +144,11 @@ export const createAdminEvent = async (req: Request, res: Response) => {
       try { parsedCustomFields = JSON.parse(customFields) as Prisma.InputJsonValue; } catch { parsedCustomFields = []; }
     }
 
+    // Handle empty strings as null
+    const finalEventType = eventType && eventType.trim() !== '' ? eventType : null;
+    const finalMaxRegistrations = maxRegistrations && String(maxRegistrations).trim() !== '' ? Number(maxRegistrations) : null;
+    const finalRegistrationDeadline = registrationDeadline && String(registrationDeadline).trim() !== '' ? new Date(registrationDeadline) : null;
+
     const newEvent = await prisma.event.create({
       data: {
         title, description, date: new Date(date), venue,
@@ -145,16 +156,16 @@ export const createAdminEvent = async (req: Request, res: Response) => {
         imageUrl: imageUrl ?? null,
         bannerUrl,
         customFields: parsedCustomFields,
-        eventType: eventType || null,
+        eventType: finalEventType,
         maxTeamSize: maxTeamSize ? Number(maxTeamSize) : 1,
-        maxRegistrations: maxRegistrations ? Number(maxRegistrations) : null,
-        registrationDeadline: registrationDeadline ? new Date(registrationDeadline) : null,
+        maxRegistrations: finalMaxRegistrations,
+        registrationDeadline: finalRegistrationDeadline,
       }
     });
     return sendSuccess(res, newEvent);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Event creation error', error);
-    return sendError(res, 'Error creating event', 500);
+    return sendError(res, 'Error creating event: ' + error.message, 500);
   }
 };
 
@@ -194,12 +205,12 @@ export const updateAdminEvent = async (req: Request, res: Response) => {
     if (body.venue       !== undefined) data.venue       = body.venue;
     if (body.price       !== undefined) data.price       = Number(body.price);
     if ('imageUrl' in body)             data.imageUrl    = body.imageUrl ?? null;
-    if (body.eventType   !== undefined) data.eventType   = body.eventType || null;
-    if (body.maxTeamSize !== undefined) data.maxTeamSize = Number(body.maxTeamSize);
+    if (body.eventType   !== undefined) data.eventType   = (body.eventType && body.eventType.trim() !== '') ? body.eventType : null;
+    if (body.maxTeamSize !== undefined) data.maxTeamSize = Number(body.maxTeamSize) || 1;
     if (body.maxRegistrations !== undefined)
-      data.maxRegistrations = body.maxRegistrations ? Number(body.maxRegistrations) : null;
+      data.maxRegistrations = (body.maxRegistrations && String(body.maxRegistrations).trim() !== '') ? Number(body.maxRegistrations) : null;
     if (body.registrationDeadline !== undefined)
-      data.registrationDeadline = body.registrationDeadline ? new Date(body.registrationDeadline) : null;
+      data.registrationDeadline = (body.registrationDeadline && String(body.registrationDeadline).trim() !== '') ? new Date(body.registrationDeadline) : null;
 
     // multer-storage-cloudinary puts the CDN URL at req.file.path
     const uploaded = (req.file as (Express.Multer.File & { path: string }) | undefined);
@@ -217,9 +228,9 @@ export const updateAdminEvent = async (req: Request, res: Response) => {
 
     const updated = await prisma.event.update({ where: { id }, data: updatePayload });
     return sendSuccess(res, updated, 'Event updated successfully');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Event update error', error);
-    return sendError(res, 'Error updating event', 500);
+    return sendError(res, 'Error updating event: ' + error.message, 500);
   }
 };
 
@@ -273,6 +284,7 @@ export const getAdminRegistrations = async (req: Request, res: Response) => {
     return sendError(res, 'Internal Server Error', 500);
   }
 };
+
 
 export const updateRegistrationStatus = async (req: Request, res: Response) => {
   try {
@@ -388,7 +400,20 @@ export const sendEventAnnouncement = async (req: Request, res: Response) => {
       select: { studentEmail: true, studentName: true },
     });
 
-    if (registrations.length === 0) {
+    const teams = await prisma.team.findMany({
+      where: { eventId: id, status: 'SUCCESS' },
+      select: { leaderEmail: true, leaderName: true, members: { select: { email: true, name: true } } },
+    });
+
+    const allRecipients = new Map<string, string>(); // email -> name
+    
+    registrations.forEach(r => allRecipients.set(r.studentEmail, r.studentName));
+    teams.forEach(t => {
+      allRecipients.set(t.leaderEmail, t.leaderName);
+      t.members.forEach(m => allRecipients.set(m.email, m.name));
+    });
+
+    if (allRecipients.size === 0) {
       return sendError(res, 'No confirmed registrants found for this event', 404);
     }
 
@@ -396,24 +421,24 @@ export const sendEventAnnouncement = async (req: Request, res: Response) => {
     let emailsSent = 0;
     const errors: string[] = [];
 
-    for (const reg of registrations) {
+    for (const [email, name] of allRecipients.entries()) {
       try {
         await sendAnnouncementEmail({
-          toEmail: reg.studentEmail,
-          studentName: reg.studentName,
+          toEmail: email,
+          studentName: name,
           eventTitle: event.title,
           subject: subject.trim(),
           message: message.trim(),
         });
         emailsSent++;
       } catch (err) {
-        console.error(`Failed to send email to ${reg.studentEmail}:`, err);
-        errors.push(reg.studentEmail);
+        console.error(`Failed to send email to ${email}:`, err);
+        errors.push(email);
       }
     }
 
-    return sendSuccess(res, { emailsSent, failed: errors.length, totalRegistrants: registrations.length },
-      `Announcement sent to ${emailsSent} of ${registrations.length} registrants.`);
+    return sendSuccess(res, { emailsSent, failed: errors.length, totalRegistrants: allRecipients.size },
+      `Announcement sent to ${emailsSent} of ${allRecipients.size} registrants.`);
   } catch (error) {
     console.error('Announcement email error:', error);
     return sendError(res, 'Error sending announcement', 500);
@@ -438,26 +463,40 @@ export const broadcastEmail = async (req: Request, res: Response) => {
       orderBy: { createdAt: 'asc' }, // keep earliest name for a given email
     });
 
-    if (uniqueRegistrants.length === 0) {
+    const successfulTeams = await prisma.team.findMany({
+      where:  { status: 'SUCCESS' },
+      select: { leaderEmail: true, leaderName: true, members: { select: { email: true, name: true } } },
+    });
+
+    const allRecipients = new Map<string, string>(); // email -> name
+    uniqueRegistrants.forEach(r => allRecipients.set(r.studentEmail, r.studentName));
+    successfulTeams.forEach(t => {
+      if (!allRecipients.has(t.leaderEmail)) allRecipients.set(t.leaderEmail, t.leaderName);
+      t.members.forEach(m => {
+        if (!allRecipients.has(m.email)) allRecipients.set(m.email, m.name);
+      });
+    });
+
+    if (allRecipients.size === 0) {
       return sendError(res, 'No confirmed registrants found across all events', 404);
     }
 
     let emailsSent = 0;
     const failedEmails: string[] = [];
 
-    for (const reg of uniqueRegistrants) {
+    for (const [email, name] of allRecipients.entries()) {
       try {
         await sendAnnouncementEmail({
-          toEmail:    reg.studentEmail,
-          studentName: reg.studentName,
+          toEmail:    email,
+          studentName: name,
           eventTitle: 'Yuvaverse Events',   // generic label for broadcast
           subject:    subject.trim(),
           message:    message.trim(),
         });
         emailsSent++;
       } catch (err) {
-        console.error(`Broadcast failed for ${reg.studentEmail}:`, err);
-        failedEmails.push(reg.studentEmail);
+        console.error(`Broadcast failed for ${email}:`, err);
+        failedEmails.push(email);
       }
     }
 
@@ -466,12 +505,75 @@ export const broadcastEmail = async (req: Request, res: Response) => {
       {
         emailsSent,
         failed:            failedEmails.length,
-        uniqueRecipients:  uniqueRegistrants.length,
+        uniqueRecipients:  allRecipients.size,
       },
       `Broadcast sent to ${emailsSent} unique registrant(s).`,
     );
   } catch (error) {
     console.error('Broadcast email error:', error);
     return sendError(res, 'Error sending broadcast', 500);
+  }
+};
+
+// --- NOTIFY PENDING / FAILED REGISTRANTS (Re-register nudge) ---
+export const notifyPendingFailed = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { subject, message } = req.body as { subject?: string; message?: string };
+
+    if (!subject?.trim() || !message?.trim()) {
+      return sendError(res, 'Subject and message are required', 400);
+    }
+
+    const event = await prisma.event.findUnique({ where: { id } });
+    if (!event) return sendError(res, 'Event not found', 404);
+
+    // Build the event URL so recipients can click directly into the event page
+    const baseUrl = process.env.SITE_URL || 'http://localhost:3000';
+    const eventUrl = `${baseUrl}/event-detail.html?id=${id}`;
+
+    // Fetch all PENDING and FAILED registrations for this event
+    const pendingFailed = await prisma.registration.findMany({
+      where: {
+        eventId: id,
+        status: { in: ['PENDING', 'FAILED'] },
+      },
+      select: { studentEmail: true, studentName: true, status: true },
+    });
+
+    if (pendingFailed.length === 0) {
+      return sendError(res, 'No pending or failed registrations found for this event', 404);
+    }
+
+    let emailsSent = 0;
+    const errors: string[] = [];
+
+    for (const reg of pendingFailed) {
+      try {
+        await sendReRegisterEmail({
+          toEmail: reg.studentEmail,
+          studentName: reg.studentName,
+          eventTitle: event.title,
+          eventDate: event.date,
+          eventVenue: event.venue,
+          registrationStatus: reg.status as 'PENDING' | 'FAILED',
+          eventUrl,
+          adminMessage: message?.trim(),
+        });
+        emailsSent++;
+      } catch (err) {
+        console.error(`Failed to send re-register email to ${reg.studentEmail}:`, err);
+        errors.push(reg.studentEmail);
+      }
+    }
+
+    return sendSuccess(
+      res,
+      { emailsSent, failed: errors.length, totalTargeted: pendingFailed.length },
+      `Re-register nudge sent to ${emailsSent} of ${pendingFailed.length} pending/failed registrant(s).`,
+    );
+  } catch (error) {
+    console.error('notifyPendingFailed error:', error);
+    return sendError(res, 'Error sending re-register emails', 500);
   }
 };

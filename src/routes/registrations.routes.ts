@@ -3,6 +3,7 @@ import { Role } from '@prisma/client';
 import {
   createOrder,
   verifyPayment,
+  cancelRegistration,
   listRegistrations,
   listRegistrationsByEvent,
   getRegistrationById,
@@ -35,6 +36,13 @@ router.post('/order', createOrderValidators, validate, createOrder);
  * Verifies payment signature, marks registration SUCCESS, sends email.
  */
 router.post('/verify', verifyPaymentValidators, validate, verifyPayment);
+
+/**
+ * POST /api/registrations/cancel
+ * Body: { registrationId }
+ * Called by the frontend when Razorpay modal is dismissed — marks PENDING → FAILED.
+ */
+router.post('/cancel', cancelRegistration);
 
 // ─── Admin Routes ─────────────────────────────────────────────────────────────
 

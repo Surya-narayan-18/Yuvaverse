@@ -16,6 +16,7 @@ const modalTitle    = document.getElementById('modal-title') as HTMLHeadingEleme
 const form          = document.getElementById('create-event-form') as HTMLFormElement;
 const fieldsWrapper = document.getElementById('dynamic-fields-wrapper') as HTMLDivElement;
 const bannerInput   = document.getElementById('ev-banner') as HTMLInputElement;
+const bannerDropZone = document.getElementById('banner-drop-zone') as HTMLDivElement;
 const previewWrap   = document.getElementById('banner-preview') as HTMLDivElement;
 const previewImg    = document.getElementById('banner-preview-img') as HTMLImageElement;
 const saveBtn       = document.getElementById('save-btn') as HTMLButtonElement;
@@ -39,6 +40,37 @@ bannerInput.addEventListener('change', () => {
   const file = bannerInput.files?.[0];
   if (file) showPreview(file);
 });
+
+// ── Drag & Drop Handlers ───────────────────────────────────────────────────
+if (bannerDropZone) {
+  ['dragenter', 'dragover'].forEach(name => {
+    bannerDropZone.addEventListener(name, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      bannerDropZone.classList.add('dragging');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(name => {
+    bannerDropZone.addEventListener(name, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      bannerDropZone.classList.remove('dragging');
+    });
+  });
+
+  bannerDropZone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      // Create a new DataTransfer to update the input's files
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      bannerInput.files = dt.files;
+      showPreview(file);
+    }
+  });
+}
+
 document.getElementById('remove-banner')?.addEventListener('click', clearPreview);
 
 // ── Modal open / close ────────────────────────────────────────────────────────
@@ -188,6 +220,16 @@ form.addEventListener('submit', async (e) => {
   fd.append('price',        (document.getElementById('ev-price') as HTMLInputElement).value);
   fd.append('customFields', JSON.stringify(customFields));
 
+  // ── Event Settings fields (these were missing — fixed) ───────────────
+  const evType = document.getElementById('ev-type') as HTMLSelectElement | null;
+  if (evType) fd.append('eventType', evType.value);
+  const evMaxTeam = document.getElementById('ev-max-team') as HTMLInputElement | null;
+  if (evMaxTeam) fd.append('maxTeamSize', evMaxTeam.value || '1');
+  const evMaxRegs = document.getElementById('ev-max-regs') as HTMLInputElement | null;
+  if (evMaxRegs) fd.append('maxRegistrations', evMaxRegs.value); // empty string = unlimited (server converts to null)
+  const evDeadlineInput = document.getElementById('ev-reg-deadline') as HTMLInputElement | null;
+  if (evDeadlineInput) fd.append('registrationDeadline', evDeadlineInput.value); // empty string = no deadline
+
   // Only attach the file if one was newly chosen
   const bannerFile = bannerInput.files?.[0];
   if (bannerFile) fd.append('banner', bannerFile);
@@ -200,13 +242,21 @@ form.addEventListener('submit', async (e) => {
   const method   = isEdit ? 'PATCH' : 'POST';
 
   try {
+    // Implement a timeout to prevent the UI from hanging indefinitely
+    // due to Cloudinary or Database connection latency.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds
+
     // NOTE: Do NOT set Content-Type header — the browser sets it automatically
     // (with the multipart boundary) when body is FormData.
     const res = await fetch(url, {
       method,
       headers: { Authorization: `Bearer ${token}` },
       body: fd,
+      signal: controller.signal
     });
+
+    clearTimeout(timeoutId);
 
     if (res.ok) {
       closeModal();
@@ -215,9 +265,13 @@ form.addEventListener('submit', async (e) => {
       const json = await res.json().catch(() => ({}));
       alert(`Failed to ${isEdit ? 'update' : 'save'} event: ${(json as { message?: string }).message ?? res.statusText}`);
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('Event save error:', err);
-    alert('Network error — please try again.');
+    if (err.name === 'AbortError') {
+      alert('The request timed out. This is usually due to a slow internet connection while uploading the banner image or connecting to the database. Please try again.');
+    } else {
+      alert('Network error — please try again.');
+    }
   } finally {
     saveBtn.disabled = false;
     saveBtn.textContent = isEdit ? 'Update Event' : 'Save Event';

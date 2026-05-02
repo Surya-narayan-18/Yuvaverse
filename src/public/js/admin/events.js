@@ -12,6 +12,7 @@ const modalTitle = document.getElementById('modal-title');
 const form = document.getElementById('create-event-form');
 const fieldsWrapper = document.getElementById('dynamic-fields-wrapper');
 const bannerInput = document.getElementById('ev-banner');
+const bannerDropZone = document.getElementById('banner-drop-zone');
 const previewWrap = document.getElementById('banner-preview');
 const previewImg = document.getElementById('banner-preview-img');
 const saveBtn = document.getElementById('save-btn');
@@ -33,6 +34,33 @@ bannerInput.addEventListener('change', () => {
     if (file)
         showPreview(file);
 });
+// ── Drag & Drop Handlers ───────────────────────────────────────────────────
+if (bannerDropZone) {
+    ['dragenter', 'dragover'].forEach(name => {
+        bannerDropZone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            bannerDropZone.classList.add('dragging');
+        });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+        bannerDropZone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            bannerDropZone.classList.remove('dragging');
+        });
+    });
+    bannerDropZone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer?.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            // Create a new DataTransfer to update the input's files
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            bannerInput.files = dt.files;
+            showPreview(file);
+        }
+    });
+}
 document.getElementById('remove-banner')?.addEventListener('click', clearPreview);
 // ── Modal open / close ────────────────────────────────────────────────────────
 function openCreateModal() {
@@ -171,6 +199,19 @@ form.addEventListener('submit', async (e) => {
     fd.append('venue', document.getElementById('ev-venue').value);
     fd.append('price', document.getElementById('ev-price').value);
     fd.append('customFields', JSON.stringify(customFields));
+    // ── Event Settings fields (these were missing — fixed) ───────────────
+    const evType = document.getElementById('ev-type');
+    if (evType)
+        fd.append('eventType', evType.value);
+    const evMaxTeam = document.getElementById('ev-max-team');
+    if (evMaxTeam)
+        fd.append('maxTeamSize', evMaxTeam.value || '1');
+    const evMaxRegs = document.getElementById('ev-max-regs');
+    if (evMaxRegs)
+        fd.append('maxRegistrations', evMaxRegs.value); // empty string = unlimited (server converts to null)
+    const evDeadlineInput = document.getElementById('ev-reg-deadline');
+    if (evDeadlineInput)
+        fd.append('registrationDeadline', evDeadlineInput.value); // empty string = no deadline
     // Only attach the file if one was newly chosen
     const bannerFile = bannerInput.files?.[0];
     if (bannerFile)
@@ -181,13 +222,19 @@ form.addEventListener('submit', async (e) => {
     const url = isEdit ? `/api/admin/events/${editingEventId}` : '/api/admin/events';
     const method = isEdit ? 'PATCH' : 'POST';
     try {
+        // Implement a timeout to prevent the UI from hanging indefinitely
+        // due to Cloudinary or Database connection latency.
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds
         // NOTE: Do NOT set Content-Type header — the browser sets it automatically
         // (with the multipart boundary) when body is FormData.
         const res = await fetch(url, {
             method,
             headers: { Authorization: `Bearer ${token}` },
             body: fd,
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
         if (res.ok) {
             closeModal();
             loadEvents();
@@ -199,7 +246,12 @@ form.addEventListener('submit', async (e) => {
     }
     catch (err) {
         console.error('Event save error:', err);
-        alert('Network error — please try again.');
+        if (err.name === 'AbortError') {
+            alert('The request timed out. This is usually due to a slow internet connection while uploading the banner image or connecting to the database. Please try again.');
+        }
+        else {
+            alert('Network error — please try again.');
+        }
     }
     finally {
         saveBtn.disabled = false;

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createTeamOrder, verifyTeamPayment } from '../controllers/team.controller';
+import { createTeamOrder, verifyTeamPayment, cancelTeam } from '../controllers/team.controller';
 
 const router = Router();
 
@@ -17,5 +17,12 @@ router.post('/order', createTeamOrder);
  * Verifies payment, marks team SUCCESS, increments event counter, sends email.
  */
 router.post('/verify', verifyTeamPayment);
+
+/**
+ * POST /api/teams/cancel
+ * Body: { teamId }
+ * Called when Razorpay modal is dismissed — marks PENDING team → FAILED.
+ */
+router.post('/cancel', cancelTeam);
 
 export default router;
