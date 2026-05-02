@@ -450,13 +450,12 @@ function openRevenueModal(eventId, eventTitle) {
         document.getElementById('rev-regs').textContent = String(d.successRegs);
         document.getElementById('rev-teams').textContent = String(d.successTeams);
         document.getElementById('rev-paid').textContent = String(d.successRegs + d.successTeams);
-        
         const revPending = document.getElementById('rev-pending');
-        if (revPending) revPending.textContent = String(d.pendingRegs + d.pendingTeams);
-        
+        if (revPending)
+            revPending.textContent = String(d.pendingRegs + d.pendingTeams);
         const revFailed = document.getElementById('rev-failed');
-        if (revFailed) revFailed.textContent = String(d.failedRegs + d.failedTeams);
-
+        if (revFailed)
+            revFailed.textContent = String(d.failedRegs + d.failedTeams);
         if (loadingEl)
             loadingEl.style.display = 'none';
         if (dataEl)

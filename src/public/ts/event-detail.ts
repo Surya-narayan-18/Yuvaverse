@@ -180,6 +180,22 @@ interface StatusDialogOptions {
       deadlinePill.style.display = '';
     }
 
+    // Render custom fields
+    const customFieldsContainer = document.getElementById('customFieldsContainer');
+    if (customFieldsContainer && (event as any).customFields && Array.isArray((event as any).customFields)) {
+      customFieldsContainer.innerHTML = '';
+      (event as any).customFields.forEach((cf: any, index: number) => {
+        const div = document.createElement('div');
+        div.className = 'form-group';
+        div.innerHTML = `
+          <label class="form-label" for="customField_${index}">${cf.label} <span aria-hidden="true">*</span></label>
+          <input class="form-input custom-answer-input" data-label="${cf.label}" id="customField_${index}" type="${cf.type === 'number' ? 'number' : 'text'}" placeholder="Enter your answer" required/>
+          <span class="form-error" role="alert"></span>
+        `;
+        customFieldsContainer.appendChild(div);
+      });
+    }
+
     document.title = `${event.title} — Yuvaverse`;
   }
 
@@ -215,7 +231,21 @@ interface StatusDialogOptions {
     const phone     = (phoneEl.value.trim() || '').replace(/\s/g, '');
     const collegeId = collegeEl.value.trim();
 
-    if (!validateForm(name, email, phone, collegeId)) return;
+    const customAnswers: Record<string, string | number> = {};
+    let customValid = true;
+    document.querySelectorAll('.custom-answer-input').forEach((el) => {
+      const input = el as HTMLInputElement;
+      const label = input.dataset.label;
+      if (!label) return;
+      if (input.required && !input.value.trim()) {
+         showError(input, 'This field is required.');
+         customValid = false;
+      } else {
+         customAnswers[label] = input.type === 'number' ? Number(input.value) : input.value.trim();
+      }
+    });
+
+    if (!validateForm(name, email, phone, collegeId) || !customValid) return;
 
     const btn = document.getElementById('registerBtn') as HTMLButtonElement;
     btn.disabled = true;
@@ -223,7 +253,7 @@ interface StatusDialogOptions {
     btn.textContent = '';
 
     const orderRes = await ApiClient.post<OrderResponseData>('/registrations/order', {
-      studentName: name, studentEmail: email, studentPhone: phone, eventId, collegeId,
+      studentName: name, studentEmail: email, studentPhone: phone, eventId, collegeId, customAnswers
     });
 
     btn.disabled = false;

@@ -122,6 +122,21 @@
                 deadlinePill.style.color = 'var(--clr-error, #dc2626)';
             deadlinePill.style.display = '';
         }
+        // Render custom fields
+        const customFieldsContainer = document.getElementById('customFieldsContainer');
+        if (customFieldsContainer && event.customFields && Array.isArray(event.customFields)) {
+            customFieldsContainer.innerHTML = '';
+            event.customFields.forEach((cf, index) => {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                div.innerHTML = `
+          <label class="form-label" for="customField_${index}">${cf.label} <span aria-hidden="true">*</span></label>
+          <input class="form-input custom-answer-input" data-label="${cf.label}" id="customField_${index}" type="${cf.type === 'number' ? 'number' : 'text'}" placeholder="Enter your answer" required/>
+          <span class="form-error" role="alert"></span>
+        `;
+                customFieldsContainer.appendChild(div);
+            });
+        }
         document.title = `${event.title} — Yuvaverse`;
     }
     // ── Individual Form Validation ──────────────────────────────────
@@ -167,14 +182,29 @@
         const email = emailEl.value.trim();
         const phone = (phoneEl.value.trim() || '').replace(/\s/g, '');
         const collegeId = collegeEl.value.trim();
-        if (!validateForm(name, email, phone, collegeId))
+        const customAnswers = {};
+        let customValid = true;
+        document.querySelectorAll('.custom-answer-input').forEach((el) => {
+            const input = el;
+            const label = input.dataset.label;
+            if (!label)
+                return;
+            if (input.required && !input.value.trim()) {
+                showError(input, 'This field is required.');
+                customValid = false;
+            }
+            else {
+                customAnswers[label] = input.type === 'number' ? Number(input.value) : input.value.trim();
+            }
+        });
+        if (!validateForm(name, email, phone, collegeId) || !customValid)
             return;
         const btn = document.getElementById('registerBtn');
         btn.disabled = true;
         btn.classList.add('btn--loading');
         btn.textContent = '';
         const orderRes = await ApiClient.post('/registrations/order', {
-            studentName: name, studentEmail: email, studentPhone: phone, eventId, collegeId,
+            studentName: name, studentEmail: email, studentPhone: phone, eventId, collegeId, customAnswers
         });
         btn.disabled = false;
         btn.classList.remove('btn--loading');

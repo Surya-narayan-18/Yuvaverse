@@ -16,6 +16,7 @@ interface CreateOrderBody {
   studentPhone: string;
   eventId: string;
   collegeId: string;
+  customAnswers?: any;
 }
 
 interface VerifyPaymentBody {
@@ -37,7 +38,7 @@ interface ListRegistrationsQuery {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function createOrder(req: Request, res: Response): Promise<void> {
-  const { studentName, studentEmail, studentPhone, eventId, collegeId } = req.body as CreateOrderBody;
+  const { studentName, studentEmail, studentPhone, eventId, collegeId, customAnswers } = req.body as CreateOrderBody;
 
   // 1. Fetch the event
   const event = await prisma.event.findUnique({ where: { id: eventId } });
@@ -99,6 +100,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
           collegeId,
           eventId,
           status: RegistrationStatus.SUCCESS,
+          customAnswers,
         },
       });
       await tx.event.update({
@@ -156,6 +158,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       eventId,
       razorpayOrderId: razorpayOrder.id,
       status: RegistrationStatus.PENDING,
+      customAnswers,
     },
   });
 
