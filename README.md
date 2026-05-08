@@ -73,7 +73,7 @@ RAZORPAY_KEY_SECRET="..."
 
 ---
 
-### Database Setup
+### Database Setup   
 
 ```bash
 npm run prisma:generate
